@@ -1,0 +1,21 @@
+[package]
+name = "iot-gateway"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+ecat = { path = "../../e-cat/ecat" }
+ecat-auth = { path = "../../e-cat/ecat-auth" }
+ecat-transport-http = { path = "../../e-cat/ecat-transport-http" }
+security-rust = { path = "/home/wwwroot/erikwang2013/security-rust" }
+axum = "0.8"
+tower = "0.5"
+http = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+
+[dev-dependencies]
+jsonwebtoken = "9"
+tower-util = "0.3"

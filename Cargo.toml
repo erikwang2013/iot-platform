@@ -1,0 +1,8 @@
+[workspace]
+members = ["services/iot-gateway", "services/iot-device"]
+exclude = ["e-cat"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
