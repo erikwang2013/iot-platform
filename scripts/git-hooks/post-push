@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# git post-push 钩子：推送 main 后按最新版本增量发布（标签 + GitHub Release）
+# 启用：git config core.hooksPath scripts/git-hooks
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+    if [[ "$remote_ref" == "refs/heads/main" ]]; then
+        "$repo_root/scripts/release.sh" minor
+        break
+    fi
+done
