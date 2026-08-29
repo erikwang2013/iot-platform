@@ -3,6 +3,15 @@ use crate::adapter::{AdapterError, VendorAdapter, VendorCreds};
 use crate::models::{DeviceRecord, PropertyValue};
 use async_trait::async_trait;
 
+/// 涂鸦开放平台签名：HMAC-SHA256(client_id + t + access_token, client_secret) 十六进制。
+pub fn sign(client_id: &str, t: &str, access_token: &str, client_secret: &str) -> String {
+    use hmac::{Hmac, Mac};
+    use sha2::Sha256;
+    let mut mac = Hmac::<Sha256>::new_from_slice(client_secret.as_bytes()).expect("hmac key");
+    mac.update(format!("{client_id}{t}{access_token}").as_bytes());
+    hex::encode(mac.finalize().into_bytes())
+}
+
 pub struct TuyaAdapter;
 
 impl TuyaAdapter {
