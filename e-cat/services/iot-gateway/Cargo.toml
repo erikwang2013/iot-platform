@@ -4,9 +4,9 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-ecat = { path = "../../e-cat/ecat" }
-ecat-auth = { path = "../../e-cat/ecat-auth" }
-ecat-transport-http = { path = "../../e-cat/ecat-transport-http" }
+ecat = { path = "../../ecat" }
+ecat-auth = { path = "../../ecat-auth" }
+ecat-transport-http = { path = "../../ecat-transport-http" }
 # 外部依赖：security-rust 需克隆 https://github.com/erikwang2013/security-rust
 # 到 /home/wwwroot/erikwang2013/security-rust（P6 部署文档给出 CI 拉取方案）
 security-rust = { path = "/home/wwwroot/erikwang2013/security-rust" }

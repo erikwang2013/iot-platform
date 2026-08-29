@@ -1,5 +1,5 @@
 [workspace]
-members = ["services/iot-gateway", "services/iot-device"]
+members = ["e-cat/services/iot-gateway", "e-cat/services/iot-device"]
 exclude = ["e-cat"]
 resolver = "2"
 

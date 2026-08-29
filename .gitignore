@@ -1,5 +1,8 @@
 /target/
 
+# backend services relocated under e-cat/ (vendored .gitignore may be overwritten by framework upgrades)
+e-cat/services/*/target
+
 # legacy rules (from pre-P0 root .gitignore)
 /admin/runtime
 /service/runtime
