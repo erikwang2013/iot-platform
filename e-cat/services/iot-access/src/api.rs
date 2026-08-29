@@ -82,7 +82,7 @@ pub async fn send_command(
         .ok_or_else(|| (StatusCode::NOT_FOUND, "device not linked".to_string()))?;
     if vendor == "direct" {
         // 直连设备：MQTT 下发
-        crate::mqtt::publish_command(&device_id, &req.code, &req.value)
+        crate::mqtt::publish_command(&api.mqtt, &device_id, &req.code, &req.value)
             .await
             .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
         return Ok(Json(json!({ "ok": true, "channel": "mqtt" })));
