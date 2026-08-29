@@ -2473,7 +2473,7 @@ git commit -m "test(access): Tuya OpenAPI mock + full-flow integration tests (oa
 - Modify: `e-cat/services/iot-gateway/src/api_version.rs`（豁免 webhook/callback 路径）
 - Modify: `scripts/smoke.sh`
 
-- [ ] **Step 1: 加 reqwest 依赖**
+- [x] **Step 1: 加 reqwest 依赖**
 
 `e-cat/services/iot-gateway/Cargo.toml` 的 `[dependencies]` 加：
 
@@ -2481,7 +2481,7 @@ git commit -m "test(access): Tuya OpenAPI mock + full-flow integration tests (oa
 reqwest = { version = "0.12", features = ["json"] }
 ```
 
-- [ ] **Step 2: 写 proxy.rs（转发 + 租户透传）**
+- [x] **Step 2: 写 proxy.rs（转发 + 租户透传）**
 
 `e-cat/services/iot-gateway/src/proxy.rs`:
 
@@ -2581,7 +2581,7 @@ async fn forward(
 
 注：P1 的 iot-access 端点全为 POST，转发统一用 POST；若后续加 GET 端点，按方法分支即可（`reqwest::Client` 的 `request(method, url)`）。
 
-- [ ] **Step 3: 更新 lib.rs 与 api_version.rs**
+- [x] **Step 3: 更新 lib.rs 与 api_version.rs**
 
 `e-cat/services/iot-gateway/src/lib.rs`（替换）：
 
@@ -2606,7 +2606,7 @@ pub mod scan;
 
 注：涂鸦 Webhook 与浏览器 OAuth 回调无法携带 `x-api-version` header，必须豁免；其余 `/api/access/*` 仍要求版本 header。
 
-- [ ] **Step 4: 更新 main.rs（挂载代理路由）**
+- [x] **Step 4: 更新 main.rs（挂载代理路由）**
 
 `e-cat/services/iot-gateway/src/main.rs`（替换）：
 
@@ -2687,12 +2687,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
 注意：`Extension<AuthClaims>` 提取器要求 JwtAuthCompat 把 claims 放入 extensions——ecat-auth 的 JwtAuthService 已做（`req.extensions().insert(AuthClaims)`，见 ecat-auth/src/claims.rs 测试用例）。若挂载顺序导致 claims 未注入，把 `.layer(JwtAuthCompat...)` 改为在 `with_state` 之后、nest 之前，或按编译报错调整。
 
-- [ ] **Step 5: 编译验证**
+- [x] **Step 5: 编译验证**
 
 Run: `cd /home/wwwroot/iot-platform/e-cat && cargo check -p iot-gateway`
 Expected: 编译通过（JWT_SECRET 由 AuthClaims 提取器隐含要求 ≥32 字节，dev 值满足）。
 
-- [ ] **Step 6: 扩展冒烟脚本（追加到 `scripts/smoke.sh` 末尾、`echo "----"` 之前）**
+- [x] **Step 6: 扩展冒烟脚本（追加到 `scripts/smoke.sh` 末尾、`echo "----"` 之前）**
 
 ```bash
 # 8. access 服务健康（直连）
@@ -2738,13 +2738,13 @@ echo "$shadow" | grep -q '"temp":23.5' && pass=$((pass+1)) && echo "PASS: redis 
 TUYA_WEBHOOK_SECRET=${TUYA_WEBHOOK_SECRET:-mock-client-secret}
 ```
 
-- [ ] **Step 7: 全链路运行冒烟**
+- [x] **Step 7: 全链路运行冒烟**
 
 Run:
 ```bash
-cd /home/wwwroot/iot-platform && docker compose up -d mysql redis emqx kafka
-cd /home/wwwroot/iot-platform/e-cat/services/iot-access && cargo run &
-cd /home/wwwroot/iot-platform/e-cat/services/iot-gateway && cargo run &
+docker compose up -d mysql redis emqx kafka
+cd /home/wwwroot/iot-platform/e-cat/services/iot-access && IOT_CRED_ENCRYPT_KEY=test-encrypt-key-0123456789 IOT_GATEWAY_SECRET=dev-gateway-secret cargo run &
+cd /home/wwwroot/iot-platform/e-cat/services/iot-gateway && IOT_GATEWAY_SECRET=dev-gateway-secret cargo run &
 cd /home/wwwroot/iot-platform/e-cat/services/iot-device && cargo run &
 sleep 15
 # 先跑一次集成测试种子数据（幂等，见 Task 9 Step 5）
@@ -2754,7 +2754,7 @@ kill %1 %2 %3 2>/dev/null; true
 ```
 Expected: 全部 PASS，`smoke: 12 passed, 0 failed`（P0 的 7 项 + P1 新增 5 项）。
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add e-cat/services/iot-gateway/ scripts/smoke.sh
