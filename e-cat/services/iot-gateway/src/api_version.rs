@@ -50,7 +50,7 @@ where
         let mut inner = self.inner.clone();
 
         Box::pin(async move {
-            if path == "/health" || path == "/metrics" {
+            if path == "/health" || path == "/ready" || path == "/metrics" {
                 return inner.call(req).await.map_err(Into::into);
             }
             match version {

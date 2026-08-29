@@ -1,9 +1,6 @@
 use axum::{Router, routing::{get, post}};
+use ecat_health::HealthRegistry;
 use iot_gateway::{api_version::ApiVersionLayer, auth_compat::JwtAuthCompat, scan::ScanLayer};
-
-async fn health() -> &'static str {
-    "OK"
-}
 
 async fn submit() -> &'static str {
     "ok"
@@ -30,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .layer(JwtAuthCompat::new(&secret, &["sub"])?);
 
     let router = Router::new()
-        .route("/health", get(health))
+        .merge(HealthRegistry::new().into_router())
         .route("/api/ping", get(|| async { "pong" }))
         .route("/api/submit", post(submit))
         .nest("/api", admin_api)

@@ -2786,6 +2786,7 @@ dependencies = [
  "axum 0.8.9",
  "ecat",
  "ecat-auth",
+ "ecat-health",
  "ecat-transport-http",
  "http",
  "jsonwebtoken",
