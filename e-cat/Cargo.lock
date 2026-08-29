@@ -2908,6 +2908,7 @@ dependencies = [
  "ecat-transport-http",
  "http",
  "jsonwebtoken",
+ "reqwest",
  "security-rust 1.0.8",
  "serde",
  "serde_json",

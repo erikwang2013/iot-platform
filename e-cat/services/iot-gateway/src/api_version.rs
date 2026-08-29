@@ -51,7 +51,12 @@ where
         let mut inner = self.inner.clone();
 
         Box::pin(async move {
-            if EXEMPT_PATHS.contains(&path.as_str()) {
+            // 涂鸦 Webhook 与浏览器 OAuth 回调无法携带 x-api-version header，豁免；
+            // 其余 /api/access/* 仍要求版本 header。
+            if EXEMPT_PATHS.contains(&path.as_str())
+                || path.starts_with("/api/access/webhook")
+                || path.starts_with("/api/access/oauth/callback")
+            {
                 return inner.call(req).await.map_err(Into::into);
             }
             match version {
