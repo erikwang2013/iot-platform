@@ -7,7 +7,7 @@ class LocaleController extends ChangeNotifier {
     Locale('fr'), Locale('es'), Locale('pt'), Locale('hi'), Locale('ar'),
     Locale('bn'), Locale('id'), Locale('ja'),
   ];
-  static const langCodes = ['zh','en','ko','ru','de','fr','es','pt','hi','ar','bn','id','ja'];
+  static final langCodes = supportedLocales.map((l) => l.languageCode).toList();
 
   final SharedPreferences _prefs;
   Locale? _override;
@@ -20,12 +20,13 @@ class LocaleController extends ChangeNotifier {
   }
 
   bool get followSystem => _followSystem;
-  Locale get effectiveLocale =>
-      _followSystem || _override == null ? _override ?? const Locale('zh') : _override!;
+  // 不跟随系统时 _override 必非空（select 设置、useSystemLocale 清空）
+  Locale get effectiveLocale => _override ?? const Locale('zh');
 
   Locale? get explicitLocale => _followSystem ? null : _override;
 
   Future<void> useSystemLocale() async {
+    if (_followSystem && _override == null) return;
     _followSystem = true;
     _override = null;
     await _prefs.remove('locale');
@@ -34,6 +35,7 @@ class LocaleController extends ChangeNotifier {
   }
 
   Future<void> select(Locale locale) async {
+    if (!_followSystem && _override == locale) return;
     _followSystem = false;
     _override = locale;
     await _prefs.setString('locale', locale.languageCode);

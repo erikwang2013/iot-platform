@@ -4,8 +4,7 @@
 e-cat/services/*/target
 
 # legacy rules (from pre-P0 root .gitignore)
-/admin/runtime
-/service/runtime
+runtime
 /.idea
 /.vscode
 *.log
@@ -13,8 +12,7 @@ e-cat/services/*/target
 /tests/tmp
 /tests/.phpunit.result.cache
 /.cursor
-/service/vendor
-/admin/vendor
+vendor
 /service/.phpunit.cache/
 /admin/.phpunit.cache/
 /.github.phpunit.cache/
@@ -29,7 +27,7 @@ skills-lock.json
 .php-cs-fixer.cache
 *.backup
 *.bak
-
+.hvigor
 
 
 apps/flutter/# Miscellaneous

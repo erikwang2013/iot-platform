@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 660" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <rect width="1120" height="660" fill="#fbfbfd"/>
+
+  <text x="560" y="30" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f172a">기능 맵</text>
+
+  <text x="290" y="56" text-anchor="middle" font-size="12" font-weight="bold" letter-spacing="2" fill="#2563eb">관리자 · 테넌트 관리자</text>
+  <g>
+    <rect x="40" y="70" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="96" font-size="14" font-weight="bold" fill="#0f172a">계정 및 테넌트</text>
+    <text x="60" y="114" font-size="10.5" fill="#475569">슈퍼 관리자 · 역할(admin/operator/read-only) · 할당량</text>
+
+    <rect x="40" y="140" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="166" font-size="14" font-weight="bold" fill="#0f172a">기기 관리</text>
+    <text x="60" y="184" font-size="10.5" fill="#475569">검색 · 제조사 OAuth 연동 안내 · 상세 · 수명 주기</text>
+
+    <rect x="40" y="210" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="236" font-size="14" font-weight="bold" fill="#0f172a">사물 모델</text>
+    <text x="60" y="254" font-size="10.5" fill="#475569">속성 / 이벤트 / 서비스 정의 · 카테고리 템플릿</text>
+
+    <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">제조사 통합</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">어댑터 상태 · OAuth 자격 증명(AES) · 웹훅</text>
+
+    <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">CDN 관리</text>
+    <text x="60" y="394" font-size="10.5" fill="#475569">제조사 추가/수정/삭제 · 활성화/비활성화 · 새로고침 및 워밍업 · 사용량</text>
+
+    <rect x="40" y="420" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="446" font-size="14" font-weight="bold" fill="#0f172a">규칙 및 알림</text>
+    <text x="60" y="464" font-size="10.5" fill="#475569">임계값 규칙 · 시나리오 자동화 · 알림 기록</text>
+
+    <rect x="40" y="490" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="516" font-size="14" font-weight="bold" fill="#0f172a">보고서 및 통계</text>
+    <text x="60" y="534" font-size="10.5" fill="#475569">기기 · 데이터 · CDN · 알림 · 테넌트 · CSV/Excel 내보내기</text>
+
+    <rect x="40" y="560" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="586" font-size="14" font-weight="bold" fill="#0f172a">시스템 설정</text>
+    <text x="60" y="604" font-size="10.5" fill="#475569">작업 로그 · API 키 · 보안 정책</text>
+  </g>
+
+  <text x="810" y="56" text-anchor="middle" font-size="12" font-weight="bold" letter-spacing="2" fill="#16a34a">클라이언트 · 최종 사용자</text>
+  <g>
+    <rect x="580" y="70" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="96" font-size="14" font-weight="bold" fill="#0f172a">로그인 / 회원가입</text>
+    <text x="600" y="114" font-size="10.5" fill="#475569">계정 · 세션</text>
+
+    <rect x="580" y="140" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="166" font-size="14" font-weight="bold" fill="#0f172a">내 기기</text>
+    <text x="600" y="184" font-size="10.5" fill="#475569">사물 모델 기반 동적 제어판</text>
+
+    <rect x="580" y="210" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="236" font-size="14" font-weight="bold" fill="#0f172a">공간 그룹</text>
+    <text x="600" y="254" font-size="10.5" fill="#475569">방 · 위치 · 기기 그룹</text>
+
+    <rect x="580" y="280" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="306" font-size="14" font-weight="bold" fill="#0f172a">시나리오 및 자동화</text>
+    <text x="600" y="324" font-size="10.5" fill="#475569">조건-동작 자동화</text>
+
+    <rect x="580" y="350" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="376" font-size="14" font-weight="bold" fill="#0f172a">알림 센터</text>
+    <text x="600" y="394" font-size="10.5" fill="#475569">인앱 메시지 · WebSocket 푸시</text>
+
+    <rect x="580" y="420" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="446" font-size="14" font-weight="bold" fill="#0f172a">이력 및 추세</text>
+    <text x="600" y="464" font-size="10.5" fill="#475569">시계열 곡선</text>
+
+    <rect x="580" y="490" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="516" font-size="14" font-weight="bold" fill="#0f172a">프로필</text>
+    <text x="600" y="534" font-size="10.5" fill="#475569">프로필 · 언어 · 테마</text>
+  </g>
+
+  <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">플랫폼 기능</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">13개 언어 i18n · 4개 플랫폼(Flutter Web/모바일 ×2 + HarmonyOS ×2) · 이중 API /api/* + /admin/* · 멀티 테넌트 SaaS · 6개 마이크로서비스</text>
+
+  <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
+  <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>
+</svg>

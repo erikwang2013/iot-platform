@@ -34,6 +34,7 @@ export class LocaleStore {
   static async resetSystem(): Promise<void> {
     const p = await LocaleStore.prefsInstance();
     await p.put(KEY_FOLLOW, true);
+    await p.delete(KEY_LOCALE);
     await p.flush();
   }
 }

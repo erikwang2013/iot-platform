@@ -15,7 +15,7 @@ SaaS 云平台：对外提供多租户服务，帮助客户统一管理接入国
 | 前端 | Flutter 多端（Web/iOS/Android）+ HarmonyOS 原生，位于 `apps/` |
 | 安全 | security-rust 攻击检测中间件（27 检测器）+ ecat-auth + ecat-tls |
 | 存储 | MySQL 8（业务）、TDengine（时序）、Redis（影子/缓存）、S3/MinIO（对象） |
-| 中间件 | EMQX（直连 MQTT broker）、Kafka（事件总线） |
+| 中间件 | EMQX（直连 MQTT broker）、Kafka（事件总线）、OpenSearch（全文检索/搜索） |
 
 ## 3. 架构：微服务拆分
 
@@ -142,6 +142,8 @@ apps/
 ```
 
 物模型两端共用：管理端定义物模型，客户端动态渲染控制面板。
+
+**全平台多语言独立适配（13 语言）**：管理端+客户端 × Flutter+HarmonyOS 四端统一 i18n——中文（默认）、英文、韩语、俄语、德语、法语、西班牙语、葡萄牙语、印地语、阿拉伯语（RTL）、孟加拉语、印尼语、日语。每语言独立文案（非直译）+ 文化适配（RTL/数字/日期/字体），语言可切换并持久化。详细设计见 `docs/superpowers/specs/2026-08-30-i18n-platform-design.md`；随 P5 前端落地，i18n 骨架先行，功能 UI 文案随各功能开发增量补充。
 
 ## 9. 部署与测试
 

@@ -58,6 +58,31 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
+  void _showAboutDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.settingsAbout),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/mascot.png', height: 120),
+            const SizedBox(height: 12),
+            Text(l10n.appName,
+                style: Theme.of(dialogContext).textTheme.titleMedium),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.commonConfirm),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -95,7 +120,7 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: Text(l10n.settingsAbout),
-            onTap: placeholder,
+            onTap: () => _showAboutDialog(context),
           ),
           ListTile(
             leading: const Icon(Icons.logout),

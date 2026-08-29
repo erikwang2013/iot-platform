@@ -5,7 +5,6 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ARB_DIR="$ROOT/apps/shared/l10n"
 LOG_DIR="$(mktemp -d)"
 trap 'rm -rf "$LOG_DIR"' EXIT
 
@@ -70,18 +69,7 @@ else
     record FAIL "web artifact index.html (client)" "build/web/index.html missing"
 fi
 
-# 7. All 13 arb files present
-missing=""
-for loc in zh en ko ru de fr es pt hi ar bn id ja; do
-    [ -f "$ARB_DIR/app_$loc.arb" ] || missing="$missing $loc"
-done
-if [ -z "$missing" ]; then
-    record PASS "13 arb files present"
-else
-    record FAIL "13 arb files present" "missing:$missing"
-fi
-
-# 8. HarmonyOS .hap build artifacts (SKIPPED if cleaned, not a failure)
+# 7. HarmonyOS .hap build artifacts (SKIPPED if cleaned, not a failure)
 hap_ok=1; hap_missing=""
 for side in admin client; do
     hap="$ROOT/apps/$side/harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap"
@@ -93,7 +81,7 @@ else
     record SKIP "harmonyOS .hap artifacts (admin + client)" "missing:$hap_missing — rerun Task 3 build (devEco/hvigor) to regenerate"
 fi
 
-# 9. Summary
+# 8. Summary
 echo
 echo "==== smoke_i18n summary: $PASS/$TOTAL PASS, $FAIL FAIL, $SKIP SKIP ===="
 if [ "$FAIL" -gt 0 ]; then

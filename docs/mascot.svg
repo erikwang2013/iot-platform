@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <rect width="400" height="400" fill="#fbfbfd" rx="24"/>
+
+  <!-- Satellite nodes (device network) -->
+  <circle cx="52" cy="130" r="14" fill="#10b981" stroke="#fbfbfd" stroke-width="4"/>
+  <circle cx="348" cy="150" r="14" fill="#f59e0b" stroke="#fbfbfd" stroke-width="4"/>
+  <line x1="64" y1="138" x2="180" y2="180" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="5 6"/>
+  <line x1="336" y1="158" x2="222" y2="196" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="5 6"/>
+
+  <!-- Antenna -->
+  <line x1="200" y1="112" x2="200" y2="58" stroke="#334155" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="200" cy="46" r="13" fill="#f59e0b" stroke="#fbbf24" stroke-width="3"/>
+
+  <!-- Signal arcs -->
+  <path d="M 218 38 A 22 22 0 0 1 232 54" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 230 28 A 38 38 0 0 1 252 52" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- Arms -->
+  <circle cx="88" cy="215" r="17" fill="#3b82f6" stroke="#1d4ed8" stroke-width="3"/>
+  <circle cx="312" cy="215" r="17" fill="#3b82f6" stroke="#1d4ed8" stroke-width="3"/>
+
+  <!-- Body -->
+  <rect x="88" y="112" width="224" height="190" rx="62" fill="#2563eb" stroke="#1d4ed8" stroke-width="4"/>
+
+  <!-- Face screen -->
+  <rect x="115" y="140" width="170" height="112" rx="36" fill="#eff6ff"/>
+
+  <!-- Eyes -->
+  <circle cx="155" cy="184" r="15" fill="#0f172a"/>
+  <circle cx="245" cy="184" r="15" fill="#0f172a"/>
+  <circle cx="160" cy="178" r="5" fill="#ffffff"/>
+  <circle cx="250" cy="178" r="5" fill="#ffffff"/>
+
+  <!-- Smile -->
+  <path d="M 172 206 Q 200 234 228 206" fill="none" stroke="#0f172a" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Screen connection dots -->
+  <circle cx="200" cy="230" r="4" fill="#10b981"/>
+  <circle cx="188" cy="230" r="4" fill="#f59e0b"/>
+  <circle cx="212" cy="230" r="4" fill="#f59e0b"/>
+
+  <!-- Feet -->
+  <rect x="128" y="306" width="44" height="20" rx="10" fill="#1d4ed8"/>
+  <rect x="228" y="306" width="44" height="20" rx="10" fill="#1d4ed8"/>
+
+  <!-- Shadow -->
+  <ellipse cx="200" cy="342" rx="82" ry="11" fill="#e2e8f0"/>
+</svg>

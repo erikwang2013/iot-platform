@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 660" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <rect width="1120" height="660" fill="#fbfbfd"/>
+
+  <text x="560" y="30" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f172a">功能图</text>
+
+  <text x="290" y="56" text-anchor="middle" font-size="12" font-weight="bold" letter-spacing="2" fill="#2563eb">管理端 · 租户管理员</text>
+  <g>
+    <rect x="40" y="70" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="96" font-size="14" font-weight="bold" fill="#0f172a">账号与租户</text>
+    <text x="60" y="114" font-size="10.5" fill="#475569">超级管理员 · 角色（admin/operator/read-only）· 配额</text>
+
+    <rect x="40" y="140" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="166" font-size="14" font-weight="bold" fill="#0f172a">设备管理</text>
+    <text x="60" y="184" font-size="10.5" fill="#475569">搜索 · 厂商 OAuth 接入引导 · 详情 · 生命周期</text>
+
+    <rect x="40" y="210" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="236" font-size="14" font-weight="bold" fill="#0f172a">物模型</text>
+    <text x="60" y="254" font-size="10.5" fill="#475569">属性 / 事件 / 服务定义 · 品类模板</text>
+
+    <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">厂商集成</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">适配器状态 · OAuth 凭据（AES）· Webhook</text>
+
+    <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">CDN 管理</text>
+    <text x="60" y="394" font-size="10.5" fill="#475569">厂商增删改 · 启用/禁用 · 刷新与预热 · 用量</text>
+
+    <rect x="40" y="420" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="446" font-size="14" font-weight="bold" fill="#0f172a">规则与告警</text>
+    <text x="60" y="464" font-size="10.5" fill="#475569">阈值规则 · 场景自动化 · 告警记录</text>
+
+    <rect x="40" y="490" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="516" font-size="14" font-weight="bold" fill="#0f172a">报表与统计</text>
+    <text x="60" y="534" font-size="10.5" fill="#475569">设备 · 数据 · CDN · 告警 · 租户 · CSV/Excel 导出</text>
+
+    <rect x="40" y="560" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="586" font-size="14" font-weight="bold" fill="#0f172a">系统设置</text>
+    <text x="60" y="604" font-size="10.5" fill="#475569">操作日志 · API 密钥 · 安全策略</text>
+  </g>
+
+  <text x="810" y="56" text-anchor="middle" font-size="12" font-weight="bold" letter-spacing="2" fill="#16a34a">客户端 · 终端用户</text>
+  <g>
+    <rect x="580" y="70" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="96" font-size="14" font-weight="bold" fill="#0f172a">登录 / 注册</text>
+    <text x="600" y="114" font-size="10.5" fill="#475569">账号 · 会话</text>
+
+    <rect x="580" y="140" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="166" font-size="14" font-weight="bold" fill="#0f172a">我的设备</text>
+    <text x="600" y="184" font-size="10.5" fill="#475569">物模型驱动的动态控制面板</text>
+
+    <rect x="580" y="210" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="236" font-size="14" font-weight="bold" fill="#0f172a">空间分组</text>
+    <text x="600" y="254" font-size="10.5" fill="#475569">房间 · 位置 · 设备分组</text>
+
+    <rect x="580" y="280" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="306" font-size="14" font-weight="bold" fill="#0f172a">场景与自动化</text>
+    <text x="600" y="324" font-size="10.5" fill="#475569">条件-动作自动化</text>
+
+    <rect x="580" y="350" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="376" font-size="14" font-weight="bold" fill="#0f172a">告警中心</text>
+    <text x="600" y="394" font-size="10.5" fill="#475569">站内消息 · WebSocket 推送</text>
+
+    <rect x="580" y="420" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="446" font-size="14" font-weight="bold" fill="#0f172a">历史与趋势</text>
+    <text x="600" y="464" font-size="10.5" fill="#475569">时序曲线</text>
+
+    <rect x="580" y="490" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="516" font-size="14" font-weight="bold" fill="#0f172a">个人中心</text>
+    <text x="600" y="534" font-size="10.5" fill="#475569">个人中心 · 语言 · 主题</text>
+  </g>
+
+  <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">平台能力</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">13 语言 i18n · 4 平台（Flutter Web/移动 ×2 + HarmonyOS ×2）· 双 API 面 /api/* + /admin/* · 多租户 SaaS · 6 微服务</text>
+
+  <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
+  <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>
+</svg>

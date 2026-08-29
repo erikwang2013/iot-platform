@@ -22,6 +22,9 @@ struct Settings {
   }
 
   async select(code: string): Promise<void> {
+    if (!this.followSystem && this.current === code) {
+      return;
+    }
     i18n.System.setAppPreferredLanguage(code);
     await LocaleStore.setLocale(code);
     this.followSystem = false;
@@ -29,6 +32,8 @@ struct Settings {
   }
 
   async follow(): Promise<void> {
+    // SDK 无 removeAppPreferredLanguage；跟随系统 = 把首选语言钉到系统语言
+    i18n.System.setAppPreferredLanguage(i18n.System.getSystemLanguage());
     await LocaleStore.resetSystem();
     this.followSystem = true;
     this.current = i18n.System.getSystemLanguage();

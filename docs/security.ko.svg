@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect width="1120" height="560" fill="#fbfbfd"/>
+
+  <text x="560" y="30" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f172a">보안 아키텍처</text>
+  <text x="560" y="52" text-anchor="middle" font-size="11.5" fill="#64748b">인바운드 트래픽 계층 방어 — REST · WebSocket · MQTT</text>
+
+  <!-- 左侧流量标注 -->
+  <line x1="30" y1="60" x2="30" y2="502" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="16" y="280" text-anchor="middle" font-size="11" fill="#475569" transform="rotate(-90 16 280)">인바운드 요청 / 기기 트래픽</text>
+
+  <!-- 第 1 层 -->
+  <g>
+    <rect x="60" y="66" width="1000" height="58" rx="10" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+    <circle cx="88" cy="95" r="14" fill="#ef4444"/>
+    <text x="88" y="100" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">1</text>
+    <text x="116" y="93" font-size="14" font-weight="bold" fill="#0f172a">진입 스크리닝</text>
+    <text x="116" y="111" font-size="11" fill="#475569">security-rust — 27개 감지기 · 주입 · XSS · 프로토콜 공격 · 민감 데이터 유출</text>
+  </g>
+  <line x1="560" y1="124" x2="560" y2="136" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 第 2 层 -->
+  <g>
+    <rect x="60" y="140" width="1000" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <circle cx="88" cy="169" r="14" fill="#3b82f6"/>
+    <text x="88" y="174" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">2</text>
+    <text x="116" y="167" font-size="14" font-weight="bold" fill="#0f172a">인증 및 권한 부여</text>
+    <text x="116" y="185" font-size="11" fill="#475569">ecat-auth JWT + RBAC · 강제 tenant_id 필터링(테넌트 격리)</text>
+  </g>
+  <line x1="560" y1="198" x2="560" y2="210" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 第 3 层 -->
+  <g>
+    <rect x="60" y="214" width="1000" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <circle cx="88" cy="243" r="14" fill="#22c55e"/>
+    <text x="88" y="248" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">3</text>
+    <text x="116" y="241" font-size="14" font-weight="bold" fill="#0f172a">전송 보안</text>
+    <text x="116" y="259" font-size="11" fill="#475569">ecat-tls 상호 TLS · 직접 연결 기기 mTLS</text>
+  </g>
+  <line x1="560" y1="272" x2="560" y2="284" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 第 4 层 -->
+  <g>
+    <rect x="60" y="288" width="1000" height="58" rx="10" fill="#fefce8" stroke="#fde047" stroke-width="1.5"/>
+    <circle cx="88" cy="317" r="14" fill="#eab308"/>
+    <text x="88" y="322" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">4</text>
+    <text x="116" y="315" font-size="14" font-weight="bold" fill="#0f172a">자격 증명 보호</text>
+    <text x="116" y="333" font-size="11" fill="#475569">제조사 및 CDN 자격 증명 AES 암호화 저장 · 키는 환경 변수로 주입</text>
+  </g>
+  <line x1="560" y1="346" x2="560" y2="358" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 第 5 层 -->
+  <g>
+    <rect x="60" y="362" width="1000" height="58" rx="10" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1.5"/>
+    <circle cx="88" cy="391" r="14" fill="#a855f7"/>
+    <text x="88" y="396" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">5</text>
+    <text x="116" y="389" font-size="14" font-weight="bold" fill="#0f172a">속도 제한 및 회로 차단기</text>
+    <text x="116" y="407" font-size="11" fill="#475569">속도 제한 · ecat-circuit-breaker(제조사 API 장애 격리)</text>
+  </g>
+  <line x1="560" y1="420" x2="560" y2="432" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 第 6 层 -->
+  <g>
+    <rect x="60" y="436" width="1000" height="58" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+    <circle cx="88" cy="465" r="14" fill="#64748b"/>
+    <text x="88" y="470" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">6</text>
+    <text x="116" y="463" font-size="14" font-weight="bold" fill="#0f172a">데이터 전달</text>
+    <text x="116" y="481" font-size="11" fill="#475569">CDN 서명 다운로드 URL · WebSocket 채널 인증</text>
+  </g>
+
+  <!-- 受保护资产 -->
+  <rect x="60" y="508" width="1000" height="34" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="560" y="530" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#0f172a">보호 자산 — 기기 데이터 · 테넌트 데이터 · 자격 증명 · 시계열 데이터</text>
+
+  <text x="560" y="556" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 556)">https://erik.xyz</text>
+  <text x="1100" y="552" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>
+</svg>

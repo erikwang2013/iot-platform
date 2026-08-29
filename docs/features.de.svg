@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 660" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <rect width="1120" height="660" fill="#fbfbfd"/>
+
+  <text x="560" y="30" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f172a">Funktionsübersicht</text>
+
+  <text x="290" y="56" text-anchor="middle" font-size="12" font-weight="bold" letter-spacing="2" fill="#2563eb">ADMIN · TENANT-ADMIN</text>
+  <g>
+    <rect x="40" y="70" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="96" font-size="14" font-weight="bold" fill="#0f172a">Konten &amp; Tenants</text>
+    <text x="60" y="114" font-size="10.5" fill="#475569">Super-Admin · Rollen (admin/operator/read-only) · Kontingente</text>
+
+    <rect x="40" y="140" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="166" font-size="14" font-weight="bold" fill="#0f172a">Geräteverwaltung</text>
+    <text x="60" y="184" font-size="10.5" fill="#475569">Suche · Vendor-OAuth-Onboarding · Details · Lebenszyklus</text>
+
+    <rect x="40" y="210" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="236" font-size="14" font-weight="bold" fill="#0f172a">Dingmodell</text>
+    <text x="60" y="254" font-size="10.5" fill="#475569">Eigenschafts- / Ereignis- / Dienstdefinitionen · Kategorievorlagen</text>
+
+    <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">Vendor-Integration</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">Adapterstatus · OAuth-Anmeldedaten (AES) · Webhooks</text>
+
+    <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">CDN-Verwaltung</text>
+    <text x="60" y="394" font-size="10.5" fill="#475569">Vendor hinzufügen/bearbeiten/löschen · aktivieren/deaktivieren · Refresh &amp; Prewarm · Nutzung</text>
+
+    <rect x="40" y="420" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="446" font-size="14" font-weight="bold" fill="#0f172a">Regeln &amp; Alarme</text>
+    <text x="60" y="464" font-size="10.5" fill="#475569">Schwellwertregeln · Szenario-Automatisierung · Alarmverlauf</text>
+
+    <rect x="40" y="490" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="516" font-size="14" font-weight="bold" fill="#0f172a">Berichte &amp; Statistiken</text>
+    <text x="60" y="534" font-size="10.5" fill="#475569">Geräte · Daten · CDN · Alarme · Tenants · CSV/Excel-Export</text>
+
+    <rect x="40" y="560" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="586" font-size="14" font-weight="bold" fill="#0f172a">Systemeinstellungen</text>
+    <text x="60" y="604" font-size="10.5" fill="#475569">Betriebsprotokolle · API-Schlüssel · Sicherheitsrichtlinie</text>
+  </g>
+
+  <text x="810" y="56" text-anchor="middle" font-size="12" font-weight="bold" letter-spacing="2" fill="#16a34a">CLIENT · ENDNUTZER</text>
+  <g>
+    <rect x="580" y="70" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="96" font-size="14" font-weight="bold" fill="#0f172a">Anmelden / Registrieren</text>
+    <text x="600" y="114" font-size="10.5" fill="#475569">Konto · Sitzung</text>
+
+    <rect x="580" y="140" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="166" font-size="14" font-weight="bold" fill="#0f172a">Meine Geräte</text>
+    <text x="600" y="184" font-size="10.5" fill="#475569">Dynamisches Bedienfeld, vom Dingmodell gesteuert</text>
+
+    <rect x="580" y="210" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="236" font-size="14" font-weight="bold" fill="#0f172a">Raumgruppen</text>
+    <text x="600" y="254" font-size="10.5" fill="#475569">Räume · Standorte · Gerätegruppen</text>
+
+    <rect x="580" y="280" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="306" font-size="14" font-weight="bold" fill="#0f172a">Szenen &amp; Automatisierung</text>
+    <text x="600" y="324" font-size="10.5" fill="#475569">条件-动作自动化</text>
+
+    <rect x="580" y="350" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="376" font-size="14" font-weight="bold" fill="#0f172a">Alarmzentrum</text>
+    <text x="600" y="394" font-size="10.5" fill="#475569">In-App-Nachrichten · WebSocket-Push</text>
+
+    <rect x="580" y="420" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="446" font-size="14" font-weight="bold" fill="#0f172a">Verlauf &amp; Trends</text>
+    <text x="600" y="464" font-size="10.5" fill="#475569">Zeitreihenkurven</text>
+
+    <rect x="580" y="490" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="516" font-size="14" font-weight="bold" fill="#0f172a">Profil</text>
+    <text x="600" y="534" font-size="10.5" fill="#475569">Profil · Sprache · Thema</text>
+  </g>
+
+  <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">Plattform-Fähigkeiten</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">i18n in 13 Sprachen · 4 Plattformen (Flutter Web/Mobil ×2 + HarmonyOS ×2) · duale API-Oberfläche /api/* + /admin/* · Multi-Tenant-SaaS · 6 Mikroservices</text>
+
+  <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
+  <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>
+</svg>

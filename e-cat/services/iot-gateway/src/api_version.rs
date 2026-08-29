@@ -8,6 +8,7 @@ use tower::{Layer, Service};
 
 pub const API_VERSION_HEADER: &str = "x-api-version";
 pub const SUPPORTED_VERSIONS: &[&str] = &["v1"];
+pub const EXEMPT_PATHS: &[&str] = &["/health", "/ready", "/metrics"];
 
 #[derive(Clone, Copy)]
 pub struct ApiVersionLayer;
@@ -50,7 +51,7 @@ where
         let mut inner = self.inner.clone();
 
         Box::pin(async move {
-            if path == "/health" || path == "/ready" || path == "/metrics" {
+            if EXEMPT_PATHS.contains(&path.as_str()) {
                 return inner.call(req).await.map_err(Into::into);
             }
             match version {

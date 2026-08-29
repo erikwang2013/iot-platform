@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 560" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect width="1120" height="560" fill="#fbfbfd"/>
+
+  <text x="560" y="30" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f172a">Arquitetura de segurança</text>
+  <text x="560" y="52" text-anchor="middle" font-size="11.5" fill="#64748b">Defesa em camadas para tráfego de entrada — REST · WebSocket · MQTT</text>
+
+  <!-- 左侧流量标注 -->
+  <line x1="30" y1="60" x2="30" y2="502" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="16" y="280" text-anchor="middle" font-size="11" fill="#475569" transform="rotate(-90 16 280)">Solicitações de entrada / tráfego de dispositivos</text>
+
+  <!-- 第 1 层 -->
+  <g>
+    <rect x="60" y="66" width="1000" height="58" rx="10" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+    <circle cx="88" cy="95" r="14" fill="#ef4444"/>
+    <text x="88" y="100" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">1</text>
+    <text x="116" y="93" font-size="14" font-weight="bold" fill="#0f172a">Triagem de entrada</text>
+    <text x="116" y="111" font-size="11" fill="#475569">security-rust — 27 detectores · injeção · XSS · ataques de protocolo · vazamento de dados sensíveis</text>
+  </g>
+  <line x1="560" y1="124" x2="560" y2="136" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 第 2 层 -->
+  <g>
+    <rect x="60" y="140" width="1000" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <circle cx="88" cy="169" r="14" fill="#3b82f6"/>
+    <text x="88" y="174" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">2</text>
+    <text x="116" y="167" font-size="14" font-weight="bold" fill="#0f172a">Autenticação e autorização</text>
+    <text x="116" y="185" font-size="11" fill="#475569">ecat-auth JWT + RBAC · filtragem obrigatória de tenant_id (isolamento de inquilinos)</text>
+  </g>
+  <line x1="560" y1="198" x2="560" y2="210" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 第 3 层 -->
+  <g>
+    <rect x="60" y="214" width="1000" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <circle cx="88" cy="243" r="14" fill="#22c55e"/>
+    <text x="88" y="248" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">3</text>
+    <text x="116" y="241" font-size="14" font-weight="bold" fill="#0f172a">Segurança de transporte</text>
+    <text x="116" y="259" font-size="11" fill="#475569">ecat-tls TLS mútuo · mTLS para dispositivos diretos</text>
+  </g>
+  <line x1="560" y1="272" x2="560" y2="284" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 第 4 层 -->
+  <g>
+    <rect x="60" y="288" width="1000" height="58" rx="10" fill="#fefce8" stroke="#fde047" stroke-width="1.5"/>
+    <circle cx="88" cy="317" r="14" fill="#eab308"/>
+    <text x="88" y="322" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">4</text>
+    <text x="116" y="315" font-size="14" font-weight="bold" fill="#0f172a">Proteção de credenciais</text>
+    <text x="116" y="333" font-size="11" fill="#475569">Credenciais de fabricantes e CDN criptografadas com AES em repouso · chaves injetadas via ambiente</text>
+  </g>
+  <line x1="560" y1="346" x2="560" y2="358" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 第 5 层 -->
+  <g>
+    <rect x="60" y="362" width="1000" height="58" rx="10" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1.5"/>
+    <circle cx="88" cy="391" r="14" fill="#a855f7"/>
+    <text x="88" y="396" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">5</text>
+    <text x="116" y="389" font-size="14" font-weight="bold" fill="#0f172a">Limite de taxa e disjuntor</text>
+    <text x="116" y="407" font-size="11" fill="#475569">Limite · ecat-circuit-breaker (isolamento de falhas das APIs de fabricantes)</text>
+  </g>
+  <line x1="560" y1="420" x2="560" y2="432" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 第 6 层 -->
+  <g>
+    <rect x="60" y="436" width="1000" height="58" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+    <circle cx="88" cy="465" r="14" fill="#64748b"/>
+    <text x="88" y="470" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">6</text>
+    <text x="116" y="463" font-size="14" font-weight="bold" fill="#0f172a">Entrega de dados</text>
+    <text x="116" y="481" font-size="11" fill="#475569">URLs assinadas de download CDN · autenticação de canais WebSocket</text>
+  </g>
+
+  <!-- 受保护资产 -->
+  <rect x="60" y="508" width="1000" height="34" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="560" y="530" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#0f172a">ATIVOS PROTEGIDOS — dados de dispositivos · dados de inquilinos · credenciais · séries temporais</text>
+
+  <text x="560" y="556" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 556)">https://erik.xyz</text>
+  <text x="1100" y="552" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>
+</svg>

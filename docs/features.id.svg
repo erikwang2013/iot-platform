@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 660" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <rect width="1120" height="660" fill="#fbfbfd"/>
+
+  <text x="560" y="30" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f172a">Peta Fitur</text>
+
+  <text x="290" y="56" text-anchor="middle" font-size="12" font-weight="bold" letter-spacing="2" fill="#2563eb">ADMIN · ADMIN TENANT</text>
+  <g>
+    <rect x="40" y="70" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="96" font-size="14" font-weight="bold" fill="#0f172a">Akun &amp; Tenant</text>
+    <text x="60" y="114" font-size="10.5" fill="#475569">Super admin · peran (admin/operator/read-only) · kuota</text>
+
+    <rect x="40" y="140" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="166" font-size="14" font-weight="bold" fill="#0f172a">Manajemen Perangkat</text>
+    <text x="60" y="184" font-size="10.5" fill="#475569">Cari · panduan on-boarding OAuth vendor · detail · siklus hidup</text>
+
+    <rect x="40" y="210" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="236" font-size="14" font-weight="bold" fill="#0f172a">Model Benda</text>
+    <text x="60" y="254" font-size="10.5" fill="#475569">Definisi properti / peristiwa / layanan · templat kategori</text>
+
+    <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">Integrasi Vendor</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">Status adaptor · kredensial OAuth (AES) · webhook</text>
+
+    <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">Manajemen CDN</text>
+    <text x="60" y="394" font-size="10.5" fill="#475569">Tambah/edit/hapus vendor · aktif/nonaktif · refresh &amp; prewarm · pemakaian</text>
+
+    <rect x="40" y="420" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="446" font-size="14" font-weight="bold" fill="#0f172a">Aturan &amp; Peringatan</text>
+    <text x="60" y="464" font-size="10.5" fill="#475569">Aturan ambang batas · otomasi skenario · riwayat peringatan</text>
+
+    <rect x="40" y="490" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="516" font-size="14" font-weight="bold" fill="#0f172a">Laporan &amp; Statistik</text>
+    <text x="60" y="534" font-size="10.5" fill="#475569">Perangkat · data · CDN · peringatan · tenant · ekspor CSV/Excel</text>
+
+    <rect x="40" y="560" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="586" font-size="14" font-weight="bold" fill="#0f172a">Pengaturan Sistem</text>
+    <text x="60" y="604" font-size="10.5" fill="#475569">Log operasi · kunci API · kebijakan keamanan</text>
+  </g>
+
+  <text x="810" y="56" text-anchor="middle" font-size="12" font-weight="bold" letter-spacing="2" fill="#16a34a">KLIEN · PENGGUNA AKHIR</text>
+  <g>
+    <rect x="580" y="70" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="96" font-size="14" font-weight="bold" fill="#0f172a">Masuk / Daftar</text>
+    <text x="600" y="114" font-size="10.5" fill="#475569">Akun · sesi</text>
+
+    <rect x="580" y="140" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="166" font-size="14" font-weight="bold" fill="#0f172a">Perangkat Saya</text>
+    <text x="600" y="184" font-size="10.5" fill="#475569">Panel kontrol dinamis berbasis model benda</text>
+
+    <rect x="580" y="210" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="236" font-size="14" font-weight="bold" fill="#0f172a">Grup Ruang</text>
+    <text x="600" y="254" font-size="10.5" fill="#475569">Ruang · lokasi · grup perangkat</text>
+
+    <rect x="580" y="280" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="306" font-size="14" font-weight="bold" fill="#0f172a">Skenario &amp; Otomasi</text>
+    <text x="600" y="324" font-size="10.5" fill="#475569">Otomasi kondisi-aksi</text>
+
+    <rect x="580" y="350" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="376" font-size="14" font-weight="bold" fill="#0f172a">Pusat Peringatan</text>
+    <text x="600" y="394" font-size="10.5" fill="#475569">Pesan dalam aplikasi · push WebSocket</text>
+
+    <rect x="580" y="420" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="446" font-size="14" font-weight="bold" fill="#0f172a">Riwayat &amp; Tren</text>
+    <text x="600" y="464" font-size="10.5" fill="#475569">Kurva deret waktu</text>
+
+    <rect x="580" y="490" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="516" font-size="14" font-weight="bold" fill="#0f172a">Profil</text>
+    <text x="600" y="534" font-size="10.5" fill="#475569">Profil · bahasa · tema</text>
+  </g>
+
+  <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">Kapabilitas Platform</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">i18n 13 bahasa · 4 platform (Flutter Web/Seluler ×2 + HarmonyOS ×2) · permukaan API ganda /api/* + /admin/* · SaaS multi-tenant · 6 mikroservis</text>
+
+  <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
+  <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>
+</svg>

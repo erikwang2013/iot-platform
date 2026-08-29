@@ -44,8 +44,9 @@
 - [ ] T2.5: 统计 API 基础：设备统计（总数/在线率/厂商分布）、数据上报量趋势（按日/周/月）
 - [ ] T2.6: 网关转发：`/api/reports/*` 与历史曲线路由到 iot-data（gRPC 或 HTTP 内部调用）
 - [ ] T2.7: 测试：TDengine 集成（Docker）+ 聚合查询断言 + 冒烟
+- [ ] T2.8: OpenSearch 检索：Docker 加 OpenSearch 单节点容器（无安全插件），建设备/告警/日志索引，`/api/search/*` 检索 API（多字段、模糊、分页）
 
-**关键文件:** `services/iot-data/{Cargo.toml,src/main.rs,src/tsdb.rs,src/consumer.rs,src/queries.rs}`、`docker-compose.yml`（+tdengine）
+**关键文件:** `services/iot-data/{Cargo.toml,src/main.rs,src/tsdb.rs,src/consumer.rs,src/queries.rs}`、`docker-compose.yml`（+tdengine、+opensearch）
 
 ---
 
@@ -83,8 +84,9 @@
 
 ## P5 前端：apps/admin + apps/client 全端
 
-**验收:** 管理端（Flutter Web）全功能可用且 API 地址可动态配置；客户端（Flutter Web/移动 + HarmonyOS）可用。
+**验收:** 管理端（Flutter Web）全功能可用且 API 地址可动态配置；客户端（Flutter Web/移动 + HarmonyOS）可用；四端 13 语言可切换（T5.0 落地）。
 
+- [ ] T5.0: 全平台多语言独立适配（13 语言：中文/英文/韩语/俄语/德语/法语/西班牙语/葡萄牙语/印地语/阿拉伯语/孟加拉语/印尼语/日语，Flutter+HarmonyOS 四端）— 执行独立计划 `docs/superpowers/plans/2026-08-30-i18n-platform-skeleton.md`（设计见 `docs/superpowers/specs/2026-08-30-i18n-platform-design.md`）。**前置任务**，其余 T5.x 依赖其骨架（shared l10n 源 + LocaleController + 语言切换 UI）
 - [ ] T5.1: Flutter 工程初始化：`apps/admin/flutter`、`apps/client/flutter`（登录页 + 布局 + 路由骨架）
 - [ ] T5.2: 管理端 API 客户端 + **地址动态化**：运行时解析 `config.json`（同源可注入）→ 当前 origin → 编译默认值（spec §8）
 - [ ] T5.3: 管理端-设备管理页：列表（搜索/筛选/分页）、详情（实时属性 WebSocket、指令下发、事件日志）、生命周期操作

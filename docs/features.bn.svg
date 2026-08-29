@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 660" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif">
+  <rect width="1120" height="660" fill="#fbfbfd"/>
+
+  <text x="560" y="30" text-anchor="middle" font-size="22" font-weight="bold" fill="#0f172a">ফিচার ম্যাপ</text>
+
+  <text x="290" y="56" text-anchor="middle" font-size="12" font-weight="bold" letter-spacing="2" fill="#2563eb">অ্যাডমিন · টেন্যান্ট অ্যাডমিন</text>
+  <g>
+    <rect x="40" y="70" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="96" font-size="14" font-weight="bold" fill="#0f172a">অ্যাকাউন্ট ও টেন্যান্ট</text>
+    <text x="60" y="114" font-size="10.5" fill="#475569">সুপার অ্যাডমিন · ভূমিকা (admin/operator/read-only) · কোটা</text>
+
+    <rect x="40" y="140" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="166" font-size="14" font-weight="bold" fill="#0f172a">ডিভাইস ব্যবস্থাপনা</text>
+    <text x="60" y="184" font-size="10.5" fill="#475569">খোঁজ · ভেন্ডর OAuth অনবোর্ডিং · বিবরণ · জীবনচক্র</text>
+
+    <rect x="40" y="210" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="236" font-size="14" font-weight="bold" fill="#0f172a">থিং মডেল</text>
+    <text x="60" y="254" font-size="10.5" fill="#475569">প্রপার্টি / ইভেন্ট / সার্ভিস সংজ্ঞা · ক্যাটাগরি টেমপ্লেট</text>
+
+    <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">ভেন্ডর ইন্টিগ্রেশন</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">অ্যাডাপ্টার অবস্থা · OAuth ক্রেডেনশিয়াল (AES) · ওয়েবহুক</text>
+
+    <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">CDN ব্যবস্থাপনা</text>
+    <text x="60" y="394" font-size="10.5" fill="#475569">ভেন্ডর যোগ/সম্পাদনা/মুছুন · সক্রিয়/নিষ্ক্রিয় · রিফ্রেশ ও প্রিওয়ার্ম · ব্যবহার</text>
+
+    <rect x="40" y="420" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="446" font-size="14" font-weight="bold" fill="#0f172a">নিয়ম ও সতর্কতা</text>
+    <text x="60" y="464" font-size="10.5" fill="#475569">থ্রেশহোল্ড নিয়ম · সিন অটোমেশন · সতর্কতা ইতিহাস</text>
+
+    <rect x="40" y="490" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="516" font-size="14" font-weight="bold" fill="#0f172a">রিপোর্ট ও পরিসংখ্যান</text>
+    <text x="60" y="534" font-size="10.5" fill="#475569">ডিভাইস · ডেটা · CDN · সতর্কতা · টেন্যান্ট · CSV/Excel এক্সপোর্ট</text>
+
+    <rect x="40" y="560" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="586" font-size="14" font-weight="bold" fill="#0f172a">সিস্টেম সেটিংস</text>
+    <text x="60" y="604" font-size="10.5" fill="#475569">অপারেশন লগ · API কী · নিরাপত্তা নীতি</text>
+  </g>
+
+  <text x="810" y="56" text-anchor="middle" font-size="12" font-weight="bold" letter-spacing="2" fill="#16a34a">ক্লায়েন্ট · শেষ ব্যবহারকারী</text>
+  <g>
+    <rect x="580" y="70" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="96" font-size="14" font-weight="bold" fill="#0f172a">লগইন / সাইন-আপ</text>
+    <text x="600" y="114" font-size="10.5" fill="#475569">অ্যাকাউন্ট · সেশন</text>
+
+    <rect x="580" y="140" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="166" font-size="14" font-weight="bold" fill="#0f172a">আমার ডিভাইস</text>
+    <text x="600" y="184" font-size="10.5" fill="#475569">থিং মডেল-চালিত ডায়নামিক কন্ট্রোল প্যানেল</text>
+
+    <rect x="580" y="210" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="236" font-size="14" font-weight="bold" fill="#0f172a">স্পেস গ্রুপ</text>
+    <text x="600" y="254" font-size="10.5" fill="#475569">রুম · অবস্থান · ডিভাইস গ্রুপ</text>
+
+    <rect x="580" y="280" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="306" font-size="14" font-weight="bold" fill="#0f172a">সিন ও অটোমেশন</text>
+    <text x="600" y="324" font-size="10.5" fill="#475569">শর্ত-কর্ম অটোমেশন</text>
+
+    <rect x="580" y="350" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="376" font-size="14" font-weight="bold" fill="#0f172a">সতর্কতা কেন্দ্র</text>
+    <text x="600" y="394" font-size="10.5" fill="#475569">ইন-অ্যাপ বার্তা · WebSocket পুশ</text>
+
+    <rect x="580" y="420" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="446" font-size="14" font-weight="bold" fill="#0f172a">ইতিহাস ও প্রবণতা</text>
+    <text x="600" y="464" font-size="10.5" fill="#475569">টাইম-সিরিজ কার্ভ</text>
+
+    <rect x="580" y="490" width="500" height="58" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
+    <text x="600" y="516" font-size="14" font-weight="bold" fill="#0f172a">প্রোফাইল</text>
+    <text x="600" y="534" font-size="10.5" fill="#475569">প্রোফাইল · ভাষা · থিম</text>
+  </g>
+
+  <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">প্ল্যাটফর্ম ক্ষমতা</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">১৩টি ভাষায় i18n · ৪টি প্ল্যাটফর্ম (Flutter Web/মোবাইল ×2 + HarmonyOS ×2) · দ্বৈত API পৃষ্ঠ /api/* + /admin/* · মাল্টি-টেন্যান্ট SaaS · ৬টি মাইক্রোসার্ভিস</text>
+
+  <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
+  <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>
+</svg>
