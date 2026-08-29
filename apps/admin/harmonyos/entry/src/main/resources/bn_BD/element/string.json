@@ -1,0 +1,284 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "আইওটি প্ল্যাটফর্ম"
+    },
+    {
+      "name": "common_ok",
+      "value": "ঠিক আছে"
+    },
+    {
+      "name": "common_cancel",
+      "value": "বাতিল"
+    },
+    {
+      "name": "common_save",
+      "value": "সংরক্ষণ"
+    },
+    {
+      "name": "common_delete",
+      "value": "মুছুন"
+    },
+    {
+      "name": "common_retry",
+      "value": "আবার চেষ্টা করুন"
+    },
+    {
+      "name": "common_confirm",
+      "value": "নিশ্চিত করুন"
+    },
+    {
+      "name": "common_back",
+      "value": "ফিরুন"
+    },
+    {
+      "name": "common_next",
+      "value": "পরবর্তী"
+    },
+    {
+      "name": "common_skip",
+      "value": "এড়িয়ে যান"
+    },
+    {
+      "name": "common_loading",
+      "value": "লোড হচ্ছে…"
+    },
+    {
+      "name": "common_empty",
+      "value": "কোনো তথ্য নেই"
+    },
+    {
+      "name": "common_error",
+      "value": "একটি সমস্যা হয়েছে"
+    },
+    {
+      "name": "common_success",
+      "value": "কার্য সম্পন্ন"
+    },
+    {
+      "name": "common_failed",
+      "value": "কার্য ব্যর্থ"
+    },
+    {
+      "name": "nav_dashboard",
+      "value": "ওভারভিউ"
+    },
+    {
+      "name": "nav_devices",
+      "value": "ডিভাইস"
+    },
+    {
+      "name": "nav_alerts",
+      "value": "সতর্কতা"
+    },
+    {
+      "name": "nav_reports",
+      "value": "পরিসংখ্যান"
+    },
+    {
+      "name": "nav_settings",
+      "value": "সেটিংস"
+    },
+    {
+      "name": "nav_profile",
+      "value": "প্রোফাইল"
+    },
+    {
+      "name": "login_title",
+      "value": "লগইন করুন"
+    },
+    {
+      "name": "login_subtitle",
+      "value": "আবার স্বাগতম"
+    },
+    {
+      "name": "login_username",
+      "value": "ব্যবহারকারীর নাম"
+    },
+    {
+      "name": "login_password",
+      "value": "পাসওয়ার্ড"
+    },
+    {
+      "name": "login_btn",
+      "value": "লগইন করুন"
+    },
+    {
+      "name": "register_btn",
+      "value": "নিবন্ধন করুন"
+    },
+    {
+      "name": "forgot_pwd",
+      "value": "পাসওয়ার্ড ভুলে গেছেন?"
+    },
+    {
+      "name": "login_error",
+      "value": "ব্যবহারকারীর নাম বা পাসওয়ার্ড ভুল"
+    },
+    {
+      "name": "login_required",
+      "value": "অনুগ্রহ করে আগে লগইন করুন"
+    },
+    {
+      "name": "device_my_devices",
+      "value": "আমার ডিভাইস"
+    },
+    {
+      "name": "device_add_device",
+      "value": "ডিভাইস যোগ করুন"
+    },
+    {
+      "name": "device_offline",
+      "value": "ডিভাইস অফলাইন"
+    },
+    {
+      "name": "device_online",
+      "value": "ডিভাইস অনলাইন"
+    },
+    {
+      "name": "device_detail",
+      "value": "ডিভাইসের বিবরণ"
+    },
+    {
+      "name": "device_name",
+      "value": "ডিভাইসের নাম"
+    },
+    {
+      "name": "device_type",
+      "value": "ডিভাইসের ধরন"
+    },
+    {
+      "name": "device_status",
+      "value": "ডিভাইসের অবস্থা"
+    },
+    {
+      "name": "device_control",
+      "value": "নিয়ন্ত্রণ প্যানেল"
+    },
+    {
+      "name": "device_scene",
+      "value": "দৃশ্য"
+    },
+    {
+      "name": "device_automation",
+      "value": "অটোমেশন"
+    },
+    {
+      "name": "alert_center",
+      "value": "বার্তা কেন্দ্র"
+    },
+    {
+      "name": "alert_no_alerts",
+      "value": "কোনো সতর্কতা নেই"
+    },
+    {
+      "name": "alert_time",
+      "value": "সতর্কতার সময়"
+    },
+    {
+      "name": "alert_level",
+      "value": "সতর্কতার মাত্রা"
+    },
+    {
+      "name": "report_device_stats",
+      "value": "ডিভাইস পরিসংখ্যান"
+    },
+    {
+      "name": "report_data_stats",
+      "value": "ডেটা পরিসংখ্যান"
+    },
+    {
+      "name": "report_cdn_stats",
+      "value": "CDN পরিসংখ্যান"
+    },
+    {
+      "name": "settings_language",
+      "value": "ভাষা"
+    },
+    {
+      "name": "settings_language_system",
+      "value": "সিস্টেম অনুসরণ"
+    },
+    {
+      "name": "settings_language_list_title",
+      "value": "ভাষা নির্বাচন"
+    },
+    {
+      "name": "settings_theme",
+      "value": "থিম"
+    },
+    {
+      "name": "settings_theme_light",
+      "value": "হালকা"
+    },
+    {
+      "name": "settings_theme_dark",
+      "value": "গাঢ়"
+    },
+    {
+      "name": "settings_about",
+      "value": "সম্পর্কে"
+    },
+    {
+      "name": "settings_about_version",
+      "value": "সংস্করণ"
+    },
+    {
+      "name": "settings_logout",
+      "value": "লগআউট"
+    },
+    {
+      "name": "settings_logout_confirm",
+      "value": "আপনি কি সত্যিই লগআউট করতে চান?"
+    },
+    {
+      "name": "i18n_demo_title",
+      "value": "স্থানীয়করণ ডেমো"
+    },
+    {
+      "name": "i18n_demo_date",
+      "value": "তারিখ"
+    },
+    {
+      "name": "i18n_demo_number",
+      "value": "সংখ্যা"
+    },
+    {
+      "name": "i18n_demo_currency",
+      "value": "মুদ্রা"
+    },
+    {
+      "name": "i18n_demo_long_text",
+      "value": "এটি একটি নমুনা পাঠ্য যা দেখায় কীভাবে দীর্ঘ লেখা লাইন ভেঙে যায় এবং পড়ার অভিজ্ঞতা কেমন হয়।"
+    },
+    {
+      "name": "i18n_demo_direction",
+      "value": "লেখার দিক"
+    },
+    {
+      "name": "error_network_error",
+      "value": "নেটওয়ার্ক সংযোগ ব্যর্থ"
+    },
+    {
+      "name": "error_server_error",
+      "value": "সার্ভার ত্রুটি"
+    },
+    {
+      "name": "error_timeout",
+      "value": "অনুরোধের সময় শেষ"
+    },
+    {
+      "name": "error_unauthorized",
+      "value": "অননুমোদিত অ্যাক্সেস"
+    },
+    {
+      "name": "error_forbidden",
+      "value": "এই কাজের অনুমতি নেই"
+    },
+    {
+      "name": "error_not_found",
+      "value": "সম্পদ পাওয়া যায়নি"
+    }
+  ]
+}

@@ -1,0 +1,284 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "IoT प्लेटफ़ॉर्म"
+    },
+    {
+      "name": "common_ok",
+      "value": "ठीक है"
+    },
+    {
+      "name": "common_cancel",
+      "value": "रद्द करें"
+    },
+    {
+      "name": "common_save",
+      "value": "सहेजें"
+    },
+    {
+      "name": "common_delete",
+      "value": "हटाएँ"
+    },
+    {
+      "name": "common_retry",
+      "value": "पुनः प्रयास करें"
+    },
+    {
+      "name": "common_confirm",
+      "value": "पुष्टि करें"
+    },
+    {
+      "name": "common_back",
+      "value": "वापस"
+    },
+    {
+      "name": "common_next",
+      "value": "आगे"
+    },
+    {
+      "name": "common_skip",
+      "value": "छोड़ें"
+    },
+    {
+      "name": "common_loading",
+      "value": "लोड हो रहा है…"
+    },
+    {
+      "name": "common_empty",
+      "value": "कोई डेटा नहीं"
+    },
+    {
+      "name": "common_error",
+      "value": "कुछ गड़बड़ हुई"
+    },
+    {
+      "name": "common_success",
+      "value": "कार्य सफल"
+    },
+    {
+      "name": "common_failed",
+      "value": "कार्य विफल"
+    },
+    {
+      "name": "nav_dashboard",
+      "value": "अवलोकन"
+    },
+    {
+      "name": "nav_devices",
+      "value": "डिवाइस"
+    },
+    {
+      "name": "nav_alerts",
+      "value": "अलर्ट"
+    },
+    {
+      "name": "nav_reports",
+      "value": "आँकड़े"
+    },
+    {
+      "name": "nav_settings",
+      "value": "सेटिंग्स"
+    },
+    {
+      "name": "nav_profile",
+      "value": "प्रोफ़ाइल"
+    },
+    {
+      "name": "login_title",
+      "value": "लॉगिन करें"
+    },
+    {
+      "name": "login_subtitle",
+      "value": "वापसी पर स्वागत है"
+    },
+    {
+      "name": "login_username",
+      "value": "उपयोगकर्ता नाम"
+    },
+    {
+      "name": "login_password",
+      "value": "पासवर्ड"
+    },
+    {
+      "name": "login_btn",
+      "value": "लॉगिन करें"
+    },
+    {
+      "name": "register_btn",
+      "value": "पंजीकरण करें"
+    },
+    {
+      "name": "forgot_pwd",
+      "value": "पासवर्ड भूल गए?"
+    },
+    {
+      "name": "login_error",
+      "value": "उपयोगकर्ता नाम या पासवर्ड गलत है"
+    },
+    {
+      "name": "login_required",
+      "value": "कृपया पहले लॉगिन करें"
+    },
+    {
+      "name": "device_my_devices",
+      "value": "मेरे डिवाइस"
+    },
+    {
+      "name": "device_add_device",
+      "value": "डिवाइस जोड़ें"
+    },
+    {
+      "name": "device_offline",
+      "value": "डिवाइस ऑफ़लाइन है"
+    },
+    {
+      "name": "device_online",
+      "value": "डिवाइस ऑनलाइन है"
+    },
+    {
+      "name": "device_detail",
+      "value": "डिवाइस विवरण"
+    },
+    {
+      "name": "device_name",
+      "value": "डिवाइस का नाम"
+    },
+    {
+      "name": "device_type",
+      "value": "डिवाइस का प्रकार"
+    },
+    {
+      "name": "device_status",
+      "value": "डिवाइस की स्थिति"
+    },
+    {
+      "name": "device_control",
+      "value": "नियंत्रण पैनल"
+    },
+    {
+      "name": "device_scene",
+      "value": "दृश्य"
+    },
+    {
+      "name": "device_automation",
+      "value": "स्वचालन"
+    },
+    {
+      "name": "alert_center",
+      "value": "संदेश केंद्र"
+    },
+    {
+      "name": "alert_no_alerts",
+      "value": "कोई अलर्ट नहीं"
+    },
+    {
+      "name": "alert_time",
+      "value": "अलर्ट समय"
+    },
+    {
+      "name": "alert_level",
+      "value": "अलर्ट स्तर"
+    },
+    {
+      "name": "report_device_stats",
+      "value": "डिवाइस आँकड़े"
+    },
+    {
+      "name": "report_data_stats",
+      "value": "डेटा आँकड़े"
+    },
+    {
+      "name": "report_cdn_stats",
+      "value": "CDN आँकड़े"
+    },
+    {
+      "name": "settings_language",
+      "value": "भाषा"
+    },
+    {
+      "name": "settings_language_system",
+      "value": "सिस्टम के अनुसार"
+    },
+    {
+      "name": "settings_language_list_title",
+      "value": "भाषा चुनें"
+    },
+    {
+      "name": "settings_theme",
+      "value": "थीम"
+    },
+    {
+      "name": "settings_theme_light",
+      "value": "हल्का"
+    },
+    {
+      "name": "settings_theme_dark",
+      "value": "गहरा"
+    },
+    {
+      "name": "settings_about",
+      "value": "के बारे में"
+    },
+    {
+      "name": "settings_about_version",
+      "value": "संस्करण"
+    },
+    {
+      "name": "settings_logout",
+      "value": "लॉगआउट करें"
+    },
+    {
+      "name": "settings_logout_confirm",
+      "value": "क्या आप वाकई लॉगआउट करना चाहते हैं?"
+    },
+    {
+      "name": "i18n_demo_title",
+      "value": "स्थानीयकरण डेमो"
+    },
+    {
+      "name": "i18n_demo_date",
+      "value": "दिनांक"
+    },
+    {
+      "name": "i18n_demo_number",
+      "value": "संख्या"
+    },
+    {
+      "name": "i18n_demo_currency",
+      "value": "मुद्रा"
+    },
+    {
+      "name": "i18n_demo_long_text",
+      "value": "यह एक नमूना पाठ है जो दर्शाता है कि लंबा पाठ कैसे टूटता है और पढ़ने का अनुभव कैसा होता है।"
+    },
+    {
+      "name": "i18n_demo_direction",
+      "value": "पाठ की दिशा"
+    },
+    {
+      "name": "error_network_error",
+      "value": "नेटवर्क कनेक्शन विफल"
+    },
+    {
+      "name": "error_server_error",
+      "value": "सर्वर त्रुटि"
+    },
+    {
+      "name": "error_timeout",
+      "value": "अनुरोध समय समाप्त"
+    },
+    {
+      "name": "error_unauthorized",
+      "value": "अनधिकृत पहुँच"
+    },
+    {
+      "name": "error_forbidden",
+      "value": "इस कार्य की अनुमति नहीं"
+    },
+    {
+      "name": "error_not_found",
+      "value": "संसाधन नहीं मिला"
+    }
+  ]
+}

@@ -1,0 +1,284 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "IoT 플랫폼"
+    },
+    {
+      "name": "common_ok",
+      "value": "확인"
+    },
+    {
+      "name": "common_cancel",
+      "value": "취소"
+    },
+    {
+      "name": "common_save",
+      "value": "저장"
+    },
+    {
+      "name": "common_delete",
+      "value": "삭제"
+    },
+    {
+      "name": "common_retry",
+      "value": "다시 시도"
+    },
+    {
+      "name": "common_confirm",
+      "value": "확인"
+    },
+    {
+      "name": "common_back",
+      "value": "뒤로"
+    },
+    {
+      "name": "common_next",
+      "value": "다음"
+    },
+    {
+      "name": "common_skip",
+      "value": "건너뛰기"
+    },
+    {
+      "name": "common_loading",
+      "value": "불러오는 중…"
+    },
+    {
+      "name": "common_empty",
+      "value": "데이터 없음"
+    },
+    {
+      "name": "common_error",
+      "value": "오류가 발생했습니다"
+    },
+    {
+      "name": "common_success",
+      "value": "작업이 완료되었습니다"
+    },
+    {
+      "name": "common_failed",
+      "value": "작업에 실패했습니다"
+    },
+    {
+      "name": "nav_dashboard",
+      "value": "대시보드"
+    },
+    {
+      "name": "nav_devices",
+      "value": "기기"
+    },
+    {
+      "name": "nav_alerts",
+      "value": "알림"
+    },
+    {
+      "name": "nav_reports",
+      "value": "통계"
+    },
+    {
+      "name": "nav_settings",
+      "value": "설정"
+    },
+    {
+      "name": "nav_profile",
+      "value": "마이페이지"
+    },
+    {
+      "name": "login_title",
+      "value": "로그인"
+    },
+    {
+      "name": "login_subtitle",
+      "value": "다시 오신 것을 환영합니다"
+    },
+    {
+      "name": "login_username",
+      "value": "사용자 이름"
+    },
+    {
+      "name": "login_password",
+      "value": "비밀번호"
+    },
+    {
+      "name": "login_btn",
+      "value": "로그인"
+    },
+    {
+      "name": "register_btn",
+      "value": "회원가입"
+    },
+    {
+      "name": "forgot_pwd",
+      "value": "비밀번호를 잊으셨나요?"
+    },
+    {
+      "name": "login_error",
+      "value": "사용자 이름 또는 비밀번호가 올바르지 않습니다"
+    },
+    {
+      "name": "login_required",
+      "value": "먼저 로그인해 주세요"
+    },
+    {
+      "name": "device_my_devices",
+      "value": "내 기기"
+    },
+    {
+      "name": "device_add_device",
+      "value": "기기 추가"
+    },
+    {
+      "name": "device_offline",
+      "value": "기기 오프라인"
+    },
+    {
+      "name": "device_online",
+      "value": "기기 온라인"
+    },
+    {
+      "name": "device_detail",
+      "value": "기기 상세"
+    },
+    {
+      "name": "device_name",
+      "value": "기기 이름"
+    },
+    {
+      "name": "device_type",
+      "value": "기기 유형"
+    },
+    {
+      "name": "device_status",
+      "value": "기기 상태"
+    },
+    {
+      "name": "device_control",
+      "value": "제어판"
+    },
+    {
+      "name": "device_scene",
+      "value": "시나리오"
+    },
+    {
+      "name": "device_automation",
+      "value": "자동화"
+    },
+    {
+      "name": "alert_center",
+      "value": "메시지 센터"
+    },
+    {
+      "name": "alert_no_alerts",
+      "value": "알림이 없습니다"
+    },
+    {
+      "name": "alert_time",
+      "value": "알림 시간"
+    },
+    {
+      "name": "alert_level",
+      "value": "알림 수준"
+    },
+    {
+      "name": "report_device_stats",
+      "value": "기기 통계"
+    },
+    {
+      "name": "report_data_stats",
+      "value": "데이터 통계"
+    },
+    {
+      "name": "report_cdn_stats",
+      "value": "CDN 통계"
+    },
+    {
+      "name": "settings_language",
+      "value": "언어"
+    },
+    {
+      "name": "settings_language_system",
+      "value": "시스템 따르기"
+    },
+    {
+      "name": "settings_language_list_title",
+      "value": "언어 선택"
+    },
+    {
+      "name": "settings_theme",
+      "value": "테마"
+    },
+    {
+      "name": "settings_theme_light",
+      "value": "라이트"
+    },
+    {
+      "name": "settings_theme_dark",
+      "value": "다크"
+    },
+    {
+      "name": "settings_about",
+      "value": "앱 정보"
+    },
+    {
+      "name": "settings_about_version",
+      "value": "버전"
+    },
+    {
+      "name": "settings_logout",
+      "value": "로그아웃"
+    },
+    {
+      "name": "settings_logout_confirm",
+      "value": "로그아웃하시겠습니까?"
+    },
+    {
+      "name": "i18n_demo_title",
+      "value": "현지화 데모"
+    },
+    {
+      "name": "i18n_demo_date",
+      "value": "날짜"
+    },
+    {
+      "name": "i18n_demo_number",
+      "value": "숫자"
+    },
+    {
+      "name": "i18n_demo_currency",
+      "value": "통화"
+    },
+    {
+      "name": "i18n_demo_long_text",
+      "value": "긴 텍스트의 줄바꿈과 가독성을 보여 주기 위한 예시 문장입니다."
+    },
+    {
+      "name": "i18n_demo_direction",
+      "value": "텍스트 방향"
+    },
+    {
+      "name": "error_network_error",
+      "value": "네트워크 연결에 실패했습니다"
+    },
+    {
+      "name": "error_server_error",
+      "value": "서버 오류가 발생했습니다"
+    },
+    {
+      "name": "error_timeout",
+      "value": "요청 시간이 초과되었습니다"
+    },
+    {
+      "name": "error_unauthorized",
+      "value": "인증되지 않은 접근입니다"
+    },
+    {
+      "name": "error_forbidden",
+      "value": "이 작업을 수행할 권한이 없습니다"
+    },
+    {
+      "name": "error_not_found",
+      "value": "리소스를 찾을 수 없습니다"
+    }
+  ]
+}

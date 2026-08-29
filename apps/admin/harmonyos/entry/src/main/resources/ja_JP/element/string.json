@@ -1,0 +1,284 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "IoTプラットフォーム"
+    },
+    {
+      "name": "common_ok",
+      "value": "OK"
+    },
+    {
+      "name": "common_cancel",
+      "value": "キャンセル"
+    },
+    {
+      "name": "common_save",
+      "value": "保存"
+    },
+    {
+      "name": "common_delete",
+      "value": "削除"
+    },
+    {
+      "name": "common_retry",
+      "value": "再試行"
+    },
+    {
+      "name": "common_confirm",
+      "value": "確認"
+    },
+    {
+      "name": "common_back",
+      "value": "戻る"
+    },
+    {
+      "name": "common_next",
+      "value": "次へ"
+    },
+    {
+      "name": "common_skip",
+      "value": "スキップ"
+    },
+    {
+      "name": "common_loading",
+      "value": "読み込み中…"
+    },
+    {
+      "name": "common_empty",
+      "value": "データがありません"
+    },
+    {
+      "name": "common_error",
+      "value": "エラーが発生しました"
+    },
+    {
+      "name": "common_success",
+      "value": "操作が成功しました"
+    },
+    {
+      "name": "common_failed",
+      "value": "操作に失敗しました"
+    },
+    {
+      "name": "nav_dashboard",
+      "value": "ダッシュボード"
+    },
+    {
+      "name": "nav_devices",
+      "value": "デバイス"
+    },
+    {
+      "name": "nav_alerts",
+      "value": "アラート"
+    },
+    {
+      "name": "nav_reports",
+      "value": "統計"
+    },
+    {
+      "name": "nav_settings",
+      "value": "設定"
+    },
+    {
+      "name": "nav_profile",
+      "value": "プロフィール"
+    },
+    {
+      "name": "login_title",
+      "value": "ログイン"
+    },
+    {
+      "name": "login_subtitle",
+      "value": "おかえりなさい"
+    },
+    {
+      "name": "login_username",
+      "value": "ユーザー名"
+    },
+    {
+      "name": "login_password",
+      "value": "パスワード"
+    },
+    {
+      "name": "login_btn",
+      "value": "ログイン"
+    },
+    {
+      "name": "register_btn",
+      "value": "新規登録"
+    },
+    {
+      "name": "forgot_pwd",
+      "value": "パスワードをお忘れですか"
+    },
+    {
+      "name": "login_error",
+      "value": "ユーザー名またはパスワードが正しくありません"
+    },
+    {
+      "name": "login_required",
+      "value": "先にログインしてください"
+    },
+    {
+      "name": "device_my_devices",
+      "value": "マイデバイス"
+    },
+    {
+      "name": "device_add_device",
+      "value": "デバイスを追加"
+    },
+    {
+      "name": "device_offline",
+      "value": "デバイスがオフラインです"
+    },
+    {
+      "name": "device_online",
+      "value": "デバイスがオンラインです"
+    },
+    {
+      "name": "device_detail",
+      "value": "デバイス詳細"
+    },
+    {
+      "name": "device_name",
+      "value": "デバイス名"
+    },
+    {
+      "name": "device_type",
+      "value": "デバイスの種類"
+    },
+    {
+      "name": "device_status",
+      "value": "デバイスの状態"
+    },
+    {
+      "name": "device_control",
+      "value": "コントロールパネル"
+    },
+    {
+      "name": "device_scene",
+      "value": "シーン"
+    },
+    {
+      "name": "device_automation",
+      "value": "自動化"
+    },
+    {
+      "name": "alert_center",
+      "value": "メッセージセンター"
+    },
+    {
+      "name": "alert_no_alerts",
+      "value": "アラートはありません"
+    },
+    {
+      "name": "alert_time",
+      "value": "アラート時刻"
+    },
+    {
+      "name": "alert_level",
+      "value": "アラートレベル"
+    },
+    {
+      "name": "report_device_stats",
+      "value": "デバイス統計"
+    },
+    {
+      "name": "report_data_stats",
+      "value": "データ統計"
+    },
+    {
+      "name": "report_cdn_stats",
+      "value": "CDN 統計"
+    },
+    {
+      "name": "settings_language",
+      "value": "言語"
+    },
+    {
+      "name": "settings_language_system",
+      "value": "システムに従う"
+    },
+    {
+      "name": "settings_language_list_title",
+      "value": "言語を選択"
+    },
+    {
+      "name": "settings_theme",
+      "value": "テーマ"
+    },
+    {
+      "name": "settings_theme_light",
+      "value": "ライト"
+    },
+    {
+      "name": "settings_theme_dark",
+      "value": "ダーク"
+    },
+    {
+      "name": "settings_about",
+      "value": "このアプリについて"
+    },
+    {
+      "name": "settings_about_version",
+      "value": "バージョン"
+    },
+    {
+      "name": "settings_logout",
+      "value": "ログアウト"
+    },
+    {
+      "name": "settings_logout_confirm",
+      "value": "ログアウトしますか？"
+    },
+    {
+      "name": "i18n_demo_title",
+      "value": "ローカライズのデモ"
+    },
+    {
+      "name": "i18n_demo_date",
+      "value": "日付"
+    },
+    {
+      "name": "i18n_demo_number",
+      "value": "数値"
+    },
+    {
+      "name": "i18n_demo_currency",
+      "value": "通貨"
+    },
+    {
+      "name": "i18n_demo_long_text",
+      "value": "これは、長いテキストの折り返しと読みやすさを示すためのサンプル文章です。"
+    },
+    {
+      "name": "i18n_demo_direction",
+      "value": "テキストの向き"
+    },
+    {
+      "name": "error_network_error",
+      "value": "ネットワーク接続に失敗しました"
+    },
+    {
+      "name": "error_server_error",
+      "value": "サーバーエラーが発生しました"
+    },
+    {
+      "name": "error_timeout",
+      "value": "リクエストがタイムアウトしました"
+    },
+    {
+      "name": "error_unauthorized",
+      "value": "未認証のアクセスです"
+    },
+    {
+      "name": "error_forbidden",
+      "value": "この操作を行う権限がありません"
+    },
+    {
+      "name": "error_not_found",
+      "value": "リソースが見つかりません"
+    }
+  ]
+}

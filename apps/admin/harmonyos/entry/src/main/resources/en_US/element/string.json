@@ -1,0 +1,284 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "IoT Platform"
+    },
+    {
+      "name": "common_ok",
+      "value": "OK"
+    },
+    {
+      "name": "common_cancel",
+      "value": "Cancel"
+    },
+    {
+      "name": "common_save",
+      "value": "Save"
+    },
+    {
+      "name": "common_delete",
+      "value": "Delete"
+    },
+    {
+      "name": "common_retry",
+      "value": "Retry"
+    },
+    {
+      "name": "common_confirm",
+      "value": "Confirm"
+    },
+    {
+      "name": "common_back",
+      "value": "Back"
+    },
+    {
+      "name": "common_next",
+      "value": "Next"
+    },
+    {
+      "name": "common_skip",
+      "value": "Skip"
+    },
+    {
+      "name": "common_loading",
+      "value": "Loading…"
+    },
+    {
+      "name": "common_empty",
+      "value": "No data"
+    },
+    {
+      "name": "common_error",
+      "value": "Something went wrong"
+    },
+    {
+      "name": "common_success",
+      "value": "Operation successful"
+    },
+    {
+      "name": "common_failed",
+      "value": "Operation failed"
+    },
+    {
+      "name": "nav_dashboard",
+      "value": "Dashboard"
+    },
+    {
+      "name": "nav_devices",
+      "value": "Devices"
+    },
+    {
+      "name": "nav_alerts",
+      "value": "Alerts"
+    },
+    {
+      "name": "nav_reports",
+      "value": "Reports"
+    },
+    {
+      "name": "nav_settings",
+      "value": "Settings"
+    },
+    {
+      "name": "nav_profile",
+      "value": "Profile"
+    },
+    {
+      "name": "login_title",
+      "value": "Sign in"
+    },
+    {
+      "name": "login_subtitle",
+      "value": "Welcome back"
+    },
+    {
+      "name": "login_username",
+      "value": "Username"
+    },
+    {
+      "name": "login_password",
+      "value": "Password"
+    },
+    {
+      "name": "login_btn",
+      "value": "Sign in"
+    },
+    {
+      "name": "register_btn",
+      "value": "Sign up"
+    },
+    {
+      "name": "forgot_pwd",
+      "value": "Forgot password?"
+    },
+    {
+      "name": "login_error",
+      "value": "Incorrect username or password"
+    },
+    {
+      "name": "login_required",
+      "value": "Please sign in first"
+    },
+    {
+      "name": "device_my_devices",
+      "value": "My devices"
+    },
+    {
+      "name": "device_add_device",
+      "value": "Add device"
+    },
+    {
+      "name": "device_offline",
+      "value": "Device offline"
+    },
+    {
+      "name": "device_online",
+      "value": "Device online"
+    },
+    {
+      "name": "device_detail",
+      "value": "Device details"
+    },
+    {
+      "name": "device_name",
+      "value": "Device name"
+    },
+    {
+      "name": "device_type",
+      "value": "Device type"
+    },
+    {
+      "name": "device_status",
+      "value": "Device status"
+    },
+    {
+      "name": "device_control",
+      "value": "Control panel"
+    },
+    {
+      "name": "device_scene",
+      "value": "Scenes"
+    },
+    {
+      "name": "device_automation",
+      "value": "Automation"
+    },
+    {
+      "name": "alert_center",
+      "value": "Notifications"
+    },
+    {
+      "name": "alert_no_alerts",
+      "value": "No alerts"
+    },
+    {
+      "name": "alert_time",
+      "value": "Alert time"
+    },
+    {
+      "name": "alert_level",
+      "value": "Alert level"
+    },
+    {
+      "name": "report_device_stats",
+      "value": "Device stats"
+    },
+    {
+      "name": "report_data_stats",
+      "value": "Data stats"
+    },
+    {
+      "name": "report_cdn_stats",
+      "value": "CDN stats"
+    },
+    {
+      "name": "settings_language",
+      "value": "Language"
+    },
+    {
+      "name": "settings_language_system",
+      "value": "Follow system"
+    },
+    {
+      "name": "settings_language_list_title",
+      "value": "Choose a language"
+    },
+    {
+      "name": "settings_theme",
+      "value": "Theme"
+    },
+    {
+      "name": "settings_theme_light",
+      "value": "Light"
+    },
+    {
+      "name": "settings_theme_dark",
+      "value": "Dark"
+    },
+    {
+      "name": "settings_about",
+      "value": "About"
+    },
+    {
+      "name": "settings_about_version",
+      "value": "Version"
+    },
+    {
+      "name": "settings_logout",
+      "value": "Log out"
+    },
+    {
+      "name": "settings_logout_confirm",
+      "value": "Are you sure you want to log out?"
+    },
+    {
+      "name": "i18n_demo_title",
+      "value": "Localization demo"
+    },
+    {
+      "name": "i18n_demo_date",
+      "value": "Date"
+    },
+    {
+      "name": "i18n_demo_number",
+      "value": "Number"
+    },
+    {
+      "name": "i18n_demo_currency",
+      "value": "Currency"
+    },
+    {
+      "name": "i18n_demo_long_text",
+      "value": "This is a sample text that shows how long text wraps and how comfortable it is to read."
+    },
+    {
+      "name": "i18n_demo_direction",
+      "value": "Text direction"
+    },
+    {
+      "name": "error_network_error",
+      "value": "Network connection failed"
+    },
+    {
+      "name": "error_server_error",
+      "value": "Server error"
+    },
+    {
+      "name": "error_timeout",
+      "value": "Request timed out"
+    },
+    {
+      "name": "error_unauthorized",
+      "value": "Unauthorized access"
+    },
+    {
+      "name": "error_forbidden",
+      "value": "You don't have permission to do this"
+    },
+    {
+      "name": "error_not_found",
+      "value": "Resource not found"
+    }
+  ]
+}

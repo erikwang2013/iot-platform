@@ -1,0 +1,284 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "Платформа IoT"
+    },
+    {
+      "name": "common_ok",
+      "value": "ОК"
+    },
+    {
+      "name": "common_cancel",
+      "value": "Отмена"
+    },
+    {
+      "name": "common_save",
+      "value": "Сохранить"
+    },
+    {
+      "name": "common_delete",
+      "value": "Удалить"
+    },
+    {
+      "name": "common_retry",
+      "value": "Повторить"
+    },
+    {
+      "name": "common_confirm",
+      "value": "Подтвердить"
+    },
+    {
+      "name": "common_back",
+      "value": "Назад"
+    },
+    {
+      "name": "common_next",
+      "value": "Далее"
+    },
+    {
+      "name": "common_skip",
+      "value": "Пропустить"
+    },
+    {
+      "name": "common_loading",
+      "value": "Загрузка…"
+    },
+    {
+      "name": "common_empty",
+      "value": "Нет данных"
+    },
+    {
+      "name": "common_error",
+      "value": "Произошла ошибка"
+    },
+    {
+      "name": "common_success",
+      "value": "Операция выполнена"
+    },
+    {
+      "name": "common_failed",
+      "value": "Операция не удалась"
+    },
+    {
+      "name": "nav_dashboard",
+      "value": "Обзор"
+    },
+    {
+      "name": "nav_devices",
+      "value": "Устройства"
+    },
+    {
+      "name": "nav_alerts",
+      "value": "Оповещения"
+    },
+    {
+      "name": "nav_reports",
+      "value": "Статистика"
+    },
+    {
+      "name": "nav_settings",
+      "value": "Настройки"
+    },
+    {
+      "name": "nav_profile",
+      "value": "Профиль"
+    },
+    {
+      "name": "login_title",
+      "value": "Вход"
+    },
+    {
+      "name": "login_subtitle",
+      "value": "С возвращением"
+    },
+    {
+      "name": "login_username",
+      "value": "Имя пользователя"
+    },
+    {
+      "name": "login_password",
+      "value": "Пароль"
+    },
+    {
+      "name": "login_btn",
+      "value": "Войти"
+    },
+    {
+      "name": "register_btn",
+      "value": "Регистрация"
+    },
+    {
+      "name": "forgot_pwd",
+      "value": "Забыли пароль?"
+    },
+    {
+      "name": "login_error",
+      "value": "Неверное имя пользователя или пароль"
+    },
+    {
+      "name": "login_required",
+      "value": "Пожалуйста, войдите в систему"
+    },
+    {
+      "name": "device_my_devices",
+      "value": "Мои устройства"
+    },
+    {
+      "name": "device_add_device",
+      "value": "Добавить устройство"
+    },
+    {
+      "name": "device_offline",
+      "value": "Устройство не в сети"
+    },
+    {
+      "name": "device_online",
+      "value": "Устройство в сети"
+    },
+    {
+      "name": "device_detail",
+      "value": "Сведения об устройстве"
+    },
+    {
+      "name": "device_name",
+      "value": "Название устройства"
+    },
+    {
+      "name": "device_type",
+      "value": "Тип устройства"
+    },
+    {
+      "name": "device_status",
+      "value": "Состояние устройства"
+    },
+    {
+      "name": "device_control",
+      "value": "Панель управления"
+    },
+    {
+      "name": "device_scene",
+      "value": "Сценарии"
+    },
+    {
+      "name": "device_automation",
+      "value": "Автоматизация"
+    },
+    {
+      "name": "alert_center",
+      "value": "Центр сообщений"
+    },
+    {
+      "name": "alert_no_alerts",
+      "value": "Оповещений нет"
+    },
+    {
+      "name": "alert_time",
+      "value": "Время оповещения"
+    },
+    {
+      "name": "alert_level",
+      "value": "Уровень оповещения"
+    },
+    {
+      "name": "report_device_stats",
+      "value": "Статистика устройств"
+    },
+    {
+      "name": "report_data_stats",
+      "value": "Статистика данных"
+    },
+    {
+      "name": "report_cdn_stats",
+      "value": "Статистика CDN"
+    },
+    {
+      "name": "settings_language",
+      "value": "Язык"
+    },
+    {
+      "name": "settings_language_system",
+      "value": "Как в системе"
+    },
+    {
+      "name": "settings_language_list_title",
+      "value": "Выбор языка"
+    },
+    {
+      "name": "settings_theme",
+      "value": "Тема"
+    },
+    {
+      "name": "settings_theme_light",
+      "value": "Светлая"
+    },
+    {
+      "name": "settings_theme_dark",
+      "value": "Тёмная"
+    },
+    {
+      "name": "settings_about",
+      "value": "О приложении"
+    },
+    {
+      "name": "settings_about_version",
+      "value": "Версия"
+    },
+    {
+      "name": "settings_logout",
+      "value": "Выйти"
+    },
+    {
+      "name": "settings_logout_confirm",
+      "value": "Выйти из системы?"
+    },
+    {
+      "name": "i18n_demo_title",
+      "value": "Демонстрация локализации"
+    },
+    {
+      "name": "i18n_demo_date",
+      "value": "Дата"
+    },
+    {
+      "name": "i18n_demo_number",
+      "value": "Число"
+    },
+    {
+      "name": "i18n_demo_currency",
+      "value": "Валюта"
+    },
+    {
+      "name": "i18n_demo_long_text",
+      "value": "Это пример текста, который показывает, как переносятся длинные строки и насколько удобно их читать."
+    },
+    {
+      "name": "i18n_demo_direction",
+      "value": "Направление текста"
+    },
+    {
+      "name": "error_network_error",
+      "value": "Ошибка сетевого подключения"
+    },
+    {
+      "name": "error_server_error",
+      "value": "Ошибка сервера"
+    },
+    {
+      "name": "error_timeout",
+      "value": "Время ожидания запроса истекло"
+    },
+    {
+      "name": "error_unauthorized",
+      "value": "Доступ не авторизован"
+    },
+    {
+      "name": "error_forbidden",
+      "value": "Недостаточно прав для этого действия"
+    },
+    {
+      "name": "error_not_found",
+      "value": "Ресурс не найден"
+    }
+  ]
+}

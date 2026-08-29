@@ -1,0 +1,284 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "IoT-Plattform"
+    },
+    {
+      "name": "common_ok",
+      "value": "OK"
+    },
+    {
+      "name": "common_cancel",
+      "value": "Abbrechen"
+    },
+    {
+      "name": "common_save",
+      "value": "Speichern"
+    },
+    {
+      "name": "common_delete",
+      "value": "Löschen"
+    },
+    {
+      "name": "common_retry",
+      "value": "Erneut versuchen"
+    },
+    {
+      "name": "common_confirm",
+      "value": "Bestätigen"
+    },
+    {
+      "name": "common_back",
+      "value": "Zurück"
+    },
+    {
+      "name": "common_next",
+      "value": "Weiter"
+    },
+    {
+      "name": "common_skip",
+      "value": "Überspringen"
+    },
+    {
+      "name": "common_loading",
+      "value": "Wird geladen…"
+    },
+    {
+      "name": "common_empty",
+      "value": "Keine Daten vorhanden"
+    },
+    {
+      "name": "common_error",
+      "value": "Es ist ein Fehler aufgetreten"
+    },
+    {
+      "name": "common_success",
+      "value": "Vorgang erfolgreich"
+    },
+    {
+      "name": "common_failed",
+      "value": "Vorgang fehlgeschlagen"
+    },
+    {
+      "name": "nav_dashboard",
+      "value": "Übersicht"
+    },
+    {
+      "name": "nav_devices",
+      "value": "Geräte"
+    },
+    {
+      "name": "nav_alerts",
+      "value": "Warnungen"
+    },
+    {
+      "name": "nav_reports",
+      "value": "Statistiken"
+    },
+    {
+      "name": "nav_settings",
+      "value": "Einstellungen"
+    },
+    {
+      "name": "nav_profile",
+      "value": "Profil"
+    },
+    {
+      "name": "login_title",
+      "value": "Anmelden"
+    },
+    {
+      "name": "login_subtitle",
+      "value": "Willkommen zurück"
+    },
+    {
+      "name": "login_username",
+      "value": "Benutzername"
+    },
+    {
+      "name": "login_password",
+      "value": "Passwort"
+    },
+    {
+      "name": "login_btn",
+      "value": "Anmelden"
+    },
+    {
+      "name": "register_btn",
+      "value": "Registrieren"
+    },
+    {
+      "name": "forgot_pwd",
+      "value": "Passwort vergessen?"
+    },
+    {
+      "name": "login_error",
+      "value": "Benutzername oder Passwort ist falsch"
+    },
+    {
+      "name": "login_required",
+      "value": "Bitte melden Sie sich zuerst an"
+    },
+    {
+      "name": "device_my_devices",
+      "value": "Meine Geräte"
+    },
+    {
+      "name": "device_add_device",
+      "value": "Gerät hinzufügen"
+    },
+    {
+      "name": "device_offline",
+      "value": "Gerät offline"
+    },
+    {
+      "name": "device_online",
+      "value": "Gerät online"
+    },
+    {
+      "name": "device_detail",
+      "value": "Gerätedetails"
+    },
+    {
+      "name": "device_name",
+      "value": "Gerätename"
+    },
+    {
+      "name": "device_type",
+      "value": "Gerätetyp"
+    },
+    {
+      "name": "device_status",
+      "value": "Gerätestatus"
+    },
+    {
+      "name": "device_control",
+      "value": "Bedienfeld"
+    },
+    {
+      "name": "device_scene",
+      "value": "Szenen"
+    },
+    {
+      "name": "device_automation",
+      "value": "Automatisierung"
+    },
+    {
+      "name": "alert_center",
+      "value": "Nachrichtenzentrum"
+    },
+    {
+      "name": "alert_no_alerts",
+      "value": "Keine Warnungen"
+    },
+    {
+      "name": "alert_time",
+      "value": "Warnzeitpunkt"
+    },
+    {
+      "name": "alert_level",
+      "value": "Warnstufe"
+    },
+    {
+      "name": "report_device_stats",
+      "value": "Gerätestatistik"
+    },
+    {
+      "name": "report_data_stats",
+      "value": "Datenstatistik"
+    },
+    {
+      "name": "report_cdn_stats",
+      "value": "CDN-Statistik"
+    },
+    {
+      "name": "settings_language",
+      "value": "Sprache"
+    },
+    {
+      "name": "settings_language_system",
+      "value": "System folgen"
+    },
+    {
+      "name": "settings_language_list_title",
+      "value": "Sprache auswählen"
+    },
+    {
+      "name": "settings_theme",
+      "value": "Design"
+    },
+    {
+      "name": "settings_theme_light",
+      "value": "Hell"
+    },
+    {
+      "name": "settings_theme_dark",
+      "value": "Dunkel"
+    },
+    {
+      "name": "settings_about",
+      "value": "Über"
+    },
+    {
+      "name": "settings_about_version",
+      "value": "Version"
+    },
+    {
+      "name": "settings_logout",
+      "value": "Abmelden"
+    },
+    {
+      "name": "settings_logout_confirm",
+      "value": "Möchten Sie sich wirklich abmelden?"
+    },
+    {
+      "name": "i18n_demo_title",
+      "value": "Lokalisierungs-Demo"
+    },
+    {
+      "name": "i18n_demo_date",
+      "value": "Datum"
+    },
+    {
+      "name": "i18n_demo_number",
+      "value": "Zahl"
+    },
+    {
+      "name": "i18n_demo_currency",
+      "value": "Währung"
+    },
+    {
+      "name": "i18n_demo_long_text",
+      "value": "Dies ist ein Beispieltext, der zeigt, wie lange Texte umbrechen und wie angenehm sie zu lesen sind."
+    },
+    {
+      "name": "i18n_demo_direction",
+      "value": "Textrichtung"
+    },
+    {
+      "name": "error_network_error",
+      "value": "Netzwerkverbindung fehlgeschlagen"
+    },
+    {
+      "name": "error_server_error",
+      "value": "Serverfehler"
+    },
+    {
+      "name": "error_timeout",
+      "value": "Zeitüberschreitung der Anfrage"
+    },
+    {
+      "name": "error_unauthorized",
+      "value": "Nicht autorisierter Zugriff"
+    },
+    {
+      "name": "error_forbidden",
+      "value": "Keine Berechtigung für diesen Vorgang"
+    },
+    {
+      "name": "error_not_found",
+      "value": "Ressource nicht gefunden"
+    }
+  ]
+}

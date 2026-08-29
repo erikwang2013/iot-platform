@@ -1,0 +1,284 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "منصة إنترنت الأشياء"
+    },
+    {
+      "name": "common_ok",
+      "value": "حسناً"
+    },
+    {
+      "name": "common_cancel",
+      "value": "إلغاء"
+    },
+    {
+      "name": "common_save",
+      "value": "حفظ"
+    },
+    {
+      "name": "common_delete",
+      "value": "حذف"
+    },
+    {
+      "name": "common_retry",
+      "value": "إعادة المحاولة"
+    },
+    {
+      "name": "common_confirm",
+      "value": "تأكيد"
+    },
+    {
+      "name": "common_back",
+      "value": "رجوع"
+    },
+    {
+      "name": "common_next",
+      "value": "التالي"
+    },
+    {
+      "name": "common_skip",
+      "value": "تخطي"
+    },
+    {
+      "name": "common_loading",
+      "value": "جارٍ التحميل…"
+    },
+    {
+      "name": "common_empty",
+      "value": "لا توجد بيانات"
+    },
+    {
+      "name": "common_error",
+      "value": "حدث خطأ"
+    },
+    {
+      "name": "common_success",
+      "value": "تمت العملية بنجاح"
+    },
+    {
+      "name": "common_failed",
+      "value": "فشلت العملية"
+    },
+    {
+      "name": "nav_dashboard",
+      "value": "نظرة عامة"
+    },
+    {
+      "name": "nav_devices",
+      "value": "الأجهزة"
+    },
+    {
+      "name": "nav_alerts",
+      "value": "التنبيهات"
+    },
+    {
+      "name": "nav_reports",
+      "value": "الإحصائيات"
+    },
+    {
+      "name": "nav_settings",
+      "value": "الإعدادات"
+    },
+    {
+      "name": "nav_profile",
+      "value": "الملف الشخصي"
+    },
+    {
+      "name": "login_title",
+      "value": "تسجيل الدخول"
+    },
+    {
+      "name": "login_subtitle",
+      "value": "مرحباً بعودتك"
+    },
+    {
+      "name": "login_username",
+      "value": "اسم المستخدم"
+    },
+    {
+      "name": "login_password",
+      "value": "كلمة المرور"
+    },
+    {
+      "name": "login_btn",
+      "value": "تسجيل الدخول"
+    },
+    {
+      "name": "register_btn",
+      "value": "إنشاء حساب"
+    },
+    {
+      "name": "forgot_pwd",
+      "value": "نسيت كلمة المرور؟"
+    },
+    {
+      "name": "login_error",
+      "value": "اسم المستخدم أو كلمة المرور غير صحيحة"
+    },
+    {
+      "name": "login_required",
+      "value": "يرجى تسجيل الدخول أولاً"
+    },
+    {
+      "name": "device_my_devices",
+      "value": "أجهزتي"
+    },
+    {
+      "name": "device_add_device",
+      "value": "إضافة جهاز"
+    },
+    {
+      "name": "device_offline",
+      "value": "الجهاز غير متصل"
+    },
+    {
+      "name": "device_online",
+      "value": "الجهاز متصل"
+    },
+    {
+      "name": "device_detail",
+      "value": "تفاصيل الجهاز"
+    },
+    {
+      "name": "device_name",
+      "value": "اسم الجهاز"
+    },
+    {
+      "name": "device_type",
+      "value": "نوع الجهاز"
+    },
+    {
+      "name": "device_status",
+      "value": "حالة الجهاز"
+    },
+    {
+      "name": "device_control",
+      "value": "لوحة التحكم"
+    },
+    {
+      "name": "device_scene",
+      "value": "المشاهد"
+    },
+    {
+      "name": "device_automation",
+      "value": "الأتمتة"
+    },
+    {
+      "name": "alert_center",
+      "value": "مركز الرسائل"
+    },
+    {
+      "name": "alert_no_alerts",
+      "value": "لا توجد تنبيهات"
+    },
+    {
+      "name": "alert_time",
+      "value": "وقت التنبيه"
+    },
+    {
+      "name": "alert_level",
+      "value": "مستوى التنبيه"
+    },
+    {
+      "name": "report_device_stats",
+      "value": "إحصائيات الأجهزة"
+    },
+    {
+      "name": "report_data_stats",
+      "value": "إحصائيات البيانات"
+    },
+    {
+      "name": "report_cdn_stats",
+      "value": "إحصائيات CDN"
+    },
+    {
+      "name": "settings_language",
+      "value": "اللغة"
+    },
+    {
+      "name": "settings_language_system",
+      "value": "متابعة النظام"
+    },
+    {
+      "name": "settings_language_list_title",
+      "value": "اختيار اللغة"
+    },
+    {
+      "name": "settings_theme",
+      "value": "المظهر"
+    },
+    {
+      "name": "settings_theme_light",
+      "value": "فاتح"
+    },
+    {
+      "name": "settings_theme_dark",
+      "value": "داكن"
+    },
+    {
+      "name": "settings_about",
+      "value": "حول التطبيق"
+    },
+    {
+      "name": "settings_about_version",
+      "value": "الإصدار"
+    },
+    {
+      "name": "settings_logout",
+      "value": "تسجيل الخروج"
+    },
+    {
+      "name": "settings_logout_confirm",
+      "value": "هل تريد تسجيل الخروج؟"
+    },
+    {
+      "name": "i18n_demo_title",
+      "value": "عرض توضيحي للترجمة"
+    },
+    {
+      "name": "i18n_demo_date",
+      "value": "التاريخ"
+    },
+    {
+      "name": "i18n_demo_number",
+      "value": "الرقم"
+    },
+    {
+      "name": "i18n_demo_currency",
+      "value": "العملة"
+    },
+    {
+      "name": "i18n_demo_long_text",
+      "value": "هذا نص تجريبي يوضح كيفية التفاف النصوص الطويلة وسهولة قراءتها."
+    },
+    {
+      "name": "i18n_demo_direction",
+      "value": "اتجاه النص"
+    },
+    {
+      "name": "error_network_error",
+      "value": "فشل الاتصال بالشبكة"
+    },
+    {
+      "name": "error_server_error",
+      "value": "خطأ في الخادم"
+    },
+    {
+      "name": "error_timeout",
+      "value": "انتهت مهلة الطلب"
+    },
+    {
+      "name": "error_unauthorized",
+      "value": "وصول غير مصرح به"
+    },
+    {
+      "name": "error_forbidden",
+      "value": "لا تملك صلاحية لهذه العملية"
+    },
+    {
+      "name": "error_not_found",
+      "value": "المورد غير موجود"
+    }
+  ]
+}
