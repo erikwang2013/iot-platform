@@ -57,6 +57,8 @@ members = [
     "examples/databases",
     "examples/middleware",
     "examples/websocket",
+    "services/iot-gateway",
+    "services/iot-device",
 ]
 resolver = "2"
 

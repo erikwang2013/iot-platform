@@ -315,7 +315,7 @@ dependencies = [
  "nkeys",
  "nuid",
  "once_cell",
- "pin-project",
+ "pin-project 1.1.13",
  "portable-atomic",
  "rand 0.8.7",
  "regex",
@@ -1794,7 +1794,7 @@ dependencies = [
  "axum 0.8.9",
  "http",
  "http-body-util",
- "security-rust",
+ "security-rust 1.0.4",
  "thiserror 2.0.19",
  "tokio",
  "tower 0.5.3",
@@ -2765,6 +2765,40 @@ dependencies = [
 ]
 
 [[package]]
+name = "iot-device"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.9",
+ "ecat",
+ "ecat-data",
+ "ecat-data-sqlx",
+ "ecat-transport-http",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "iot-gateway"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.9",
+ "ecat",
+ "ecat-auth",
+ "ecat-transport-http",
+ "http",
+ "jsonwebtoken",
+ "security-rust 1.0.8",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tower 0.5.3",
+ "tower-util",
+ "tracing",
+]
+
+[[package]]
 name = "ipconfig"
 version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3573,11 +3607,31 @@ dependencies = [
 
 [[package]]
 name = "pin-project"
+version = "0.4.30"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ef0f924a5ee7ea9cbcea77529dba45f8a9ba9f622419fe3386ca581a3ae9d5a"
+dependencies = [
+ "pin-project-internal 0.4.30",
+]
+
+[[package]]
+name = "pin-project"
 version = "1.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2466b2336ed02bcdca6b294417127b90ec92038d1d5c4fbeac971a922e0e0924"
 dependencies = [
- "pin-project-internal",
+ "pin-project-internal 1.1.13",
+]
+
+[[package]]
+name = "pin-project-internal"
+version = "0.4.30"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "851c8d0ce9bebe43790dedfc86614c23494ac9f423dd618d3a61fc693eafe61e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -3877,7 +3931,7 @@ dependencies = [
  "quinn-udp",
  "rustc-hash",
  "rustls",
- "socket2 0.5.10",
+ "socket2 0.6.5",
  "thiserror 2.0.19",
  "tokio",
  "tracing",
@@ -3915,9 +3969,9 @@ dependencies = [
  "cfg_aliases",
  "libc",
  "once_cell",
- "socket2 0.5.10",
+ "socket2 0.6.5",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -4524,6 +4578,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "security-rust"
+version = "1.0.8"
+dependencies = [
+ "regex",
+]
+
+[[package]]
 name = "semver"
 version = "1.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5056,6 +5117,17 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "syn"
+version = "1.0.109"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "unicode-ident",
+]
+
+[[package]]
+name = "syn"
 version = "2.0.119"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297"
@@ -5282,6 +5354,7 @@ dependencies = [
  "bytes",
  "libc",
  "mio 1.2.2",
+ "parking_lot",
  "pin-project-lite",
  "signal-hook-registry",
  "socket2 0.6.5",
@@ -5419,7 +5492,7 @@ dependencies = [
  "hyper-timeout",
  "hyper-util",
  "percent-encoding",
- "pin-project",
+ "pin-project 1.1.13",
  "prost",
  "rustls-pemfile",
  "socket2 0.5.10",
@@ -5455,7 +5528,7 @@ dependencies = [
  "futures-core",
  "futures-util",
  "indexmap 1.9.3",
- "pin-project",
+ "pin-project 1.1.13",
  "pin-project-lite",
  "rand 0.8.7",
  "slab",
@@ -5511,6 +5584,18 @@ name = "tower-service"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8df9b6e13f2d32c91b9bd719c00d1958837bc7dec474d94952798cc8e69eeec3"
+
+[[package]]
+name = "tower-util"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d1093c19826d33807c72511e68f73b4a0469a3f22c2bd5f7d5212178b4b89674"
+dependencies = [
+ "futures-core",
+ "futures-util",
+ "pin-project 0.4.30",
+ "tower-service",
+]
 
 [[package]]
 name = "tracing"
