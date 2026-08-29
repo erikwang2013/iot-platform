@@ -5,15 +5,39 @@ use axum::{
     extract::{Query, State},
     http::{HeaderMap, StatusCode},
 };
+use hmac::Mac;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::sync::Arc;
 
-/// state = base64url(tenant_id:vendor)，回调时还原租户归属。
+/// state = base64url(nonce|expiry|tenant:vendor|hmac-sha256(nonce|expiry|tenant:vendor))
+/// 防篡改 + 防重放；签名密钥由 IOT_CRED_ENCRYPT_KEY 派生（同凭据加密密钥）。
+const STATE_TTL_SECS: u64 = 600;
+
+fn state_key() -> [u8; 32] {
+    crate::crypto::derive_key(&std::env::var("IOT_CRED_ENCRYPT_KEY").unwrap_or_default())
+}
+
 pub fn encode_state(tenant_id: &str, vendor: &str) -> String {
+    let expiry = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+        + STATE_TTL_SECS;
+    encode_state_at(tenant_id, vendor, expiry)
+}
+
+/// 测试/特殊用途：可指定过期 epoch 秒。
+pub fn encode_state_at(tenant_id: &str, vendor: &str, expiry: u64) -> String {
     use base64::Engine;
-    base64::engine::general_purpose::URL_SAFE_NO_PAD
-        .encode(format!("{tenant_id}:{vendor}"))
+    let nonce: [u8; 16] = rand::random();
+    let mut msg = nonce.to_vec();
+    msg.extend_from_slice(&expiry.to_le_bytes());
+    msg.extend_from_slice(format!("{tenant_id}:{vendor}").as_bytes());
+    let mut mac = hmac::Hmac::<sha2::Sha256>::new_from_slice(&state_key()).expect("hmac key");
+    mac.update(&msg);
+    msg.extend_from_slice(&mac.finalize().into_bytes());
+    base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(&msg)
 }
 
 pub fn decode_state(state: &str) -> Result<(String, String), String> {
@@ -21,7 +45,22 @@ pub fn decode_state(state: &str) -> Result<(String, String), String> {
     let raw = base64::engine::general_purpose::URL_SAFE_NO_PAD
         .decode(state)
         .map_err(|e| format!("bad state: {e}"))?;
-    let s = String::from_utf8(raw).map_err(|e| format!("bad state: {e}"))?;
+    if raw.len() < 16 + 8 + 32 + 3 {
+        return Err("bad state".into());
+    }
+    let (head, sig) = raw.split_at(raw.len() - 32);
+    let mut mac = hmac::Hmac::<sha2::Sha256>::new_from_slice(&state_key()).expect("hmac key");
+    mac.update(head);
+    mac.verify_slice(sig).map_err(|_| "bad state signature".to_string())?;
+    let expiry = u64::from_le_bytes(head[16..24].try_into().unwrap());
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    if now >= expiry {
+        return Err("state expired".into());
+    }
+    let s = std::str::from_utf8(&head[24..]).map_err(|_| "bad state".to_string())?;
     let (t, v) = s.split_once(':').ok_or_else(|| "bad state".to_string())?;
     Ok((t.to_string(), v.to_string()))
 }
