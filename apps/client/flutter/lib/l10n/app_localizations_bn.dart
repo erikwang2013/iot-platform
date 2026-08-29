@@ -1,0 +1,221 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Bengali Bangla (`bn`).
+class AppLocalizationsBn extends AppLocalizations {
+  AppLocalizationsBn([String locale = 'bn']) : super(locale);
+
+  @override
+  String get appName => 'আইওটি প্ল্যাটফর্ম';
+
+  @override
+  String get commonOk => 'ঠিক আছে';
+
+  @override
+  String get commonCancel => 'বাতিল';
+
+  @override
+  String get commonSave => 'সংরক্ষণ';
+
+  @override
+  String get commonDelete => 'মুছুন';
+
+  @override
+  String get commonRetry => 'আবার চেষ্টা করুন';
+
+  @override
+  String get commonConfirm => 'নিশ্চিত করুন';
+
+  @override
+  String get commonBack => 'ফিরুন';
+
+  @override
+  String get commonNext => 'পরবর্তী';
+
+  @override
+  String get commonSkip => 'এড়িয়ে যান';
+
+  @override
+  String get commonLoading => 'লোড হচ্ছে…';
+
+  @override
+  String get commonEmpty => 'কোনো তথ্য নেই';
+
+  @override
+  String get commonError => 'একটি সমস্যা হয়েছে';
+
+  @override
+  String get commonSuccess => 'কার্য সম্পন্ন';
+
+  @override
+  String get commonFailed => 'কার্য ব্যর্থ';
+
+  @override
+  String get navDashboard => 'ওভারভিউ';
+
+  @override
+  String get navDevices => 'ডিভাইস';
+
+  @override
+  String get navAlerts => 'সতর্কতা';
+
+  @override
+  String get navReports => 'পরিসংখ্যান';
+
+  @override
+  String get navSettings => 'সেটিংস';
+
+  @override
+  String get navProfile => 'প্রোফাইল';
+
+  @override
+  String get loginTitle => 'লগইন করুন';
+
+  @override
+  String get loginSubtitle => 'আবার স্বাগতম';
+
+  @override
+  String get loginUsername => 'ব্যবহারকারীর নাম';
+
+  @override
+  String get loginPassword => 'পাসওয়ার্ড';
+
+  @override
+  String get loginBtn => 'লগইন করুন';
+
+  @override
+  String get registerBtn => 'নিবন্ধন করুন';
+
+  @override
+  String get forgotPwd => 'পাসওয়ার্ড ভুলে গেছেন?';
+
+  @override
+  String get loginError => 'ব্যবহারকারীর নাম বা পাসওয়ার্ড ভুল';
+
+  @override
+  String get loginRequired => 'অনুগ্রহ করে আগে লগইন করুন';
+
+  @override
+  String get deviceMyDevices => 'আমার ডিভাইস';
+
+  @override
+  String get deviceAddDevice => 'ডিভাইস যোগ করুন';
+
+  @override
+  String get deviceOffline => 'ডিভাইস অফলাইন';
+
+  @override
+  String get deviceOnline => 'ডিভাইস অনলাইন';
+
+  @override
+  String get deviceDetail => 'ডিভাইসের বিবরণ';
+
+  @override
+  String get deviceName => 'ডিভাইসের নাম';
+
+  @override
+  String get deviceType => 'ডিভাইসের ধরন';
+
+  @override
+  String get deviceStatus => 'ডিভাইসের অবস্থা';
+
+  @override
+  String get deviceControl => 'নিয়ন্ত্রণ প্যানেল';
+
+  @override
+  String get deviceScene => 'দৃশ্য';
+
+  @override
+  String get deviceAutomation => 'অটোমেশন';
+
+  @override
+  String get alertCenter => 'বার্তা কেন্দ্র';
+
+  @override
+  String get alertNoAlerts => 'কোনো সতর্কতা নেই';
+
+  @override
+  String get alertTime => 'সতর্কতার সময়';
+
+  @override
+  String get alertLevel => 'সতর্কতার মাত্রা';
+
+  @override
+  String get reportDeviceStats => 'ডিভাইস পরিসংখ্যান';
+
+  @override
+  String get reportDataStats => 'ডেটা পরিসংখ্যান';
+
+  @override
+  String get reportCdnStats => 'CDN পরিসংখ্যান';
+
+  @override
+  String get settingsLanguage => 'ভাষা';
+
+  @override
+  String get settingsLanguageSystem => 'সিস্টেম অনুসরণ';
+
+  @override
+  String get settingsLanguageListTitle => 'ভাষা নির্বাচন';
+
+  @override
+  String get settingsTheme => 'থিম';
+
+  @override
+  String get settingsThemeLight => 'হালকা';
+
+  @override
+  String get settingsThemeDark => 'গাঢ়';
+
+  @override
+  String get settingsAbout => 'সম্পর্কে';
+
+  @override
+  String get settingsAboutVersion => 'সংস্করণ';
+
+  @override
+  String get settingsLogout => 'লগআউট';
+
+  @override
+  String get settingsLogoutConfirm => 'আপনি কি সত্যিই লগআউট করতে চান?';
+
+  @override
+  String get i18nDemoTitle => 'স্থানীয়করণ ডেমো';
+
+  @override
+  String get i18nDemoDate => 'তারিখ';
+
+  @override
+  String get i18nDemoNumber => 'সংখ্যা';
+
+  @override
+  String get i18nDemoCurrency => 'মুদ্রা';
+
+  @override
+  String get i18nDemoLongText =>
+      'এটি একটি নমুনা পাঠ্য যা দেখায় কীভাবে দীর্ঘ লেখা লাইন ভেঙে যায় এবং পড়ার অভিজ্ঞতা কেমন হয়।';
+
+  @override
+  String get i18nDemoDirection => 'লেখার দিক';
+
+  @override
+  String get errorNetworkError => 'নেটওয়ার্ক সংযোগ ব্যর্থ';
+
+  @override
+  String get errorServerError => 'সার্ভার ত্রুটি';
+
+  @override
+  String get errorTimeout => 'অনুরোধের সময় শেষ';
+
+  @override
+  String get errorUnauthorized => 'অননুমোদিত অ্যাক্সেস';
+
+  @override
+  String get errorForbidden => 'এই কাজের অনুমতি নেই';
+
+  @override
+  String get errorNotFound => 'সম্পদ পাওয়া যায়নি';
+}
