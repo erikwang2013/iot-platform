@@ -1401,7 +1401,7 @@ git commit -m "feat(access): Tuya adapter (OAuth refresh + OpenAPI list/status/c
 - Modify: `e-cat/services/iot-access/src/lib.rs`
 - Create: `e-cat/services/iot-access/tests/webhook.rs`
 
-- [ ] **Step 1: 写失败测试（事件归一化纯函数，无需 Docker）**
+- [x] **Step 1: 写失败测试（事件归一化纯函数，无需 Docker）**
 
 `e-cat/services/iot-access/tests/webhook.rs`:
 
@@ -1448,12 +1448,12 @@ fn unknown_bizcode_is_error() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `cd /home/wwwroot/iot-platform/e-cat && cargo test -p iot-access --test webhook`
 Expected: 编译失败（`iot_access::webhook` 无 `normalize_event`/`WebhookPayload`）。
 
-- [ ] **Step 3: 实现 events.rs（Kafka 发布 + 影子更新）**
+- [x] **Step 3: 实现 events.rs（Kafka 发布 + 影子更新）**
 
 `e-cat/services/iot-access/src/events.rs`:
 
@@ -1507,7 +1507,7 @@ pub async fn shadow_apply(redis: &RedisCache, ev: &EventMessage) -> Result<(), S
 }
 ```
 
-- [ ] **Step 4: 实现 webhook.rs（接收 + 验签 + 归一化 + 发布）**
+- [x] **Step 4: 实现 webhook.rs（接收 + 验签 + 归一化 + 发布）**
 
 `e-cat/services/iot-access/src/webhook.rs`:
 
@@ -1709,7 +1709,7 @@ pub fn router(ws: WebhookState) -> axum::Router {
 }
 ```
 
-- [ ] **Step 5: 更新 lib.rs**
+- [x] **Step 5: 更新 lib.rs**
 
 `e-cat/services/iot-access/src/lib.rs`（替换）：
 
@@ -1726,12 +1726,12 @@ pub mod store;
 pub mod webhook;
 ```
 
-- [ ] **Step 6: 运行测试确认通过**
+- [x] **Step 6: 运行测试确认通过**
 
 Run: `cd /home/wwwroot/iot-platform/e-cat && cargo test -p iot-access --test webhook`
 Expected: 3 个测试全 PASS。
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add e-cat/services/iot-access/
@@ -1746,7 +1746,7 @@ git commit -m "feat(access): Tuya webhook receive (signature verify + normalize)
 - Create: `e-cat/services/iot-access/src/mqtt.rs`（替换占位文件）
 - Create: `e-cat/services/iot-access/tests/mqtt_payload.rs`
 
-- [ ] **Step 1: 写失败测试（直连上报 payload 解析，无 Docker）**
+- [x] **Step 1: 写失败测试（直连上报 payload 解析，无 Docker）**
 
 `e-cat/services/iot-access/tests/mqtt_payload.rs`:
 
@@ -1777,12 +1777,12 @@ fn bad_json_is_error() {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `cd /home/wwwroot/iot-platform/e-cat && cargo test -p iot-access --test mqtt_payload`
 Expected: 编译失败（`iot_access::mqtt` 无 `parse_payload`）。
 
-- [ ] **Step 3: 实现 mqtt.rs（按设备订阅 + 周期刷新 + 指令下发）**
+- [x] **Step 3: 实现 mqtt.rs（按设备订阅 + 周期刷新 + 指令下发）**
 
 `e-cat/services/iot-access/src/mqtt.rs`:
 
@@ -1916,12 +1916,12 @@ pub async fn run(
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `cd /home/wwwroot/iot-platform/e-cat && cargo test -p iot-access --test mqtt_payload`
 Expected: 3 个测试全 PASS。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add e-cat/services/iot-access/
