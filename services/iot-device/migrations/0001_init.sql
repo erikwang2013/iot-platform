@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS devices (
     vendor VARCHAR(64) NOT NULL DEFAULT '',
     status VARCHAR(32) NOT NULL DEFAULT 'offline',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_devices_tenant (tenant_id),
     CONSTRAINT fk_devices_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 ) ENGINE = InnoDB;
-
-CREATE INDEX idx_devices_tenant ON devices(tenant_id);
