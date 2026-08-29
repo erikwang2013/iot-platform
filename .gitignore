@@ -83,3 +83,11 @@ apps/harmonyos/hvigorw.bat
 # SDK build artifacts
 __pycache__/
 sdk/rust/target
+
+# HarmonyOS build artifacts (per-app worktrees)
+apps/*/harmonyos/.hvigor/
+apps/*/harmonyos/**/oh_modules/
+apps/*/harmonyos/**/build/
+apps/*/harmonyos/.cxx/
+apps/*/harmonyos/.idea/
+apps/*/harmonyos/local.properties

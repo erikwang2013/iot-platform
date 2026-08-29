@@ -1,0 +1,12 @@
+{
+  "color": [
+    {
+      "name": "app_primary",
+      "value": "#409EFF"
+    },
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    }
+  ]
+}

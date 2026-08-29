@@ -1,0 +1,284 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "Plateforme IoT"
+    },
+    {
+      "name": "common_ok",
+      "value": "OK"
+    },
+    {
+      "name": "common_cancel",
+      "value": "Annuler"
+    },
+    {
+      "name": "common_save",
+      "value": "Enregistrer"
+    },
+    {
+      "name": "common_delete",
+      "value": "Supprimer"
+    },
+    {
+      "name": "common_retry",
+      "value": "Réessayer"
+    },
+    {
+      "name": "common_confirm",
+      "value": "Confirmer"
+    },
+    {
+      "name": "common_back",
+      "value": "Retour"
+    },
+    {
+      "name": "common_next",
+      "value": "Suivant"
+    },
+    {
+      "name": "common_skip",
+      "value": "Passer"
+    },
+    {
+      "name": "common_loading",
+      "value": "Chargement…"
+    },
+    {
+      "name": "common_empty",
+      "value": "Aucune donnée"
+    },
+    {
+      "name": "common_error",
+      "value": "Une erreur est survenue"
+    },
+    {
+      "name": "common_success",
+      "value": "Opération réussie"
+    },
+    {
+      "name": "common_failed",
+      "value": "Échec de l'opération"
+    },
+    {
+      "name": "nav_dashboard",
+      "value": "Aperçu"
+    },
+    {
+      "name": "nav_devices",
+      "value": "Appareils"
+    },
+    {
+      "name": "nav_alerts",
+      "value": "Alertes"
+    },
+    {
+      "name": "nav_reports",
+      "value": "Statistiques"
+    },
+    {
+      "name": "nav_settings",
+      "value": "Paramètres"
+    },
+    {
+      "name": "nav_profile",
+      "value": "Profil"
+    },
+    {
+      "name": "login_title",
+      "value": "Connexion"
+    },
+    {
+      "name": "login_subtitle",
+      "value": "Bon retour parmi nous"
+    },
+    {
+      "name": "login_username",
+      "value": "Nom d'utilisateur"
+    },
+    {
+      "name": "login_password",
+      "value": "Mot de passe"
+    },
+    {
+      "name": "login_btn",
+      "value": "Se connecter"
+    },
+    {
+      "name": "register_btn",
+      "value": "S'inscrire"
+    },
+    {
+      "name": "forgot_pwd",
+      "value": "Mot de passe oublié ?"
+    },
+    {
+      "name": "login_error",
+      "value": "Nom d'utilisateur ou mot de passe incorrect"
+    },
+    {
+      "name": "login_required",
+      "value": "Veuillez vous connecter d'abord"
+    },
+    {
+      "name": "device_my_devices",
+      "value": "Mes appareils"
+    },
+    {
+      "name": "device_add_device",
+      "value": "Ajouter un appareil"
+    },
+    {
+      "name": "device_offline",
+      "value": "Appareil hors ligne"
+    },
+    {
+      "name": "device_online",
+      "value": "Appareil en ligne"
+    },
+    {
+      "name": "device_detail",
+      "value": "Détails de l'appareil"
+    },
+    {
+      "name": "device_name",
+      "value": "Nom de l'appareil"
+    },
+    {
+      "name": "device_type",
+      "value": "Type d'appareil"
+    },
+    {
+      "name": "device_status",
+      "value": "État de l'appareil"
+    },
+    {
+      "name": "device_control",
+      "value": "Panneau de contrôle"
+    },
+    {
+      "name": "device_scene",
+      "value": "Scènes"
+    },
+    {
+      "name": "device_automation",
+      "value": "Automatisation"
+    },
+    {
+      "name": "alert_center",
+      "value": "Centre de messages"
+    },
+    {
+      "name": "alert_no_alerts",
+      "value": "Aucune alerte"
+    },
+    {
+      "name": "alert_time",
+      "value": "Heure de l'alerte"
+    },
+    {
+      "name": "alert_level",
+      "value": "Niveau d'alerte"
+    },
+    {
+      "name": "report_device_stats",
+      "value": "Statistiques des appareils"
+    },
+    {
+      "name": "report_data_stats",
+      "value": "Statistiques des données"
+    },
+    {
+      "name": "report_cdn_stats",
+      "value": "Statistiques CDN"
+    },
+    {
+      "name": "settings_language",
+      "value": "Langue"
+    },
+    {
+      "name": "settings_language_system",
+      "value": "Suivre le système"
+    },
+    {
+      "name": "settings_language_list_title",
+      "value": "Choisir la langue"
+    },
+    {
+      "name": "settings_theme",
+      "value": "Thème"
+    },
+    {
+      "name": "settings_theme_light",
+      "value": "Clair"
+    },
+    {
+      "name": "settings_theme_dark",
+      "value": "Sombre"
+    },
+    {
+      "name": "settings_about",
+      "value": "À propos"
+    },
+    {
+      "name": "settings_about_version",
+      "value": "Version"
+    },
+    {
+      "name": "settings_logout",
+      "value": "Se déconnecter"
+    },
+    {
+      "name": "settings_logout_confirm",
+      "value": "Voulez-vous vraiment vous déconnecter ?"
+    },
+    {
+      "name": "i18n_demo_title",
+      "value": "Démo de localisation"
+    },
+    {
+      "name": "i18n_demo_date",
+      "value": "Date"
+    },
+    {
+      "name": "i18n_demo_number",
+      "value": "Nombre"
+    },
+    {
+      "name": "i18n_demo_currency",
+      "value": "Devise"
+    },
+    {
+      "name": "i18n_demo_long_text",
+      "value": "Ceci est un texte d'exemple qui montre comment les longs textes passent à la ligne et le confort de lecture qu'ils offrent."
+    },
+    {
+      "name": "i18n_demo_direction",
+      "value": "Sens du texte"
+    },
+    {
+      "name": "error_network_error",
+      "value": "Échec de la connexion réseau"
+    },
+    {
+      "name": "error_server_error",
+      "value": "Erreur serveur"
+    },
+    {
+      "name": "error_timeout",
+      "value": "Délai de la requête dépassé"
+    },
+    {
+      "name": "error_unauthorized",
+      "value": "Accès non autorisé"
+    },
+    {
+      "name": "error_forbidden",
+      "value": "Opération non autorisée"
+    },
+    {
+      "name": "error_not_found",
+      "value": "Ressource introuvable"
+    }
+  ]
+}

@@ -1,0 +1,284 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "Platform IoT"
+    },
+    {
+      "name": "common_ok",
+      "value": "OK"
+    },
+    {
+      "name": "common_cancel",
+      "value": "Batal"
+    },
+    {
+      "name": "common_save",
+      "value": "Simpan"
+    },
+    {
+      "name": "common_delete",
+      "value": "Hapus"
+    },
+    {
+      "name": "common_retry",
+      "value": "Coba lagi"
+    },
+    {
+      "name": "common_confirm",
+      "value": "Konfirmasi"
+    },
+    {
+      "name": "common_back",
+      "value": "Kembali"
+    },
+    {
+      "name": "common_next",
+      "value": "Lanjut"
+    },
+    {
+      "name": "common_skip",
+      "value": "Lewati"
+    },
+    {
+      "name": "common_loading",
+      "value": "Memuat…"
+    },
+    {
+      "name": "common_empty",
+      "value": "Tidak ada data"
+    },
+    {
+      "name": "common_error",
+      "value": "Terjadi kesalahan"
+    },
+    {
+      "name": "common_success",
+      "value": "Operasi berhasil"
+    },
+    {
+      "name": "common_failed",
+      "value": "Operasi gagal"
+    },
+    {
+      "name": "nav_dashboard",
+      "value": "Ringkasan"
+    },
+    {
+      "name": "nav_devices",
+      "value": "Perangkat"
+    },
+    {
+      "name": "nav_alerts",
+      "value": "Peringatan"
+    },
+    {
+      "name": "nav_reports",
+      "value": "Statistik"
+    },
+    {
+      "name": "nav_settings",
+      "value": "Pengaturan"
+    },
+    {
+      "name": "nav_profile",
+      "value": "Profil"
+    },
+    {
+      "name": "login_title",
+      "value": "Masuk"
+    },
+    {
+      "name": "login_subtitle",
+      "value": "Selamat datang kembali"
+    },
+    {
+      "name": "login_username",
+      "value": "Nama pengguna"
+    },
+    {
+      "name": "login_password",
+      "value": "Kata sandi"
+    },
+    {
+      "name": "login_btn",
+      "value": "Masuk"
+    },
+    {
+      "name": "register_btn",
+      "value": "Daftar"
+    },
+    {
+      "name": "forgot_pwd",
+      "value": "Lupa kata sandi?"
+    },
+    {
+      "name": "login_error",
+      "value": "Nama pengguna atau kata sandi salah"
+    },
+    {
+      "name": "login_required",
+      "value": "Silakan masuk terlebih dahulu"
+    },
+    {
+      "name": "device_my_devices",
+      "value": "Perangkat saya"
+    },
+    {
+      "name": "device_add_device",
+      "value": "Tambah perangkat"
+    },
+    {
+      "name": "device_offline",
+      "value": "Perangkat offline"
+    },
+    {
+      "name": "device_online",
+      "value": "Perangkat online"
+    },
+    {
+      "name": "device_detail",
+      "value": "Detail perangkat"
+    },
+    {
+      "name": "device_name",
+      "value": "Nama perangkat"
+    },
+    {
+      "name": "device_type",
+      "value": "Jenis perangkat"
+    },
+    {
+      "name": "device_status",
+      "value": "Status perangkat"
+    },
+    {
+      "name": "device_control",
+      "value": "Panel kontrol"
+    },
+    {
+      "name": "device_scene",
+      "value": "Skenario"
+    },
+    {
+      "name": "device_automation",
+      "value": "Otomatisasi"
+    },
+    {
+      "name": "alert_center",
+      "value": "Pusat pesan"
+    },
+    {
+      "name": "alert_no_alerts",
+      "value": "Tidak ada peringatan"
+    },
+    {
+      "name": "alert_time",
+      "value": "Waktu peringatan"
+    },
+    {
+      "name": "alert_level",
+      "value": "Tingkat peringatan"
+    },
+    {
+      "name": "report_device_stats",
+      "value": "Statistik perangkat"
+    },
+    {
+      "name": "report_data_stats",
+      "value": "Statistik data"
+    },
+    {
+      "name": "report_cdn_stats",
+      "value": "Statistik CDN"
+    },
+    {
+      "name": "settings_language",
+      "value": "Bahasa"
+    },
+    {
+      "name": "settings_language_system",
+      "value": "Ikuti sistem"
+    },
+    {
+      "name": "settings_language_list_title",
+      "value": "Pilih bahasa"
+    },
+    {
+      "name": "settings_theme",
+      "value": "Tema"
+    },
+    {
+      "name": "settings_theme_light",
+      "value": "Terang"
+    },
+    {
+      "name": "settings_theme_dark",
+      "value": "Gelap"
+    },
+    {
+      "name": "settings_about",
+      "value": "Tentang"
+    },
+    {
+      "name": "settings_about_version",
+      "value": "Versi"
+    },
+    {
+      "name": "settings_logout",
+      "value": "Keluar"
+    },
+    {
+      "name": "settings_logout_confirm",
+      "value": "Yakin ingin keluar?"
+    },
+    {
+      "name": "i18n_demo_title",
+      "value": "Demo lokalisasi"
+    },
+    {
+      "name": "i18n_demo_date",
+      "value": "Tanggal"
+    },
+    {
+      "name": "i18n_demo_number",
+      "value": "Angka"
+    },
+    {
+      "name": "i18n_demo_currency",
+      "value": "Mata uang"
+    },
+    {
+      "name": "i18n_demo_long_text",
+      "value": "Ini adalah contoh teks yang menunjukkan cara teks panjang dibungkus dan kenyamanan membacanya."
+    },
+    {
+      "name": "i18n_demo_direction",
+      "value": "Arah teks"
+    },
+    {
+      "name": "error_network_error",
+      "value": "Koneksi jaringan gagal"
+    },
+    {
+      "name": "error_server_error",
+      "value": "Kesalahan server"
+    },
+    {
+      "name": "error_timeout",
+      "value": "Waktu permintaan habis"
+    },
+    {
+      "name": "error_unauthorized",
+      "value": "Akses tidak sah"
+    },
+    {
+      "name": "error_forbidden",
+      "value": "Tidak memiliki izin untuk operasi ini"
+    },
+    {
+      "name": "error_not_found",
+      "value": "Sumber daya tidak ditemukan"
+    }
+  ]
+}
