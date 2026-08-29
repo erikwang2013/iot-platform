@@ -133,22 +133,17 @@ pub async fn receive(
                 .into_response()
         }
     };
-    // 签名校验：header 存在则必须通过（HMAC-SHA256(raw body, client_secret)）
-    if let Some(sig) = headers
-        .get("x-tuya-signature")
-        .and_then(|v| v.to_str().ok())
-    {
-        let secret = match ws.store.load_creds(&tenant_id, "tuya").await {
-            Ok(c) => c["client_secret"].as_str().unwrap_or("").to_string(),
-            Err(_) => String::new(),
-        };
-        if !secret.is_empty() && !verify_signature(&secret, &raw, sig) {
-            return (
-                StatusCode::FORBIDDEN,
-                Json(json!({"error": "bad tuya signature"})),
-            )
-                .into_response();
+    // 签名校验：fail-closed —— 头缺失 401，secret 不可用 403，不匹配 403
+    let sig = headers.get("x-tuya-signature").and_then(|v| v.to_str().ok());
+    let secret = match ws.store.load_creds(&tenant_id, "tuya").await {
+        Ok(c) => c["client_secret"].as_str().unwrap_or("").to_string(),
+        Err(e) => {
+            tracing::warn!(error = %e, "load tuya creds for signature verify failed");
+            String::new()
         }
+    };
+    if let Err((status, msg)) = verify_webhook_signature(&secret, &raw, sig) {
+        return (status, Json(json!({"error": msg}))).into_response();
     }
     let ev = match normalize_event(&platform_id, &tenant_id, &p) {
         Ok(ev) => ev,
@@ -179,13 +174,45 @@ fn extract_device_id(p: &WebhookPayload) -> Option<String> {
         .map(str::to_string)
 }
 
+/// 验签门：缺头 → 401；secret 为空 → 403；HMAC 不匹配 → 403。fail-closed。
+pub fn verify_webhook_signature(
+    secret: &str,
+    raw: &[u8],
+    sig: Option<&str>,
+) -> Result<(), (StatusCode, &'static str)> {
+    let sig = match sig {
+        Some(s) => s,
+        None => return Err((StatusCode::UNAUTHORIZED, "missing x-tuya-signature")),
+    };
+    if secret.is_empty() {
+        return Err((StatusCode::FORBIDDEN, "signature secret unavailable"));
+    }
+    if !verify_signature(secret, raw, sig) {
+        return Err((StatusCode::FORBIDDEN, "bad tuya signature"));
+    }
+    Ok(())
+}
+
 fn verify_signature(secret: &str, raw: &[u8], sig: &str) -> bool {
     use hmac::{Hmac, Mac};
     use sha2::Sha256;
     type HmacSha256 = Hmac<Sha256>;
     let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).expect("hmac key");
     mac.update(raw);
-    hex::encode(mac.finalize().into_bytes()) == sig
+    let expect = mac.finalize().into_bytes();
+    let got = match hex::decode(sig) {
+        Ok(g) => g,
+        Err(_) => return false,
+    };
+    ct_eq(&expect, &got)
+}
+
+/// 常数时间字节比较（等长逐字节 XOR；长度差直接失败）。
+fn ct_eq(a: &[u8], b: &[u8]) -> bool {
+    if a.len() != b.len() {
+        return false;
+    }
+    a.iter().zip(b).fold(0u8, |acc, (x, y)| acc | (x ^ y)) == 0
 }
 
 pub fn router(ws: WebhookState) -> axum::Router {
