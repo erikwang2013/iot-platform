@@ -2102,7 +2102,7 @@ git commit -m "feat(access): main assembly (mysql/redis/kafka/mqtt wiring + tena
 - Create: `e-cat/services/iot-access/tests/tuya_flow.rs`
 - Create: `e-cat/services/iot-access/tests/event_flow.rs`（需 docker，标注 `#[ignore]`）
 
-- [ ] **Step 1: 写 mock 服务器（tests/mock_tuya.rs，模块被 tuya_flow.rs 引用）**
+- [x] **Step 1: 写 mock 服务器（tests/mock_tuya.rs，模块被 tuya_flow.rs 引用）**
 
 `e-cat/services/iot-access/tests/mock_tuya.rs`:
 
@@ -2238,7 +2238,7 @@ pub async fn spawn() -> tokio::task::JoinHandle<()> {
 }
 ```
 
-- [ ] **Step 2: 写 tuya_flow.rs（适配器全流程：授权码 → 拉设备 → 属性 → 指令）**
+- [x] **Step 2: 写 tuya_flow.rs（适配器全流程：授权码 → 拉设备 → 属性 → 指令）**
 
 `e-cat/services/iot-access/tests/tuya_flow.rs`:
 
@@ -2303,12 +2303,12 @@ async fn expired_token_auto_refresh_on_list() {
 }
 ```
 
-- [ ] **Step 3: 运行 tuya_flow（无需 docker）**
+- [x] **Step 3: 运行 tuya_flow（无需 docker）**
 
 Run: `cd /home/wwwroot/iot-platform/e-cat && cargo test -p iot-access --test tuya_flow`
 Expected: 2 个测试 PASS（mock 绑定 127.0.0.1:18084，全流程本地完成）。
 
-- [ ] **Step 4: 写 event_flow.rs（Webhook → Kafka + Redis 影子，需 docker）**
+- [x] **Step 4: 写 event_flow.rs（Webhook → Kafka + Redis 影子，需 docker）**
 
 `e-cat/services/iot-access/tests/event_flow.rs`:
 
@@ -2444,7 +2444,7 @@ fn tuya_sign(raw: &[u8]) -> String {
 
 注：测试运行目录须为 `e-cat/services/iot-access`（`migrations/` 相对路径）。`Cargo.toml` 的 `[dev-dependencies]` 需补 `futures-util`（或直接依赖主依赖，已含）。
 
-- [ ] **Step 5: 运行集成测试（docker 已启动时）**
+- [x] **Step 5: 运行集成测试（docker 已启动时）**
 
 Run:
 ```bash
