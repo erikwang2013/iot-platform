@@ -6,7 +6,7 @@
 
 **Architecture:** 根 Cargo workspace 挂 `services/` 下两个二进制 crate；iot-gateway 用 ecat::App + HttpServer（axum 0.8），按 tower 中间件栈：JWT（分面）→ security-rust 扫描 → X-API-Version 校验 → 路由；iot-device 用 ecat-data-sqlx 的 SqlxClient + RdbmsClient 查询 PG。服务间通信（gRPC/Kafka）P1 再做，P0 各自独立端口。
 
-**Tech Stack:** Rust 2024 edition、e-cat v3.0.3（本地 `e-cat/` path 依赖）、axum 0.8、tower 0.5、security-rust（本地 `/home/wwwroot/erikwang2013/security-rust`）、sqlx Any 驱动、PostgreSQL 16、Docker Compose。
+**Tech Stack:** Rust 2024 edition、e-cat v3.0.3（本地 `e-cat/` path 依赖）、axum 0.8、tower 0.5、security-rust（本地 `/home/wwwroot/erikwang2013/security-rust`）、sqlx Any 驱动（mysql feature 已内置）、MySQL 8、Docker Compose。
 
 **约定:** API 版本放 header `X-API-Version: v1`，缺失 400、不支持 406（spec §8）。管理端 `/api/*`（JWT 需 sub+role）、客户端 `/admin/*`（JWT 需 sub）。`/health`、`/metrics` 豁免鉴权与版本校验。
 
@@ -750,7 +750,7 @@ git commit -m "feat(gateway): JWT dual-face routing (/api admin, /admin client)"
 
 ---
 
-### Task 5: iot-device 服务（PG 连通 + 建表 + 查询）
+### Task 5: iot-device 服务（MySQL 连通 + 建表 + 查询）
 
 **Files:**
 - Modify: `services/iot-device/src/main.rs`
@@ -762,21 +762,22 @@ git commit -m "feat(gateway): JWT dual-face routing (/api admin, /admin client)"
 
 ```sql
 CREATE TABLE IF NOT EXISTS tenants (
-    id UUID PRIMARY KEY,
-    name TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
+    id VARCHAR(36) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS devices (
-    id UUID PRIMARY KEY,
-    tenant_id UUID NOT NULL REFERENCES tenants(id),
-    name TEXT NOT NULL,
-    vendor TEXT NOT NULL DEFAULT '',
-    status TEXT NOT NULL DEFAULT 'offline',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
+    id VARCHAR(36) PRIMARY KEY,
+    tenant_id VARCHAR(36) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    vendor VARCHAR(64) NOT NULL DEFAULT '',
+    status VARCHAR(32) NOT NULL DEFAULT 'offline',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_devices_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+) ENGINE = InnoDB;
 
-CREATE INDEX IF NOT EXISTS idx_devices_tenant ON devices(tenant_id);
+CREATE INDEX idx_devices_tenant ON devices(tenant_id);
 ```
 
 - [ ] **Step 2: 写 main.rs（启动时迁移 + 双端点）**
@@ -833,8 +834,8 @@ async fn list_devices(
 ) -> Result<axum::Json<Value>, (axum::http::StatusCode, String)> {
     // ponytail: P0 支持任意/按租户过滤；参数化查询防注入，租户强制隔离 P1 随鉴权一起做
     let sql = match &filter.tenant_id {
-        Some(_) => "SELECT id::text, name, vendor, status FROM devices WHERE tenant_id = ?",
-        None => "SELECT id::text, name, vendor, status FROM devices",
+        Some(_) => "SELECT id, name, vendor, status FROM devices WHERE tenant_id = ?",
+        None => "SELECT id, name, vendor, status FROM devices",
     };
     let rows = db.0.query_with(sql, &[]).await.map_err(db_err)?;
     let devices: Vec<DeviceRow> = rows
@@ -856,7 +857,7 @@ fn db_err(e: ecat_data::RdbmsError) -> (axum::http::StatusCode, String) {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let db_url = std::env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgres://iot:iot@localhost:5432/iot".into());
+        .unwrap_or_else(|_| "mysql://iot:iot@localhost:3306/iot".into());
     let db = SqlxClient::connect(&db_url).await?;
     migrate(&db).await?;
 
@@ -887,7 +888,7 @@ Expected: 编译通过。
 
 ```bash
 git add services/iot-device/
-git commit -m "feat(device): PG connectivity, idempotent schema, health + device list endpoints"
+git commit -m "feat(device): MySQL connectivity, idempotent schema, health + device list endpoints"
 ```
 
 ---
@@ -901,18 +902,19 @@ git commit -m "feat(device): PG connectivity, idempotent schema, health + device
 
 ```yaml
 services:
-  postgres:
-    image: postgres:16-alpine
+  mysql:
+    image: mysql:8
     environment:
-      POSTGRES_USER: iot
-      POSTGRES_PASSWORD: iot
-      POSTGRES_DB: iot
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: iot
+      MYSQL_USER: iot
+      MYSQL_PASSWORD: iot
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - mysqldata:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U iot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uiot", "-piot"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -956,7 +958,7 @@ services:
       - miniodata:/data
 
 volumes:
-  pgdata:
+  mysqldata:
   kafkadata:
   miniodata:
 ```
@@ -966,12 +968,12 @@ volumes:
 Run:
 ```bash
 cd /home/wwwroot/iot-platform
-docker compose up -d postgres redis emqx kafka minio
+docker compose up -d mysql redis emqx kafka minio
 docker compose ps
 ```
-Expected: 5 个容器 Running（postgres healthcheck 最终 healthy）。
+Expected: 5 个容器 Running（mysql healthcheck 最终 healthy）。
 
-- [ ] **Step 3: 运行 iot-device 并验证 PG 连通**
+- [ ] **Step 3: 运行 iot-device 并验证 MySQL 连通**
 
 Run:
 ```bash
@@ -985,11 +987,10 @@ Expected: `{"status":"ok","db":true}`；再 `curl -s http://localhost:8081/api/d
 
 Run:
 ```bash
-docker exec -i iot-platform-postgres-1 psql -U iot -d iot <<'SQL'
-INSERT INTO tenants (id, name) VALUES ('11111111-1111-1111-1111-111111111111', 'demo-tenant') ON CONFLICT DO NOTHING;
-INSERT INTO devices (id, tenant_id, name, vendor, status)
-VALUES ('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'temp-sensor-1', 'tuya', 'online')
-ON CONFLICT DO NOTHING;
+docker exec -i iot-platform-mysql-1 mysql -uiot -piot iot <<'SQL'
+INSERT IGNORE INTO tenants (id, name) VALUES ('11111111-1111-1111-1111-111111111111', 'demo-tenant');
+INSERT IGNORE INTO devices (id, tenant_id, name, vendor, status)
+VALUES ('22222222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'temp-sensor-1', 'tuya', 'online');
 SQL
 curl -s http://localhost:8081/api/devices
 ```
@@ -999,7 +1000,7 @@ Expected: `{"devices":[{"id":"22222222-...","name":"temp-sensor-1","vendor":"tuy
 
 ```bash
 git add docker-compose.yml
-git commit -m "chore: docker compose infrastructure (postgres/redis/emqx/kafka/minio)"
+git commit -m "chore: docker compose infrastructure (mysql/redis/emqx/kafka/minio)"
 ```
 
 ---

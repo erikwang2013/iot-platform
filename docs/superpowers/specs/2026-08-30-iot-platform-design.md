@@ -14,7 +14,7 @@ SaaS 云平台：对外提供多租户服务，帮助客户统一管理接入国
 | 后端 | Rust + e-cat v3.0.3 微服务框架（已置于 `e-cat/`，workspace 内 crate 直接复用） |
 | 前端 | Flutter 多端（Web/iOS/Android）+ HarmonyOS 原生，位于 `apps/` |
 | 安全 | security-rust 攻击检测中间件（27 检测器）+ ecat-auth + ecat-tls |
-| 存储 | PostgreSQL（业务）、TDengine（时序）、Redis（影子/缓存）、S3/MinIO（对象） |
+| 存储 | MySQL 8（业务）、TDengine（时序）、Redis（影子/缓存）、S3/MinIO（对象） |
 | 中间件 | EMQX（直连 MQTT broker）、Kafka（事件总线） |
 
 ## 3. 架构：微服务拆分
@@ -63,7 +63,7 @@ SaaS 云平台：对外提供多租户服务，帮助客户统一管理接入国
 
 | 存储 | 用途 |
 |------|------|
-| PostgreSQL | 租户、用户、设备元数据、物模型、CDN 配置、规则 |
+| MySQL 8 | 租户、用户、设备元数据、物模型、CDN 配置、规则 |
 | TDengine | 设备时序数据（属性历史、事件） |
 | Redis | 设备影子（实时状态）、缓存、会话 |
 | EMQX | 直连设备 MQTT broker |
@@ -127,6 +127,8 @@ SaaS 云平台：对外提供多租户服务，帮助客户统一管理接入国
 
 统计查询由 iot-data 服务统一承担（TDengine 时序聚合 + PG 报表聚合），报表接口走管理端 `/api/reports/*`，受同一 JWT + 租户隔离保护。基础统计随 P2（数据阶段）落地，CDN 用量报表随 P4 落地。
 
+**管理端 Web API 地址动态化**：管理端 Flutter Web 构建产物可部署到任意域名，API 地址运行时解析而非构建期硬编码——优先级：同源 `config.json`（可被 nginx/网关注入覆盖）→ 当前页面 origin（同源部署自动适配）→ 编译期默认值。移动端/HarmonyOS 保持编译配置。管理端 Web 地址变化无需重新构建。
+
 前端结构（用户已确认）：
 
 ```
@@ -143,14 +145,14 @@ apps/
 
 ## 9. 部署与测试
 
-- **部署**：Docker Compose 起步（6 服务 + PG + TDengine + Redis + EMQX + Kafka + MinIO），单机可跑通；后期按服务独立扩缩容
+- **部署**：Docker Compose 起步（6 服务 + MySQL + TDengine + Redis + EMQX + Kafka + MinIO），单机可跑通；后期按服务独立扩缩容
 - **测试**：单元测试（各服务）、集成测试（真实 PG/TDengine + EMQX + 厂商 mock 服务器）、security-rust 检测器测试、ecat-bench 压测
 
 ## 10. 实施阶段
 
 | 阶段 | 内容 |
 |------|------|
-| P0 骨架 | 仓库结构、iot-gateway + iot-device + Docker 编排（PG/Redis/EMQX/Kafka/MinIO） |
+| P0 骨架 | 仓库结构、iot-gateway + iot-device + Docker 编排（MySQL/Redis/EMQX/Kafka/MinIO） |
 | P1 接入 | iot-access + 涂鸦适配器 + 直连 MQTT |
 | P2 数据 | iot-data + TDengine + 历史曲线 |
 | P3 规则 | iot-rule 告警 + 场景自动化 |
