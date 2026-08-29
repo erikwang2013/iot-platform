@@ -940,7 +940,7 @@ git commit -m "feat(access): OAuth authorization-code flow API + encrypted crede
 - Modify: `e-cat/services/iot-access/src/lib.rs`
 - Create: `e-cat/services/iot-access/tests/tuya_sign.rs`
 
-- [ ] **Step 1: 写失败测试（签名向量 + 刷新逻辑）**
+- [x] **Step 1: 写失败测试（签名向量 + 刷新逻辑）**
 
 `e-cat/services/iot-access/tests/tuya_sign.rs`:
 
@@ -961,12 +961,12 @@ fn sign_matches_hmac_sha256_hex() {
 
 注：上面的 hex 是占位示例值——Step 2 先运行测试看失败，然后用 `python3 -c "import hmac,hashlib;print(hmac.new(b'secret', b'client_id'+b'1690000000000', hashlib.sha256).hexdigest())"` 计算真实值替换后再跑。签名格式是确定的：`HMAC-SHA256(client_id + t + access_token, secret)` 输出小写 hex，与涂鸦官方一致。
 
-- [ ] **Step 2: 运行确认失败**
+- [x] **Step 2: 运行确认失败**
 
 Run: `cd /home/wwwroot/iot-platform/e-cat && cargo test -p iot-access --test tuya_sign`
 Expected: 编译失败（`iot_access::adapters::tuya` 不存在）。
 
-- [ ] **Step 3: 实现 tuya.rs（Trait 首个实现）**
+- [x] **Step 3: 实现 tuya.rs（Trait 首个实现）**
 
 `e-cat/services/iot-access/src/adapters/tuya.rs`:
 
@@ -1224,7 +1224,7 @@ impl TuyaAdapter {
 }
 ```
 
-- [ ] **Step 4: 实现 api.rs（设备导入 + 指令下发端点）**
+- [x] **Step 4: 实现 api.rs（设备导入 + 指令下发端点）**
 
 `e-cat/services/iot-access/src/api.rs`:
 
@@ -1334,7 +1334,7 @@ pub async fn send_command(
 }
 ```
 
-- [ ] **Step 5: 更新 lib.rs + store 加 find_link**
+- [x] **Step 5: 更新 lib.rs + store 加 find_link**
 
 `e-cat/services/iot-access/src/lib.rs`（替换）：
 
@@ -1374,7 +1374,7 @@ pub mod webhook;
     }
 ```
 
-- [ ] **Step 6: 计算真实签名向量并运行测试**
+- [x] **Step 6: 计算真实签名向量并运行测试**
 
 Run:
 ```bash
@@ -1384,7 +1384,7 @@ Expected: 输出 64 位 hex —— 用它替换 `tests/tuya_sign.rs` 中的断�
 Run: `cd /home/wwwroot/iot-platform/e-cat && cargo test -p iot-access --test tuya_sign`
 Expected: 1 个测试 PASS。
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add e-cat/services/iot-access/

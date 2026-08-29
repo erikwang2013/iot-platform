@@ -29,7 +29,12 @@ pub struct TuyaAdapter {
 
 impl TuyaAdapter {
     pub fn new() -> Self {
-        Self { http: reqwest::Client::new() }
+        Self {
+            http: reqwest::Client::builder()
+                .timeout(std::time::Duration::from_secs(10))
+                .build()
+                .expect("http client"),
+        }
     }
 
     fn base(&self) -> String {
@@ -85,7 +90,7 @@ impl TuyaAdapter {
         Ok(body["result"].clone())
     }
 
-    /// grant_type=refresh_token 换新；成功写回 DB（调用方忽略返回值则只更新内存凭据）。
+    /// grant_type=refresh_token 换新；返回新凭据，由调用方决定是否持久化。
     pub async fn refresh_token(&self, creds: &VendorCreds) -> Result<VendorCreds, AdapterError> {
         let t = now_ms();
         let sign = sign(&creds.client_id, &t, "", &creds.client_secret);
