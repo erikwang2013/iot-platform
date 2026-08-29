@@ -81,7 +81,9 @@ impl SqlxClient {
 }
 
 /// 单格类型转换链：bool → i64 → i32 → f64（NaN/Inf 转字符串）→ String →
-/// Blob（base64）。此前 Blob/BYTEA 列会静默落到 Null。
+/// Blob（合法 UTF-8 还原为字符串，否则 base64）。MySQL 把 TEXT 列按 Blob
+/// kind 上报（Any 层无法区分 TEXT/BLOB），若一律 base64 会把密文列二次编码
+/// （88→120 字符），故先按 UTF-8 解码，仅对真正的二进制 BLOB 走 base64。
 /// 注意：sqlx Any 驱动不支持时间类型，timestamp 列会在 fetch 时直接报错
 /// （AnyDriverError），不会静默——调用方可自行 CAST 成文本。
 fn cell_to_json(row: &AnyRow, col: &str) -> serde_json::Value {
@@ -114,7 +116,10 @@ fn cell_to_json(row: &AnyRow, col: &str) -> serde_json::Value {
         .or_else(|_| row.try_get::<String, _>(col).map(serde_json::Value::String))
         .or_else(|_| {
             row.try_get::<Vec<u8>, _>(col).map(|b| {
-                serde_json::Value::String(base64::engine::general_purpose::STANDARD.encode(b))
+                serde_json::Value::String(match String::from_utf8(b) {
+                    Ok(s) => s,
+                    Err(e) => base64::engine::general_purpose::STANDARD.encode(e.into_bytes()),
+                })
             })
         })
         .unwrap_or(serde_json::Value::Null)
@@ -417,16 +422,29 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn cell_to_json_encodes_blob_as_base64() {
+    async fn cell_to_json_encodes_binary_blob_as_base64() {
         let client = single_conn_client("t1").await;
         client.execute("CREATE TABLE t (data BLOB)").await.unwrap();
-        // 真实 BLOB 字节（0x01 0x02 0x03），绕过 bind（bind 会把 JSON 值绑成文本）
+        // 0xFF 开头 = 非法 UTF-8，走 base64 分支（bind 会把 JSON 值绑成文本，故用字面量）
         client
-            .execute("INSERT INTO t VALUES (x'010203')")
+            .execute("INSERT INTO t VALUES (x'FF0102')")
             .await
             .unwrap();
         let rows = client.query("SELECT data FROM t").await.unwrap();
-        assert_eq!(rows[0].get("data"), Some(&serde_json::json!("AQID")));
+        assert_eq!(rows[0].get("data"), Some(&serde_json::json!("/wEC")));
+    }
+
+    #[tokio::test]
+    async fn cell_to_json_decodes_utf8_blob_as_string() {
+        // MySQL 把 TEXT 列按 Blob kind 上报；合法 UTF-8（如 base64 密文）应还原为字符串
+        let client = single_conn_client("t1").await;
+        client.execute("CREATE TABLE t (data BLOB)").await.unwrap();
+        client
+            .execute("INSERT INTO t VALUES (x'68656C6C6F')") // "hello"
+            .await
+            .unwrap();
+        let rows = client.query("SELECT data FROM t").await.unwrap();
+        assert_eq!(rows[0].get("data"), Some(&serde_json::json!("hello")));
     }
 
     #[tokio::test]

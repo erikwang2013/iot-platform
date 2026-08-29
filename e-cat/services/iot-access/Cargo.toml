@@ -31,3 +31,4 @@ futures-util = "0.3"
 
 [dev-dependencies]
 tower-util = "0.3"
+tower.workspace = true
