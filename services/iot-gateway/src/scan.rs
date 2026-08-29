@@ -90,9 +90,9 @@ where
         let mut inner = self.inner.clone();
 
         Box::pin(async move {
-            let body_bytes = if scan_body {
+            let (body_bytes, pass_body) = if scan_body {
                 match to_bytes(body, MAX_BODY_BYTES).await {
-                    Ok(b) => Some(b),
+                    Ok(b) => (Some(b), None),
                     Err(_) => {
                         return Ok(Response::builder()
                             .status(StatusCode::PAYLOAD_TOO_LARGE)
@@ -101,7 +101,7 @@ where
                     }
                 }
             } else {
-                None
+                (None, Some(body))
             };
 
             let mut input = query;
@@ -126,7 +126,8 @@ where
                     .unwrap());
             }
 
-            let req = Request::from_parts(parts, Body::from(body_bytes.unwrap_or_default()));
+            let body = pass_body.unwrap_or_else(|| Body::from(body_bytes.unwrap_or_default()));
+            let req = Request::from_parts(parts, body);
             inner.call(req).await.map_err(Into::into)
         })
     }
