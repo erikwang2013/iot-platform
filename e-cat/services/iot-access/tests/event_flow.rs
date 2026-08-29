@@ -15,11 +15,11 @@ use std::sync::Arc;
 use tower::ServiceExt;
 
 async fn setup() -> (Store, KafkaMq, RedisCache) {
-    // 端口对应本地容器映射（compose：mysql 13307、redis 16379、kafka 9092），可用环境变量覆盖
+    // 端口对应本地容器映射（compose 默认：mysql 3306、redis 6379（MYSQL_PORT/REDIS_PORT 可覆盖）、kafka 9092），可用环境变量覆盖
     let db = Arc::new(
         SqlxClient::connect(
             &std::env::var("DATABASE_URL")
-                .unwrap_or_else(|_| "mysql://iot:iot@localhost:13307/iot".into()),
+                .unwrap_or_else(|_| "mysql://iot:iot@localhost:3306/iot".into()),
         )
         .await
         .unwrap(),
@@ -69,7 +69,7 @@ async fn setup() -> (Store, KafkaMq, RedisCache) {
     let kafka = KafkaMq::connect(&std::env::var("KAFKA_BROKERS").unwrap_or_else(|_| "localhost:9092".into()))
         .await
         .unwrap();
-    let redis = RedisCache::connect(&std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:16379".into()))
+    let redis = RedisCache::connect(&std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".into()))
         .await
         .unwrap();
     (store, kafka, redis)
