@@ -59,6 +59,7 @@ members = [
     "examples/websocket",
     "services/iot-gateway",
     "services/iot-device",
+    "services/iot-access",
 ]
 resolver = "2"
 
