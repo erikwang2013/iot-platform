@@ -46,7 +46,18 @@ SaaS 云平台：对外提供多租户服务，帮助客户统一管理接入国
 
 ### 4.3 厂商适配器
 
-插件化统一 Trait：`list_devices / get_properties / send_command / subscribe_events`。首期四家：涂鸦、小米 MIoT、华为云 IoTDA、AWS/Azure。后续按 Trait 补充。
+插件化统一 Trait：`list_devices / get_properties / send_command / subscribe_events`。首期四家：涂鸦、小米 MIoT、华为云 IoTDA、AWS/Azure。
+
+**扩展路线图**（按优先级分三批，全部插件化按 Trait 补充）：
+
+| 批次 | 厂商/生态 | 说明 |
+|------|-----------|------|
+| 第一批（国内补充） | 阿里云 IoT + 天猫精灵、腾讯云 IoT、中移物联 OneNET、天翼物联 CTWing | 国内用户量/运营商客户主力 |
+| 第二批（国际补充） | Apple HomeKit、Samsung SmartThings、Google Home（IoT Core 已停服，以 Home/Nest 生态为准）、Philips Hue、宜家 TRÅDFRI、Sonos | 海外生态覆盖 |
+| 第三批（桥接与工业） | Home Assistant 桥接（间接覆盖数百品牌）、Modbus/OPC UA 直连网关 | 长尾与工厂设备 |
+| 协议生态（走直连层） | Matter、Zigbee/Z-Wave、LoRaWAN、NB-IoT、BLE | 直连接入，非厂商云 |
+
+接入优先级：首期四家 → 第一批 → 第二批 → 第三批。厂商凭据、OAuth 授权流程在各适配器内独立实现，统一走 §6 凭据加密。
 
 ## 5. 数据存储
 
