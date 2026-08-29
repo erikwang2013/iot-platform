@@ -129,6 +129,24 @@ impl Store {
             .ok_or_else(|| "device not found".to_string())
     }
 
+    /// 查设备链接信息：(vendor, vendor_id)；未链接返回 None。
+    pub async fn find_link(&self, device_id: &str) -> Result<Option<(String, String)>, String> {
+        let rows = self
+            .db
+            .query_with(
+                "SELECT vendor, vendor_id FROM device_links WHERE device_id = ?",
+                &[json!(device_id)],
+            )
+            .await
+            .map_err(|e| format!("find link: {e}"))?;
+        Ok(rows.first().and_then(|r| {
+            Some((
+                r.get("vendor")?.as_str()?.to_string(),
+                r.get("vendor_id")?.as_str()?.to_string(),
+            ))
+        }))
+    }
+
     /// 导入设备（Task 5 用）：platform_id 已存在则复用，否则新建。
     pub async fn upsert_device(
         &self,

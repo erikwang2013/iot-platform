@@ -2,7 +2,7 @@ use crate::models::{DeviceRecord, PropertyValue};
 use async_trait::async_trait;
 
 /// 解密后的厂商凭据（DB 中存 AES 密文，见 crypto.rs / store.rs）
-#[derive(Clone, Debug, serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct VendorCreds {
     pub client_id: String,
     pub client_secret: String,
