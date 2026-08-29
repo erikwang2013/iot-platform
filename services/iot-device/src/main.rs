@@ -14,7 +14,10 @@ struct Db(Arc<SqlxClient>);
 
 async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let sql = std::fs::read_to_string("migrations/0001_init.sql")?;
-    db.execute(&sql).await?;
+    // execute 逐条执行: sqlx Any 驱动不启用 multi-statements,整文件一次 execute 会 1064
+    for stmt in sql.split(';').filter(|s| !s.trim().is_empty()) {
+        db.execute(stmt).await?;
+    }
     Ok(())
 }
 
