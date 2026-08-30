@@ -19,6 +19,9 @@ async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send
         include_str!("../migrations/0001_init.sql"),
         include_str!("../migrations/0002_vendor_auth.sql"),
         include_str!("../migrations/0003_platform.sql"),
+        include_str!("../migrations/0004_audit.sql"),
+        include_str!("../migrations/0005_groups.sql"),
+        include_str!("../migrations/0006_api_keys.sql"),
     ] {
         db.execute_script(sql).await?;
     }
@@ -109,11 +112,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             .await;
     });
 
-    // 公开路由：涂鸦 webhook、OAuth 回调、登录（浏览器跳回/登录前置，无 JWT/租户）
-    let login = Router::new().route("/login", axum::routing::post(auth::login)).with_state(auth_state);
+    // 公开路由：涂鸦 webhook、OAuth 回调、登录、开放 API 换 token
+    // （浏览器跳回/登录前置/开放客户端，无 JWT/租户）
+    let login = Router::new().route("/login", axum::routing::post(auth::login)).with_state(auth_state.clone());
+    let open = Router::new()
+        .route("/open/token", axum::routing::post(auth::open_token))
+        .with_state(auth_state);
     let public = Router::new()
         .merge(webhook::router(webhook_state))
-        .merge(oauth::router_public(oauth_state.clone()));
+        .merge(oauth::router_public(oauth_state.clone()))
+        .merge(open);
     // 受保护路由：需网关 secret + x-tenant-id
     let protected = Router::new()
         .merge(oauth::router(oauth_state))

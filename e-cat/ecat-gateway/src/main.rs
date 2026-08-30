@@ -3,12 +3,16 @@ use ecat_auth::JwtAuthCompat;
 use ecat_health::HealthRegistry;
 use ecat_gateway::{
     api_version::ApiVersionLayer,
+    audit::MysqlAuditSink,
     proxy::{
         ProxyState, access_proxy, access_proxy_open, auth_proxy, cdn_proxy, console_proxy,
         data_proxy, device_proxy, rule_proxy,
     },
 };
-use ecat_middleware::{MemoryStore, RateLimitLayer, RateLimitStore, RedisRateLimitStore};
+use ecat_middleware::{
+    AuditState, MemoryStore, RateLimitLayer, RateLimitStore, RedisRateLimitStore,
+    audit_middleware,
+};
 use ecat_security::SecurityBodyCompatLayer;
 use std::sync::Arc;
 use std::time::Duration;
@@ -39,10 +43,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // 不可用时降级内存 fail-open，可用性优先，降级有日志告警）
     let rate_store = rate_limit_store(&redis_url).await;
 
-    // /api/access/* 公开路径：OAuth 回调、涂鸦 Webhook（无 JWT，浏览器/厂商服务器直连）
+    // 审计 sink：管理面写操作（POST/PUT/PATCH/DELETE）落库 audit_log。
+    // MySQL 不可用时降级空实现（日志告警）——审计属可观测性增强，不阻塞启动。
+    let audit_dsn = std::env::var("DATABASE_URL")
+        .unwrap_or_else(|_| "mysql://iot:iot@localhost:3306/iot".into());
+    let audit_state = AuditState(Arc::new(MysqlAuditSink::connect(&audit_dsn).await));
+
+    // /api/access/* 公开路径：OAuth 回调、涂鸦 Webhook、开放 API 换 token
+    // （无 JWT，浏览器/厂商服务器/开放客户端直连）
     let access_public = Router::new()
         .route("/oauth/callback", get(access_proxy_open))
         .route("/webhook/tuya", post(access_proxy_open))
+        .route("/open/token", post(access_proxy_open))
         .with_state(proxy_state.clone());
     // /api/access/* 受保护路径：JWT 校验后透传租户（AuthClaims.sub → x-tenant-id）
     let access_admin = Router::new()
@@ -50,6 +62,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/vendors/{vendor}/import", post(access_proxy))
         .route("/devices/{device_id}/command", post(access_proxy))
         // 全写操作：设备命令/厂商导入属于"设备操作"，operator 可做
+        // 审计层在 JWT 内层：JWT 先注入 AuthClaims，写操作据此记租户/角色；
+        // 401/403 短路（不产生业务事件），与"仅审计成功会话"语义一致。
+        .layer(axum::middleware::from_fn_with_state(
+            audit_state.clone(),
+            audit_middleware,
+        ))
         .layer(
             JwtAuthCompat::new(&secret, &["sub", "role"])?
                 .role_policy(ROLES_ALL, ROLES_WRITE),
@@ -59,6 +77,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let data_admin = Router::new()
         .route("/data/history", get(data_proxy))
         .route("/data/export", get(data_proxy))
+        // 审计层在 JWT 内层：JWT 先注入 AuthClaims，写操作据此记租户/角色；
+        // 401/403 短路（不产生业务事件），与"仅审计成功会话"语义一致。
+        .layer(axum::middleware::from_fn_with_state(
+            audit_state.clone(),
+            audit_middleware,
+        ))
         .layer(
             JwtAuthCompat::new(&secret, &["sub", "role"])?
                 .role_policy(ROLES_ALL, &[]),
@@ -73,6 +97,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/rule/stats", get(rule_proxy))
         .route("/rule/channels", get(rule_proxy))
         .route("/rule/channels/{channel}", put(rule_proxy).delete(rule_proxy))
+        // 审计层在 JWT 内层：JWT 先注入 AuthClaims，写操作据此记租户/角色；
+        // 401/403 短路（不产生业务事件），与"仅审计成功会话"语义一致。
+        .layer(axum::middleware::from_fn_with_state(
+            audit_state.clone(),
+            audit_middleware,
+        ))
         .layer(
             JwtAuthCompat::new(&secret, &["sub", "role"])?
                 .role_policy(ROLES_ALL, ROLES_WRITE),
@@ -93,6 +123,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/cdn/providers/{id}/prefetch", post(cdn_proxy))
         .route("/cdn/tasks", get(cdn_proxy))
         .route("/cdn/stats", get(cdn_proxy))
+        // 审计层在 JWT 内层：JWT 先注入 AuthClaims，写操作据此记租户/角色；
+        // 401/403 短路（不产生业务事件），与"仅审计成功会话"语义一致。
+        .layer(axum::middleware::from_fn_with_state(
+            audit_state.clone(),
+            audit_middleware,
+        ))
         .layer(
             JwtAuthCompat::new(&secret, &["sub", "role"])?
                 .role_policy(ROLES_ALL, ROLES_WRITE),
@@ -108,6 +144,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/tenants/{id}", delete(console_proxy))
         .route("/users", get(console_proxy).post(console_proxy))
         .route("/users/{id}", delete(console_proxy))
+        .route("/audit", get(console_proxy))
+        .route("/api-keys", get(console_proxy).post(console_proxy))
+        .route("/api-keys/{id}", delete(console_proxy))
+        // 审计层在 JWT 内层：JWT 先注入 AuthClaims，写操作据此记租户/角色；
+        // 401/403 短路（不产生业务事件），与"仅审计成功会话"语义一致。
+        .layer(axum::middleware::from_fn_with_state(
+            audit_state.clone(),
+            audit_middleware,
+        ))
         .layer(
             JwtAuthCompat::new(&secret, &["sub", "role"])?
                 .role_policy(ROLES_ALL, ROLES_ADMIN),
@@ -116,6 +161,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let models_admin = Router::new()
         .route("/models/things", get(console_proxy).post(console_proxy))
         .route("/models/things/{id}", get(console_proxy).delete(console_proxy))
+        // 审计层在 JWT 内层：JWT 先注入 AuthClaims，写操作据此记租户/角色；
+        // 401/403 短路（不产生业务事件），与"仅审计成功会话"语义一致。
+        .layer(axum::middleware::from_fn_with_state(
+            audit_state.clone(),
+            audit_middleware,
+        ))
         .layer(
             JwtAuthCompat::new(&secret, &["sub", "role"])?
                 .role_policy(ROLES_ALL, ROLES_WRITE),
@@ -125,8 +176,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let device_admin = Router::new()
         .route("/devices", get(device_proxy))
         .route("/devices/stats", get(device_proxy))
+        .route("/devices/groups", get(device_proxy).post(device_proxy))
+        .route("/devices/groups/{id}", delete(device_proxy))
+        .route(
+            "/devices/groups/{id}/members",
+            post(device_proxy).delete(device_proxy),
+        )
+        .route("/devices/batch", post(device_proxy))
         .route("/devices/{id}", put(device_proxy).delete(device_proxy))
         .route("/devices/{id}/unbind", post(device_proxy))
+        .route("/devices/{id}/tags", get(device_proxy))
+        // 审计层在 JWT 内层：JWT 先注入 AuthClaims，写操作据此记租户/角色；
+        // 401/403 短路（不产生业务事件），与"仅审计成功会话"语义一致。
+        .layer(axum::middleware::from_fn_with_state(
+            audit_state.clone(),
+            audit_middleware,
+        ))
         .layer(
             JwtAuthCompat::new(&secret, &["sub", "role"])?
                 .role_policy(ROLES_ALL, ROLES_WRITE),
@@ -137,6 +202,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/ota/firmwares/{id}", delete(device_proxy))
         .route("/ota/tasks", get(device_proxy).post(device_proxy))
         .route("/ota/tasks/{id}/report", post(device_proxy))
+        // 审计层在 JWT 内层：JWT 先注入 AuthClaims，写操作据此记租户/角色；
+        // 401/403 短路（不产生业务事件），与"仅审计成功会话"语义一致。
+        .layer(axum::middleware::from_fn_with_state(
+            audit_state.clone(),
+            audit_middleware,
+        ))
         .layer(
             JwtAuthCompat::new(&secret, &["sub", "role"])?
                 .role_policy(ROLES_ALL, ROLES_ADMIN),

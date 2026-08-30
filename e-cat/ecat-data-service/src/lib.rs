@@ -1,3 +1,4 @@
+pub mod anomaly;
 pub mod api;
 pub mod export;
 pub mod ingest;

@@ -23,6 +23,12 @@ pub struct LoginReq {
     pub password: String,
 }
 
+#[derive(Deserialize)]
+pub struct OpenTokenReq {
+    pub app_id: String,
+    pub app_secret: String,
+}
+
 /// 密码校验：pepper 为密钥的 HMAC-SHA256 摘要比对（常数时间）。
 pub fn password_matches(stored_hash: &str, pepper: &str, password: &str) -> bool {
     verify_hmac_sha256_hex(pepper, password.as_bytes(), stored_hash)
@@ -60,6 +66,30 @@ pub async fn login(
         "token": token,
         "user": { "id": user.id, "username": user.username, "role": user.role, "tenant_id": user.tenant_id },
     })))
+}
+
+/// POST /api/access/open/token：开放 API 客户端凭 app_id/app_secret 换只读
+/// JWT（role=read-only，仅读端点可用）。失败统一 401 通用文案（防枚举）。
+pub async fn open_token(
+    State(auth): State<AuthState>,
+    Json(req): Json<OpenTokenReq>,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    if req.app_id.trim().is_empty() || req.app_secret.is_empty() {
+        return Err((StatusCode::BAD_REQUEST, "app_id and app_secret required".into()));
+    }
+    let tenant_id = match auth.store.verify_api_key(req.app_id.trim(), &req.app_secret).await {
+        Ok(Some(t)) => t,
+        Ok(None) | Err(_) => {
+            tracing::warn!("open token failed: invalid or revoked api key");
+            return Err((StatusCode::UNAUTHORIZED, "invalid app_id or app_secret".into()));
+        }
+    };
+    let token = issue_token(&auth.jwt_secret, &tenant_id, "read-only", auth.token_ttl_secs)
+        .map_err(|e| {
+            tracing::error!(error = %e, "token issue failed");
+            (StatusCode::INTERNAL_SERVER_ERROR, "internal error".into())
+        })?;
+    Ok(Json(json!({ "token": token, "tenant_id": tenant_id, "role": "read-only" })))
 }
 
 #[cfg(test)]

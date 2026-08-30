@@ -1730,9 +1730,12 @@ dependencies = [
 name = "ecat-gateway"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "axum 0.8.9",
  "ecat",
  "ecat-auth",
+ "ecat-data",
+ "ecat-data-sqlx",
  "ecat-health",
  "ecat-middleware",
  "ecat-security",
@@ -1824,6 +1827,7 @@ version = "3.0.3"
 dependencies = [
  "async-trait",
  "axum 0.8.9",
+ "ecat-auth",
  "ecat-tracing",
  "http",
  "redis",
@@ -1984,6 +1988,7 @@ dependencies = [
  "futures-util",
  "jsonwebtoken",
  "lettre",
+ "redis",
  "reqwest",
  "serde",
  "serde_json",

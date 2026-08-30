@@ -32,8 +32,8 @@ pub struct NewRule {
     pub enabled: Option<bool>,
 }
 
-/// WebSocket 推送与 webhook 载荷（引擎产出物）。
-#[derive(Serialize, Clone, Debug, PartialEq)]
+/// WebSocket 推送与 webhook 载荷（引擎产出物；Redis 跨实例桥需 Deserialize）。
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct AlertMessage {
     pub rule_id: String,
     pub rule_name: String,

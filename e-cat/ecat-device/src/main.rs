@@ -2,6 +2,10 @@ use axum::{Router, middleware, routing::{delete, get, post, put}};
 use ecat_data_sqlx::SqlxClient;
 use ecat_device::{
     Db, create_firmware, create_ota_task, delete_device, delete_firmware, device_stats,
+    groups::{
+        add_members, batch_devices, create_group, delete_group, list_device_tags, list_groups,
+        remove_members,
+    },
     list_devices, list_firmwares, list_ota_tasks, migrate, report_ota_progress, unbind_device,
     update_device,
 };
@@ -23,8 +27,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let devices = Router::new()
         .route("/", get(list_devices))
         .route("/stats", get(device_stats))
+        .route("/groups", get(list_groups).post(create_group))
+        .route("/groups/{id}", delete(delete_group))
+        .route("/groups/{id}/members", post(add_members).delete(remove_members))
+        .route("/batch", post(batch_devices))
         .route("/{id}", put(update_device).delete(delete_device))
         .route("/{id}/unbind", post(unbind_device))
+        .route("/{id}/tags", get(list_device_tags))
         .with_state(Db(db.clone()));
     let ota = Router::new()
         .route("/firmwares", get(list_firmwares).post(create_firmware))

@@ -1,0 +1,21 @@
+# 非敏感配置。基础设施地址按实际部署调整：
+# - 同集群内：mysql/redis/kafka 等 Service 名（见 infra 说明）
+# - 外部托管：写外部可达地址
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iot-config
+  namespace: iot
+data:
+  DATABASE_URL: "mysql://iot:iot@mysql:3306/iot"
+  REDIS_URL: "redis://redis:6379"
+  KAFKA_BROKERS: "kafka:9092"
+  MQTT_URL: "tcp://emqx:1883"
+  TDENGINE_URL: "http://tdengine:6041"
+  TDENGINE_USER: "root"
+  TDENGINE_PASS: "taosdata"
+  TUYA_CLIENT_ID: "dev-tuya-client-id"
+  MIOT_CLIENT_ID: "dev-miot-client-id"
+  ACCESS_CALLBACK_BASE: "http://iot-gateway:8080/api/access/oauth/callback"
+  JWT_TTL_SECS: "86400"
+  RUST_LOG: "info"

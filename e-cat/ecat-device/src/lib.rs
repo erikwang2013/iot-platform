@@ -1,6 +1,8 @@
+pub mod groups;
+
 use axum::{
     Json,
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
 };
 use ecat_data::RdbmsClient;
@@ -13,10 +15,12 @@ use std::sync::Arc;
 pub struct Db(pub Arc<SqlxClient>);
 
 /// 单一副本存于 ecat-access/migrations/，编译期 include_str! 内联，无运行时文件依赖。
-const MIGRATION_SQL: [&str; 3] = [
+const MIGRATION_SQL: [&str; 5] = [
     include_str!("../../ecat-access/migrations/0001_init.sql"),
     include_str!("../../ecat-access/migrations/0002_vendor_auth.sql"),
     include_str!("../../ecat-access/migrations/0003_platform.sql"),
+    include_str!("../../ecat-access/migrations/0004_audit.sql"),
+    include_str!("../../ecat-access/migrations/0005_groups.sql"),
 ];
 
 pub async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -62,18 +66,36 @@ struct DeviceRow {
 
 /// 租户强制隔离：tenant 由 tenant_from_header 中间件从 x-tenant-id 校验后写入 extensions
 /// （main.rs 挂载），handler 不再接受客户端自报租户。
+/// 可选过滤：?group_id=&tag=（分组/标签，见 groups.rs 表）。
+#[derive(Deserialize)]
+pub struct DeviceListQuery {
+    pub group_id: Option<String>,
+    pub tag: Option<String>,
+}
+
 pub async fn list_devices(
     State(db): State<Db>,
     tenant: axum::Extension<String>,
+    Query(q): Query<DeviceListQuery>,
 ) -> Result<axum::Json<Value>, (axum::http::StatusCode, String)> {
-    let rows = db
-        .0
-        .query_with(
-            "SELECT id, name, vendor, status FROM devices WHERE tenant_id = ?",
-            &[json!(tenant.as_str())],
-        )
-        .await
-        .map_err(db_err)?;
+    let mut sql =
+        String::from("SELECT id, name, vendor, status FROM devices WHERE tenant_id = ?");
+    let mut params: Vec<Value> = vec![json!(tenant.as_str())];
+    if let Some(g) = &q.group_id {
+        sql.push_str(
+            " AND EXISTS (SELECT 1 FROM device_group_members m \
+             WHERE m.device_id = devices.id AND m.group_id = ?)",
+        );
+        params.push(json!(g));
+    }
+    if let Some(t) = &q.tag {
+        sql.push_str(
+            " AND EXISTS (SELECT 1 FROM device_tags t2 \
+             WHERE t2.device_id = devices.id AND t2.tag = ?)",
+        );
+        params.push(json!(t));
+    }
+    let rows = db.0.query_with(&sql, &params).await.map_err(db_err)?;
     let devices: Vec<DeviceRow> = rows
         .iter()
         .map(|r| DeviceRow {

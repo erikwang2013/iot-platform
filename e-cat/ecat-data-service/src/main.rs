@@ -22,12 +22,44 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         td.query(&sql).await?;
     }
 
-    let kafka = Arc::new(KafkaMq::connect(&kafka_brokers).await?);
+    // 消费组固定：多副本时分区在实例间拆分，避免重复写入（TDengine 同 ts 覆盖幂等兜底）
+    let kafka = Arc::new(
+        KafkaMq::from_config(ecat_mq_kafka::KafkaConfig {
+            brokers: kafka_brokers.clone(),
+            group_id: Some("iot-data-ingest".into()),
+            auto_commit: false,
+            security_protocol: None,
+            sasl_mechanism: None,
+            sasl_username: None,
+            sasl_password: None,
+        })
+        .await?,
+    );
+
+    // 异常检测独立消费组（与 ingest 组互不抢分区）：消费 iot.events →
+    // 统计基线检测 → 异常事件回写同 topic 供 rule 引擎入告警流
+    let anomaly_kafka = Arc::new(
+        KafkaMq::from_config(ecat_mq_kafka::KafkaConfig {
+            brokers: kafka_brokers.clone(),
+            group_id: Some("iot-anomaly".into()),
+            auto_commit: false,
+            security_protocol: None,
+            sasl_mechanism: None,
+            sasl_username: None,
+            sasl_password: None,
+        })
+        .await?,
+    );
 
     // 后台任务：消费 iot.events → TDengine
     let (ingest_td, ingest_kafka) = (td.clone(), kafka.clone());
     tokio::spawn(async move {
         ecat_data_service::ingest::run(ingest_td, ingest_kafka).await;
+    });
+
+    // 后台任务：统计异常检测（Welford 在线基线，z-score 判异）
+    tokio::spawn(async move {
+        ecat_data_service::anomaly::run(anomaly_kafka).await;
     });
 
     let api_state = ApiState { td: td.clone() };

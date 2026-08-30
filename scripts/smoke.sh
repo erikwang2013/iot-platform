@@ -170,3 +170,129 @@ grep -q '"value":30' /tmp/rule_alerts.json \
 echo "----"
 echo "smoke: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]
+
+# ========== 扩展冒烟（v1.10 补充）==========
+
+# 21. 真实登录链路（管理端 /api/auth/login，admin/admin123）→ 200 且拿 token
+login=$(curl -s -X POST -H "content-type: application/json" \
+  -d '{"username":"admin","password":"admin123"}' "$GATEWAY/api/auth/login" || true)
+admin_token=$(echo "$login" | grep -o '"token":"[^"]*"' | head -1 | cut -d'"' -f4)
+[ -n "$admin_token" ] && pass=$((pass+1)) && echo "PASS: login admin/admin123 -> token" \
+  || { fail=$((fail+1)); echo "FAIL: login (got: $(echo "$login" | head -c 120))"; }
+
+# 22. RBAC 三角色矩阵：read-only 写 → 403；operator 写 → 201；read-only 读 → 200
+mint() { # mint <role>
+  python3 - "$JWT_SECRET" "$1" <<'PY'
+import sys, base64, json, hmac, hashlib, time
+secret = sys.argv[1].encode()
+def b64(d): return base64.urlsafe_b64encode(d).rstrip(b"=").decode()
+header = b64(json.dumps({"alg":"HS256","typ":"JWT"}).encode())
+payload = b64(json.dumps({"sub":"smoke-tenant","role":sys.argv[2],"exp":int(time.time())+3600}).encode())
+sig = b64(hmac.new(secret, f"{header}.{payload}".encode(), hashlib.sha256).digest())
+print(f"{header}.{payload}.{sig}")
+PY
+}
+ro_token=$(mint read-only)
+op_token=$(mint operator)
+code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $ro_token" \
+  -X POST -H "content-type: application/json" -d '{"name":"x","device_id":"smoke-dev","code":"temp","operator":"gt","threshold":10}' \
+  "$GATEWAY/api/rule/rules")
+check "rbac read-only write -> 403" 403 "$code"
+code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $op_token" \
+  -X POST -H "content-type: application/json" -d '{"name":"smoke-op-rule","device_id":"smoke-dev","code":"temp","operator":"gt","threshold":99}' \
+  "$GATEWAY/api/rule/rules")
+check "rbac operator write -> 201" 201 "$code"
+code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $ro_token" \
+  "$GATEWAY/api/rule/rules")
+check "rbac read-only read -> 200" 200 "$code"
+
+# 23. 审计日志：admin 可查（200 含 events），read-only 403
+code=$(curl -s -o /tmp/audit.json -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $admin_token" \
+  "$GATEWAY/api/audit?page=1&size=5")
+check "audit admin read -> 200" 200 "$code"
+grep -q '"events"' /tmp/audit.json && pass=$((pass+1)) && echo "PASS: audit returns events" \
+  || { fail=$((fail+1)); echo "FAIL: audit events (got: $(head -c 150 /tmp/audit.json))"; }
+code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $ro_token" \
+  "$GATEWAY/api/audit")
+check "audit read-only -> 403" 403 "$code"
+
+# 24. OTA 闭环（admin）：建固件 201 → 任务列表 200
+code=$(curl -s -o /tmp/ota_fw.json -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $admin_token" \
+  -X POST -H "content-type: application/json" \
+  -d '{"name":"smoke-fw","version":"1.0.0","url":"http://example.com/fw.bin","description":"smoke"}' \
+  "$GATEWAY/api/ota/firmwares")
+check "ota firmware create -> 201" 201 "$code"
+code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $admin_token" \
+  "$GATEWAY/api/ota/tasks")
+check "ota tasks list -> 200" 200 "$code"
+
+# 25. 统计接口（规则/设备）
+code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $admin_token" \
+  "$GATEWAY/api/rule/stats")
+check "rule stats -> 200" 200 "$code"
+code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $admin_token" \
+  "$GATEWAY/api/device/stats")
+check "device stats -> 200" 200 "$code"
+
+# 26. 真实厂商链路（可选）：设 TUYA_CLIENT_ID/TUYA_CLIENT_SECRET 且配置过凭据才跑
+#     流程：授权 URL → 凭据已配置时拉设备列表 → 下发指令
+if [ -n "${TUYA_CLIENT_ID:-}" ] && [ -n "${TUYA_CLIENT_SECRET:-}" ]; then
+  code=$(curl -s -o /tmp/tuya_devices.json -w "%{http_code}" -H "x-api-version: v1" \
+    -H "authorization: Bearer $admin_token" -X POST -H "content-type: application/json" \
+    -d '{"vendor":"tuya"}' "$GATEWAY/api/access/oauth/authorize-url")
+  check "tuya oauth authorize-url -> 200" 200 "$code"
+  code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" \
+    -H "authorization: Bearer $admin_token" -X POST -H "content-type: application/json" \
+    -d '{"code":"temp","value":26}' \
+    "$GATEWAY/api/access/devices/tuya-dev-1/command")
+  # 未绑定设备/未配凭据时为 404/400（链路已通到业务层即算 PASS）；401 才是真失败
+  case "$code" in
+    401|403) check "tuya device command reachable" 200 "$code" ;;
+    *) pass=$((pass+1)); echo "PASS: tuya device command accepted (resp $code, 需凭据+绑定才回 200)" ;;
+  esac
+  echo "NOTE: 真实厂商链路（拉设备/指令回执）需开发者账号凭据配置，见 docs/vendors/README"
+else
+  echo "SKIP: 真实厂商链路未跑（未设 TUYA_CLIENT_ID/TUYA_CLIENT_SECRET，环境依赖）"
+fi
+
+# 27. 开放 API 密钥闭环（#57）：admin 创建 → 换 token → 只读调用 → 吊销 → 换 token 401
+code=$(curl -s -o /tmp/apikey.json -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $admin_token" \
+  -X POST -H "content-type: application/json" -d '{"name":"smoke-bi"}' \
+  "$GATEWAY/api/api-keys")
+check "api key create -> 201" 201 "$code"
+app_id=$(grep -o '"app_id":"[^"]*"' /tmp/apikey.json | head -1 | cut -d'"' -f4)
+app_secret=$(grep -o '"app_secret":"[^"]*"' /tmp/apikey.json | head -1 | cut -d'"' -f4)
+if [ -n "$app_id" ] && [ -n "$app_secret" ]; then
+  pass=$((pass+1)); echo "PASS: api key secret returned once"
+  code=$(curl -s -o /tmp/open_token.json -w "%{http_code}" -H "content-type: application/json" \
+    -d "{\"app_id\":\"$app_id\",\"app_secret\":\"$app_secret\"}" \
+    "$GATEWAY/api/access/open/token")
+  check "open token exchange -> 200" 200 "$code"
+  open_token=$(grep -o '"token":"[^"]*"' /tmp/open_token.json | head -1 | cut -d'"' -f4)
+  if [ -n "$open_token" ]; then
+    pass=$((pass+1)); echo "PASS: open token minted"
+    code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $open_token" \
+      "$GATEWAY/api/devices")
+    check "open token read devices -> 200" 200 "$code"
+    code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $open_token" \
+      -X POST -H "content-type: application/json" -d '{"name":"x"}' "$GATEWAY/api/tenants")
+    check "open token write tenants -> 403" 403 "$code"
+  else
+    fail=$((fail+1)); echo "FAIL: open token empty (got: $(head -c 150 /tmp/open_token.json))"
+  fi
+  # 吊销 → 立即失效
+  code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $admin_token" \
+    -X DELETE "$GATEWAY/api/api-keys/$app_id")
+  check "api key revoke -> 200" 200 "$code"
+  code=$(curl -s -o /dev/null -w "%{http_code}" -H "content-type: application/json" \
+    -d "{\"app_id\":\"$app_id\",\"app_secret\":\"$app_secret\"}" \
+    "$GATEWAY/api/access/open/token")
+  check "revoked key token -> 401" 401 "$code"
+else
+  fail=$((fail+1)); echo "FAIL: api key missing app_id/app_secret (got: $(head -c 150 /tmp/apikey.json))"
+fi
+
+# 28. 管理端 api-keys 列表（admin 200）
+code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $admin_token" \
+  "$GATEWAY/api/api-keys")
+check "api keys list -> 200" 200 "$code"

@@ -59,6 +59,116 @@ services:
     ports:
       - "${TDENGINE_PORT:-6041}:6041"
 
+
+# ===== 业务服务（本地全栈一键起：docker compose --profile app up -d --build）=====
+  # 镜像经 deploy/docker/Dockerfile 多阶段构建（release 二进制，无源码）。
+  # .env 提供密钥（JWT_SECRET 等），容器内地址经 environment 显式覆盖为服务名。
+  iot-gateway:
+    image: iot-gateway:local
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+      args: { BIN: iot-gateway }
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: "mysql://iot:iot@mysql:3306/iot"
+      REDIS_URL: "redis://redis:6379"
+    ports:
+      - "8080:8080"
+    depends_on: [mysql, redis]
+
+  iot-device:
+    image: iot-device:local
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+      args: { BIN: iot-device }
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: "mysql://iot:iot@mysql:3306/iot"
+    ports:
+      - "8081:8081"
+    depends_on: [mysql]
+
+  iot-access:
+    image: iot-access:local
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+      args: { BIN: iot-access }
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: "mysql://iot:iot@mysql:3306/iot"
+      REDIS_URL: "redis://redis:6379"
+      KAFKA_BROKERS: "kafka:9092"
+      MQTT_URL: "tcp://emqx:1883"
+      ACCESS_CALLBACK_BASE: "http://localhost:8080/api/access/oauth/callback"
+    ports:
+      - "8082:8082"
+    depends_on: [mysql, redis, kafka, emqx]
+
+  iot-rule:
+    image: iot-rule:local
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+      args: { BIN: iot-rule }
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: "mysql://iot:iot@mysql:3306/iot"
+      REDIS_URL: "redis://redis:6379"
+      KAFKA_BROKERS: "kafka:9092"
+    ports:
+      - "8084:8084"
+    depends_on: [mysql, redis, kafka]
+
+  iot-data:
+    image: iot-data:local
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+      args: { BIN: iot-data }
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      KAFKA_BROKERS: "kafka:9092"
+      TDENGINE_URL: "http://tdengine:6041"
+      TDENGINE_USER: "root"
+      TDENGINE_PASS: "taosdata"
+    ports:
+      - "8083:8083"
+    depends_on: [kafka, tdengine]
+
+  iot-cdn:
+    image: iot-cdn:local
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile
+      args: { BIN: iot-cdn }
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: "mysql://iot:iot@mysql:3306/iot"
+    ports:
+      - "8085:8085"
+    depends_on: [mysql]
+
 volumes:
   mysqldata:
   kafkadata:

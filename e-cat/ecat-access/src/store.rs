@@ -26,6 +26,29 @@ pub fn creds_json(cfg: &Value) -> Vec<u8> {
     serde_json::to_vec(cfg).unwrap_or_default()
 }
 
+/// 开放 API 密钥行（api_keys 表）。app_secret 仅在创建时返回一次，
+/// 库中只存 SHA-256 哈希。
+#[derive(Debug, Clone, Serialize)]
+pub struct ApiKeyRow {
+    pub id: String,
+    pub tenant_id: String,
+    pub name: String,
+    pub created_at: String,
+    pub revoked: bool,
+}
+
+/// 审计日志行（audit_log 表，由网关写操作审计中间件写入）。
+#[derive(Debug, Clone, Serialize)]
+pub struct AuditRow {
+    pub id: i64,
+    pub tenant_id: String,
+    pub role: String,
+    pub method: String,
+    pub path: String,
+    pub status: i64,
+    pub created_at: String,
+}
+
 #[derive(Clone)]
 pub struct Store {
     pub db: Arc<SqlxClient>,
@@ -410,5 +433,136 @@ impl Store {
             .await
             .map_err(|e| format!("insert link: {e}"))?;
         Ok(platform_id)
+    }
+
+    /// 分页查询审计日志（网关写操作审计写入）。created_at 是 TIMESTAMP，
+    /// sqlx Any 不支持时间类型，按 CHAR 取回。
+    pub async fn list_audit(
+        &self,
+        tenant_id: &str,
+        page: u32,
+        size: u32,
+    ) -> Result<Vec<AuditRow>, String> {
+        let limit = size.min(200) as i64;
+        let offset = (page.saturating_sub(1) as i64) * limit;
+        let rows = self
+            .db
+            .query_with(
+                "SELECT id, tenant_id, role, method, path, status, \
+                 CAST(created_at AS CHAR) AS created_at \
+                 FROM audit_log WHERE tenant_id = ? \
+                 ORDER BY id DESC LIMIT ? OFFSET ?",
+                &[json!(tenant_id), json!(limit), json!(offset)],
+            )
+            .await
+            .map_err(|e| format!("list audit: {e}"))?;
+        Ok(rows
+            .iter()
+            .map(|r| AuditRow {
+                id: r.get("id").and_then(Value::as_i64).unwrap_or(0),
+                tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or("").to_string(),
+                role: r.get("role").and_then(Value::as_str).unwrap_or("").to_string(),
+                method: r.get("method").and_then(Value::as_str).unwrap_or("").to_string(),
+                path: r.get("path").and_then(Value::as_str).unwrap_or("").to_string(),
+                status: r.get("status").and_then(Value::as_i64).unwrap_or(0),
+                created_at: r.get("created_at").and_then(Value::as_str).unwrap_or("").to_string(),
+            })
+            .collect())
+    }
+
+    // ---- 开放 API 密钥（api_keys 表）----
+
+    /// 创建开放 API 密钥：app_secret 明文仅此一次返回，库中只存
+    /// HMAC-SHA256 哈希（app_id 即主键，作为客户端的 API 标识）。
+    pub async fn create_api_key(
+        &self,
+        tenant_id: &str,
+        name: &str,
+    ) -> Result<(String, String), String> {
+        let id = uuid::Uuid::new_v4().to_string();
+        let secret = format!(
+            "{}{}",
+            uuid::Uuid::new_v4().simple(),
+            uuid::Uuid::new_v4().simple()
+        );
+        let hash = ecat_security::crypto::hmac_sha256_hex(&secret, id.as_bytes());
+        self.db
+            .execute_with(
+                "INSERT INTO api_keys (id, tenant_id, name, secret_hash) VALUES (?, ?, ?, ?)",
+                &[json!(id), json!(tenant_id), json!(name), json!(hash)],
+            )
+            .await
+            .map_err(|e| format!("create api key: {e}"))?;
+        Ok((id, secret))
+    }
+
+    pub async fn list_api_keys(&self, tenant_id: &str) -> Result<Vec<ApiKeyRow>, String> {
+        let rows = self
+            .db
+            .query_with(
+                "SELECT id, tenant_id, name, CAST(created_at AS CHAR) AS created_at, \
+                 CAST(revoked_at AS CHAR) AS revoked_at \
+                 FROM api_keys WHERE tenant_id = ? ORDER BY created_at",
+                &[json!(tenant_id)],
+            )
+            .await
+            .map_err(|e| format!("list api keys: {e}"))?;
+        Ok(rows
+            .iter()
+            .map(|r| ApiKeyRow {
+                id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
+                tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or("").to_string(),
+                name: r.get("name").and_then(Value::as_str).unwrap_or("").to_string(),
+                created_at: r.get("created_at").and_then(Value::as_str).unwrap_or("").to_string(),
+                revoked: r.get("revoked_at").and_then(Value::as_str).is_some(),
+            })
+            .collect())
+    }
+
+    /// 吊销密钥（幂等：已吊销返回 false）。仅本租户可吊销。
+    pub async fn revoke_api_key(&self, tenant_id: &str, id: &str) -> Result<bool, String> {
+        let n = self
+            .db
+            .execute_with(
+                "UPDATE api_keys SET revoked_at = NOW() \
+                 WHERE id = ? AND tenant_id = ? AND revoked_at IS NULL",
+                &[json!(id), json!(tenant_id)],
+            )
+            .await
+            .map_err(|e| format!("revoke api key: {e}"))?;
+        Ok(n > 0)
+    }
+
+    /// 校验开放 API 密钥：存在且未吊销且摘要匹配 → 返回租户 ID；否则 None。
+    pub async fn verify_api_key(
+        &self,
+        app_id: &str,
+        secret: &str,
+    ) -> Result<Option<String>, String> {
+        let rows = self
+            .db
+            .query_with(
+                "SELECT tenant_id, secret_hash, CAST(revoked_at AS CHAR) AS revoked_at \
+                 FROM api_keys WHERE id = ?",
+                &[json!(app_id)],
+            )
+            .await
+            .map_err(|e| format!("verify api key: {e}"))?;
+        let row = rows.first().ok_or_else(|| "api key not found".to_string())?;
+        if row.get("revoked_at").and_then(Value::as_str).is_some() {
+            return Ok(None);
+        }
+        let hash = row
+            .get("secret_hash")
+            .and_then(Value::as_str)
+            .ok_or_else(|| "api key row malformed".to_string())?;
+        let tenant_id = row
+            .get("tenant_id")
+            .and_then(Value::as_str)
+            .ok_or_else(|| "api key row malformed".to_string())?;
+        if !ecat_security::crypto::verify_hmac_sha256_hex(secret, app_id.as_bytes(), hash) {
+            return Ok(None);
+        }
+        Ok(Some(tenant_id.to_string()))
     }
 }

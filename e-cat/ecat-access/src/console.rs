@@ -2,7 +2,7 @@ use crate::store::Store;
 use axum::{
     Json,
     Router,
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     routing::{delete, get},
 };
@@ -54,7 +54,53 @@ pub fn router(state: ConsoleState) -> Router {
                 .route("/", get(list_models).post(create_model))
                 .route("/{id}", get(device_model).delete(delete_model)),
         )
+        .nest(
+            "/audit",
+            Router::new().route("/", get(list_audit)),
+        )
+        .nest(
+            "/api-keys",
+            Router::new()
+                .route("/", get(list_api_keys).post(create_api_key))
+                .route("/{id}", delete(revoke_api_key)),
+        )
         .with_state(state)
+}
+
+#[derive(Deserialize)]
+pub struct AuditQuery {
+    pub page: Option<u32>,
+    pub size: Option<u32>,
+}
+
+/// GET /api/audit?page=1&size=20：本租户审计日志（分页倒序）。
+/// 仅 admin 可见（read-only 角色 403）——审计含谁/何时/改了什么，属敏感数据。
+pub async fn list_audit(
+    State(s): State<ConsoleState>,
+    headers: axum::http::HeaderMap,
+    tenant: axum::Extension<String>,
+    Query(q): Query<AuditQuery>,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    require_admin(&headers)?;
+    let tenant_id = tenant_of(tenant);
+    let page = q.page.unwrap_or(1).max(1);
+    let size = q.size.unwrap_or(20).clamp(1, 200);
+    let rows = s
+        .store
+        .list_audit(&tenant_id, page, size)
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    let events: Vec<Value> = rows
+        .iter()
+        .map(|r| {
+            json!({
+                "id": r.id, "tenant_id": r.tenant_id, "role": r.role,
+                "method": r.method, "path": r.path, "status": r.status,
+                "created_at": r.created_at,
+            })
+        })
+        .collect();
+    Ok(Json(json!({ "page": page, "size": size, "total": events.len(), "events": events })))
 }
 
 /// GET /api/tenants：租户列表（平台超管职能；skeleton 全量返回，租户级
@@ -179,6 +225,64 @@ pub async fn delete_user(
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?
     {
         return Err((StatusCode::NOT_FOUND, "user not found".into()));
+    }
+    Ok(Json(json!({ "ok": true })))
+}
+
+/// GET /api/api-keys：本租户开放 API 密钥列表（只含元数据，secret 不回显）。
+pub async fn list_api_keys(
+    State(s): State<ConsoleState>,
+    tenant: axum::Extension<String>,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    let keys = s
+        .store
+        .list_api_keys(&tenant_of(tenant))
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    Ok(Json(json!({ "keys": keys })))
+}
+
+#[derive(Deserialize)]
+pub struct ApiKeyReq {
+    pub name: String,
+}
+
+/// POST /api/api-keys：创建开放 API 密钥。app_secret 仅此一次返回
+/// （库中只存哈希），丢失需吊销重建。
+pub async fn create_api_key(
+    State(s): State<ConsoleState>,
+    headers: axum::http::HeaderMap,
+    tenant: axum::Extension<String>,
+    Json(req): Json<ApiKeyReq>,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    require_admin(&headers)?;
+    let name = req.name.trim().to_string();
+    if name.is_empty() {
+        return Err((StatusCode::BAD_REQUEST, "name required".into()));
+    }
+    let (app_id, app_secret) = s
+        .store
+        .create_api_key(&tenant_of(tenant), &name)
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    Ok(Json(json!({ "app_id": app_id, "app_secret": app_secret })))
+}
+
+/// DELETE /api/api-keys/{id}：吊销密钥（幂等；已吊销返回 404）。
+pub async fn revoke_api_key(
+    State(s): State<ConsoleState>,
+    headers: axum::http::HeaderMap,
+    tenant: axum::Extension<String>,
+    Path(id): Path<String>,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    require_admin(&headers)?;
+    if !s
+        .store
+        .revoke_api_key(&tenant_of(tenant), &id)
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?
+    {
+        return Err((StatusCode::NOT_FOUND, "api key not found or already revoked".into()));
     }
     Ok(Json(json!({ "ok": true })))
 }

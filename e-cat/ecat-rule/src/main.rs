@@ -1,7 +1,12 @@
 use axum::{Router, middleware, routing::get};
 use ecat_data_sqlx::SqlxClient;
 use ecat_mq_kafka::KafkaMq;
-use ecat_rule::{api::{self, ApiState}, push::PushHub, store::RuleStore, ws};
+use ecat_rule::{
+    api::{self, ApiState},
+    push::{AlertBridge, PushHub},
+    store::RuleStore,
+    ws,
+};
 use std::sync::Arc;
 
 #[tokio::main]
@@ -13,6 +18,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let db_url = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "mysql://iot:iot@localhost:3306/iot".into());
+    let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".into());
     let kafka_brokers =
         std::env::var("KAFKA_BROKERS").unwrap_or_else(|_| "localhost:9092".into());
 
@@ -25,10 +31,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let hub = PushHub::new();
     let http = reqwest::Client::new();
 
+    // 告警跨实例广播桥：本地直达 + Redis pub/sub 扇出（多副本时 WS 推送全量可达）
+    let bridge = AlertBridge::connect(hub.clone(), &redis_url).await;
+    tokio::spawn(AlertBridge::spawn_subscriber(hub.clone(), redis_url.clone()));
+
     // 后台任务：消费 iot.events → 匹配 → 推送/落库/webhook
-    let (run_kafka, run_store, run_hub, run_http) = (kafka.clone(), store.clone(), hub.clone(), http.clone());
+    let (run_kafka, run_store, run_bridge, run_http) = (kafka.clone(), store.clone(), bridge.clone(), http.clone());
     tokio::spawn(async move {
-        ecat_rule::runner::run(run_kafka, run_store, run_hub, run_http).await;
+        ecat_rule::runner::run(run_kafka, run_store, run_bridge, run_http).await;
     });
 
     let api_state = ApiState { store: store.clone() };
