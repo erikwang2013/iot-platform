@@ -211,12 +211,55 @@ pub fn verify_token(token: &str, secret: &str) -> Result<AuthClaims, String> {
     .map_err(|e| format!("bad token: {e}"))
 }
 
+/// 签发 HS256 JWT（登录成功路径统一走这里）：sub=租户 ID（网关代理
+/// 契约 sub→x-tenant-id）、role=用户角色，带 exp/iat。网关 JwtAuthCompat
+/// 校验 sub+role 两 claim，缺 role 即 403（P5 观察项）。
+pub fn issue_token(
+    secret: &str,
+    sub: &str,
+    role: &str,
+    ttl_secs: u64,
+) -> Result<String, String> {
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(|e| e.to_string())?
+        .as_secs();
+    let claims = AuthClaims {
+        sub: sub.to_string(),
+        exp: Some(now + ttl_secs),
+        iat: Some(now),
+        role: Some(role.to_string()),
+        extra: Default::default(),
+    };
+    jsonwebtoken::encode(
+        &jsonwebtoken::Header::new(jsonwebtoken::Algorithm::HS256),
+        &claims,
+        &jsonwebtoken::EncodingKey::from_secret(secret.as_bytes()),
+    )
+    .map_err(|e| e.to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use tower::ServiceExt;
 
     const SECRET: &str = "0123456789abcdef0123456789abcdef";
+
+    #[test]
+    fn issue_token_roundtrip_carries_sub_and_role() {
+        let token = issue_token(SECRET, "tenant-1", "admin", 3600).unwrap();
+        let claims = verify_token(&token, SECRET).unwrap();
+        assert_eq!(claims.sub, "tenant-1");
+        assert_eq!(claims.role(), Some("admin"));
+        assert!(claims.exp.unwrap() > claims.iat.unwrap());
+    }
+
+    #[test]
+    fn issue_token_wrong_secret_fails_verification() {
+        let token = issue_token(SECRET, "t1", "operator", 3600).unwrap();
+        assert!(verify_token(&token, "another-secret-0123456789abcdef").is_err());
+    }
     const ISSUER: &str = "https://issuer.example";
     const AUDIENCE: &str = "api.example";
 
