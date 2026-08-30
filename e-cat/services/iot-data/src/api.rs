@@ -2,8 +2,9 @@ use crate::models::HistoryPoint;
 use crate::td::{escape_sql_string, parse_points};
 use axum::{
     Json,
-    extract::{Query, State},
+    extract::{Query, RawQuery, State},
     http::StatusCode,
+    response::{IntoResponse, Response},
 };
 use ecat_data::TsdbClient;
 use ecat_data_tdengine::TdengineClient;
@@ -43,6 +44,7 @@ fn default_limit() -> i64 {
 pub fn router(api: ApiState) -> axum::Router {
     axum::Router::new()
         .route("/history", axum::routing::get(history))
+        .route("/export", axum::routing::get(export))
         .with_state(api)
 }
 
@@ -88,6 +90,73 @@ fn validate(q: &HistoryQuery) -> Result<(), (StatusCode, String)> {
         }
     }
     Ok(())
+}
+
+/// GET /api/data/export?device_id=&code=&start=&end=&format=csv|xlsx
+/// 导出与 history 同一 SQL 的数据（无分页上限，limit 固定 100000）。
+pub async fn export(
+    State(api): State<ApiState>,
+    axum::Extension(tenant_id): axum::Extension<String>,
+    Query(q): Query<HistoryQuery>,
+    axum::extract::RawQuery(raw): axum::extract::RawQuery,
+) -> axum::response::Response {
+    let mut q = q;
+    if let Err(e) = validate(&q) {
+        return (e.0, e.1).into_response();
+    }
+    q.limit = 100_000;
+    let fmt = raw
+        .as_deref()
+        .and_then(|r| {
+            r.split('&')
+                .find(|kv| kv.starts_with("format="))
+                .map(|kv| kv.trim_start_matches("format="))
+        })
+        .unwrap_or("csv");
+    let sql = build_history_sql(&tenant_id, &q);
+    let resp = match api.td.query(&sql).await {
+        Ok(r) => r,
+        Err(e) => {
+            return (
+                StatusCode::BAD_GATEWAY,
+                format!("tdengine: {e}"),
+            )
+                .into_response()
+        }
+    };
+    let points = match crate::td::parse_points(&resp) {
+        Ok(p) => p,
+        Err(e) => return (StatusCode::BAD_GATEWAY, e).into_response(),
+    };
+    match fmt {
+        "xlsx" => match crate::export::xlsx_of_points(&points) {
+            Ok(buf) => axum::response::Response::builder()
+                .status(StatusCode::OK)
+                .header(
+                    axum::http::header::CONTENT_TYPE,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+                .header(
+                    axum::http::header::CONTENT_DISPOSITION,
+                    "attachment; filename=\"export.xlsx\"",
+                )
+                .body(axum::body::Body::from(buf))
+                .unwrap(),
+            Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
+        },
+        _ => {
+            let csv = crate::export::csv_of_points(&points);
+            axum::response::Response::builder()
+                .status(StatusCode::OK)
+                .header(axum::http::header::CONTENT_TYPE, "text/csv; charset=utf-8")
+                .header(
+                    axum::http::header::CONTENT_DISPOSITION,
+                    "attachment; filename=\"export.csv\"",
+                )
+                .body(axum::body::Body::from(csv))
+                .unwrap()
+        }
+    }
 }
 
 /// 组装查询 SQL。租户/设备/属性全部经 escape_sql_string，防注入。
