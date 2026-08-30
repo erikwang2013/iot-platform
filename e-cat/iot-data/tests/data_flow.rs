@@ -5,8 +5,8 @@ use ecat_data_tdengine::TdengineClient;
 use ecat_data_tdengine::sql::parse_points;
 use ecat_mq::MessageQueue;
 use ecat_mq_kafka::KafkaMq;
-use iot_data::api::{ApiState, build_history_sql};
-use iot_data::models::EventMessage;
+use ecat_data_service::api::{ApiState, build_history_sql};
+use ecat_data_service::models::EventMessage;
 use serde_json::json;
 use std::sync::Arc;
 
@@ -18,7 +18,7 @@ async fn kafka_event_lands_in_tdengine_and_queryable() {
         "root",
         "taosdata",
     ));
-    for sql in iot_data::td::schema_sqls() {
+    for sql in ecat_data_service::td::schema_sqls() {
         td.query(&sql).await.expect("schema init");
     }
 
@@ -31,12 +31,12 @@ async fn kafka_event_lands_in_tdengine_and_queryable() {
         value: json!(23.5),
         ts: 1_690_000_000_000,
     };
-    td.query(&iot_data::ingest::batch_sql(&[ev]))
+    td.query(&ecat_data_service::ingest::batch_sql(&[ev]))
         .await
         .expect("ingest insert");
 
     // 2) 查询 API 的 SQL 可读回
-    let q = iot_data::api::HistoryQuery {
+    let q = ecat_data_service::api::HistoryQuery {
         device_id: "itest-dev".into(),
         code: "temp".into(),
         start: 1_690_000_000_000,
@@ -80,7 +80,7 @@ async fn http_history_handler_returns_points() {
         "root",
         "taosdata",
     ));
-    for sql in iot_data::td::schema_sqls() {
+    for sql in ecat_data_service::td::schema_sqls() {
         td.query(&sql).await.expect("schema init");
     }
     let ev = EventMessage {
@@ -91,11 +91,11 @@ async fn http_history_handler_returns_points() {
         value: json!(25.0),
         ts: 1_690_000_100_000,
     };
-    td.query(&iot_data::ingest::batch_sql(&[ev]))
+    td.query(&ecat_data_service::ingest::batch_sql(&[ev]))
         .await
         .expect("ingest insert");
 
-    let app = iot_data::api::router(ApiState { td: td.clone() });
+    let app = ecat_data_service::api::router(ApiState { td: td.clone() });
     let resp = app
         .oneshot(
             Request::builder()

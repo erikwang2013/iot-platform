@@ -1,4 +1,4 @@
-use iot_data::api::{HistoryQuery, build_history_sql};
+use ecat_data_service::api::{HistoryQuery, build_history_sql};
 use serde::Deserialize;
 
 #[derive(Deserialize)]

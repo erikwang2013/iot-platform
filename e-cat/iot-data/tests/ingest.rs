@@ -1,5 +1,5 @@
-use iot_data::ingest::{TOPIC_EVENTS, batch_sql};
-use iot_data::models::EventMessage;
+use ecat_data_service::ingest::{TOPIC_EVENTS, batch_sql};
+use ecat_data_service::models::EventMessage;
 use serde_json::json;
 
 #[test]

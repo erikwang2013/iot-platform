@@ -1,5 +1,5 @@
 use ecat_data_tdengine::sql::{escape_sql_string, parse_points, ts_to_ms};
-use iot_data::td::schema_sqls;
+use ecat_data_service::td::schema_sqls;
 use serde_json::json;
 
 #[test]

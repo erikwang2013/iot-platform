@@ -1,7 +1,7 @@
 use axum::{Router, middleware};
 use ecat_data::TsdbClient;
 use ecat_mq_kafka::KafkaMq;
-use iot_data::api::{self, ApiState};
+use ecat_data_service::api::{self, ApiState};
 use std::sync::Arc;
 
 #[tokio::main]
@@ -16,9 +16,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let kafka_brokers =
         std::env::var("KAFKA_BROKERS").unwrap_or_else(|_| "localhost:9092".into());
 
-    let td = Arc::new(iot_data::td::connect(&td_url, &td_user, &td_pass));
+    let td = Arc::new(ecat_data_service::td::connect(&td_url, &td_user, &td_pass));
     // 幂等建库建表
-    for sql in iot_data::td::schema_sqls() {
+    for sql in ecat_data_service::td::schema_sqls() {
         td.query(&sql).await?;
     }
 
@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // 后台任务：消费 iot.events → TDengine
     let (ingest_td, ingest_kafka) = (td.clone(), kafka.clone());
     tokio::spawn(async move {
-        iot_data::ingest::run(ingest_td, ingest_kafka).await;
+        ecat_data_service::ingest::run(ingest_td, ingest_kafka).await;
     });
 
     let api_state = ApiState { td: td.clone() };

@@ -1,5 +1,5 @@
-use iot_data::export::{csv_of_points, xlsx_of_points};
-use iot_data::models::HistoryPoint;
+use ecat_data_service::export::{csv_of_points, xlsx_of_points};
+use ecat_data_service::models::HistoryPoint;
 use serde_json::json;
 
 #[test]

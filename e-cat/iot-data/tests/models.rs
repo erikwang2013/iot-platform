@@ -1,4 +1,4 @@
-use iot_data::models::EventMessage;
+use ecat_data_service::models::EventMessage;
 
 #[test]
 fn deserializes_p1_kafka_shape() {
