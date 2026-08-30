@@ -37,14 +37,11 @@ pub fn validate_rule(r: &NewRule) -> Result<(), String> {
 }
 
 /// 迁移执行（复用 ecat-data-sqlx::execute_script 逐条执行）。
-/// CARGO_MANIFEST_DIR 编译期锚定，不依赖进程 CWD。
+/// 编译期 include_str! 内联，无运行时文件依赖。
+const MIGRATION_SQL: &str = include_str!("../migrations/0001_rule_tables.sql");
+
 pub async fn migrate(db: &SqlxClient) -> Result<(), String> {
-    let sql = std::fs::read_to_string(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/migrations/0001_rule_tables.sql"
-    ))
-    .map_err(|e| format!("read migration: {e}"))?;
-    db.execute_script(&sql)
+    db.execute_script(MIGRATION_SQL)
         .await
         .map_err(|e| format!("migrate: {e}"))?;
     Ok(())
@@ -55,9 +52,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn migration_file_exists() {
-        let f = concat!(env!("CARGO_MANIFEST_DIR"), "/migrations/0001_rule_tables.sql");
-        assert!(std::path::Path::new(f).is_file(), "{f} missing");
+    fn migration_sql_non_empty() {
+        assert!(!MIGRATION_SQL.trim().is_empty());
     }
 }
 

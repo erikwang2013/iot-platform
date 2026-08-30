@@ -12,12 +12,12 @@ use ecat_access::{
 use std::sync::Arc;
 
 async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    // CARGO_MANIFEST_DIR 编译期锚定，不依赖进程 CWD（iot-device 亦经此读取单一副本）
-    for file in [
-        concat!(env!("CARGO_MANIFEST_DIR"), "/migrations/0001_init.sql"),
-        concat!(env!("CARGO_MANIFEST_DIR"), "/migrations/0002_vendor_auth.sql"),
+    // 编译期 include_str! 内联，无运行时文件依赖（iot-device 亦经此读取单一副本）
+    for sql in [
+        include_str!("../migrations/0001_init.sql"),
+        include_str!("../migrations/0002_vendor_auth.sql"),
     ] {
-        db.execute_script(&std::fs::read_to_string(file)?).await?;
+        db.execute_script(sql).await?;
     }
     Ok(())
 }

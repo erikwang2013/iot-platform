@@ -8,22 +8,15 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub struct Db(pub Arc<SqlxClient>);
 
-/// 单一副本存于 ecat-access/migrations/，此处经 CARGO_MANIFEST_DIR 锚定跨包引用，
-/// 不依赖进程 CWD（iot-device 启动即调 migrate）。
+/// 单一副本存于 ecat-access/migrations/，编译期 include_str! 内联，无运行时文件依赖。
 const MIGRATION_SQL: [&str; 2] = [
-    concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../ecat-access/migrations/0001_init.sql"
-    ),
-    concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../ecat-access/migrations/0002_vendor_auth.sql"
-    ),
+    include_str!("../../ecat-access/migrations/0001_init.sql"),
+    include_str!("../../ecat-access/migrations/0002_vendor_auth.sql"),
 ];
 
 pub async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    for file in MIGRATION_SQL {
-        db.execute_script(&std::fs::read_to_string(file)?).await?;
+    for sql in MIGRATION_SQL {
+        db.execute_script(sql).await?;
     }
     Ok(())
 }
@@ -78,9 +71,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn migrate_sql_files_exist() {
-        for f in MIGRATION_SQL {
-            assert!(std::path::Path::new(f).is_file(), "{f} missing");
-        }
+    fn migrate_sql_non_empty() {
+        assert!(!MIGRATION_SQL[0].trim().is_empty());
+        assert!(!MIGRATION_SQL[1].trim().is_empty());
     }
 }
