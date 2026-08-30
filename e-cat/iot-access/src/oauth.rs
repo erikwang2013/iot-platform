@@ -15,7 +15,7 @@ use std::sync::Arc;
 const STATE_TTL_SECS: u64 = 600;
 
 fn state_key() -> [u8; 32] {
-    crate::crypto::derive_key(&std::env::var("IOT_CRED_ENCRYPT_KEY").unwrap_or_default())
+    ecat_security::crypto::derive_key(&std::env::var("IOT_CRED_ENCRYPT_KEY").unwrap_or_default())
 }
 
 pub fn encode_state(tenant_id: &str, vendor: &str) -> String {

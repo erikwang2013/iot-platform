@@ -1,5 +1,4 @@
 use crate::models::HistoryPoint;
-use crate::td::{escape_sql_string, parse_points};
 use axum::{
     Json,
     extract::{Query, State},
@@ -8,6 +7,7 @@ use axum::{
 };
 use ecat_data::TsdbClient;
 use ecat_data_tdengine::TdengineClient;
+use ecat_data_tdengine::sql::{escape_sql_string, parse_points};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::sync::Arc;
@@ -140,7 +140,7 @@ pub async fn export(
                 .into_response()
         }
     };
-    let points = match crate::td::parse_points(&resp) {
+    let points = match parse_points(&resp) {
         Ok(p) => p,
         Err(e) => return (StatusCode::BAD_GATEWAY, e).into_response(),
     };

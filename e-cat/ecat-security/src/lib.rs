@@ -1,4 +1,6 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
+pub mod crypto;
+
 use http::{Request, StatusCode};
 use security_rust::Scanner;
 use std::future::Future;

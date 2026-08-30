@@ -13,6 +13,12 @@ tower = { workspace = true, features = ["util"] }
 http.workspace = true
 axum.workspace = true
 http-body-util = "0.1"
+aes-gcm = "0.10"
+rand = "0.8"
+base64 = "0.22"
+sha2.workspace = true
+hmac = "0.12"
+hex = "0.4"
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "rt"] }

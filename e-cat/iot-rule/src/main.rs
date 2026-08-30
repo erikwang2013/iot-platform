@@ -1,5 +1,4 @@
 use axum::{Router, middleware, routing::get};
-use ecat_data::RdbmsClient;
 use ecat_data_sqlx::SqlxClient;
 use ecat_mq_kafka::KafkaMq;
 use iot_rule::{api::{self, ApiState}, push::PushHub, store::RuleStore, ws};
@@ -45,19 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .with_state(hub);
 
     let health_router = ecat_health::HealthRegistry::new()
-        .with_check(ecat_health::FnCheck::new("db", {
-            let db = db.clone();
-            move || {
-                let db = db.clone();
-                async move {
-                    db.execute("SELECT 1").await.map(|_| ()).map_err(|e| {
-                        // 细节只进日志，不回给客户端（/ready 无鉴权直接可达）
-                        tracing::warn!(error = %e, "health check db failed");
-                        "db check failed".to_string()
-                    })
-                }
-            }
-        }))
+        .with_check(ecat_health::db_check(db.clone()))
         .into_router();
 
     let router = Router::new()

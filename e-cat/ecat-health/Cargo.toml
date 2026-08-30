@@ -6,6 +6,7 @@ license.workspace = true
 description = "Health check endpoint and registry for e-cat services"
 
 [dependencies]
+ecat-data = { path = "../ecat-data" }
 axum.workspace = true
 tokio = { workspace = true, features = ["sync"] }
 async-trait.workspace = true

@@ -9,6 +9,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use ecat_data_redis::RedisCache;
+use ecat_iot::now_ms;
 use ecat_mq_kafka::KafkaMq;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -52,13 +53,6 @@ pub fn normalize_event(
         value: ev_value,
         ts,
     })
-}
-
-fn now_ms() -> i64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_millis() as i64
 }
 
 #[derive(Clone)]
@@ -187,32 +181,10 @@ pub fn verify_webhook_signature(
     if secret.is_empty() {
         return Err((StatusCode::FORBIDDEN, "signature secret unavailable"));
     }
-    if !verify_signature(secret, raw, sig) {
+    if !ecat_security::crypto::verify_hmac_sha256_hex(secret, raw, sig) {
         return Err((StatusCode::FORBIDDEN, "bad tuya signature"));
     }
     Ok(())
-}
-
-fn verify_signature(secret: &str, raw: &[u8], sig: &str) -> bool {
-    use hmac::{Hmac, Mac};
-    use sha2::Sha256;
-    type HmacSha256 = Hmac<Sha256>;
-    let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).expect("hmac key");
-    mac.update(raw);
-    let expect = mac.finalize().into_bytes();
-    let got = match hex::decode(sig) {
-        Ok(g) => g,
-        Err(_) => return false,
-    };
-    ct_eq(&expect, &got)
-}
-
-/// 常数时间字节比较（等长逐字节 XOR；长度差直接失败）。
-fn ct_eq(a: &[u8], b: &[u8]) -> bool {
-    if a.len() != b.len() {
-        return false;
-    }
-    a.iter().zip(b).fold(0u8, |acc, (x, y)| acc | (x ^ y)) == 0
 }
 
 pub fn router(ws: WebhookState) -> axum::Router {

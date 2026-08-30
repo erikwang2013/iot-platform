@@ -1,4 +1,6 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
+pub mod sql;
+
 use async_trait::async_trait;
 use ecat_data::{DataPoint, FieldValue, TsdbClient};
 use ecat_errors::{Error, ErrorCode};

@@ -1,4 +1,5 @@
-use iot_data::td::{escape_sql_string, parse_points, schema_sqls, ts_to_ms};
+use ecat_data_tdengine::sql::{escape_sql_string, parse_points, ts_to_ms};
+use iot_data::td::schema_sqls;
 use serde_json::json;
 
 #[test]
@@ -24,10 +25,10 @@ fn schema_sqls_are_idempotent_and_qualified() {
 
 #[test]
 fn ts_to_ms_accepts_number_and_string() {
-    assert_eq!(ts_to_ms(&json!(1690000000000i64)), Some(1690000000000));
-    assert_eq!(ts_to_ms(&json!("1690000000000")), Some(1690000000000));
+    assert_eq!(ts_to_ms(&json!(1690000000000i64)), Some(1690000000000i64));
+    assert_eq!(ts_to_ms(&json!("1690000000000")), Some(1690000000000i64));
     // 时间字符串（TDengine REST 字符串格式）可解析；2023-07-22 09:46:40Z = 1690019200000
-    assert_eq!(ts_to_ms(&json!("2023-07-22 09:46:40.000")), Some(1690019200000));
+    assert_eq!(ts_to_ms(&json!("2023-07-22 09:46:40.000")), Some(1690019200000i64));
     assert_eq!(ts_to_ms(&json!("nope")), None);
 }
 

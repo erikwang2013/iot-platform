@@ -2,6 +2,7 @@
 //! `cargo test -p iot-data --test data_flow -- --ignored`
 use ecat_data::TsdbClient;
 use ecat_data_tdengine::TdengineClient;
+use ecat_data_tdengine::sql::parse_points;
 use ecat_mq::MessageQueue;
 use ecat_mq_kafka::KafkaMq;
 use iot_data::api::{ApiState, build_history_sql};
@@ -46,7 +47,7 @@ async fn kafka_event_lands_in_tdengine_and_queryable() {
         offset: 0,
     };
     let resp = td.query(&build_history_sql("itest-tenant", &q)).await.unwrap();
-    let points = iot_data::td::parse_points(&resp).unwrap();
+    let points = parse_points(&resp).unwrap();
     assert_eq!(points.len(), 1, "应查到 1 点: {resp}");
     assert_eq!(points[0].ts, 1_690_000_000_000);
     assert_eq!(points[0].value, json!(23.5));

@@ -1,6 +1,14 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 use serde::{Deserialize, Serialize};
 
+/// 当前时间（epoch 毫秒）。
+pub fn now_ms() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as i64
+}
+
 /// 事件总线 topic：iot-access 发布，iot-data / iot-rule 订阅。
 pub const TOPIC_EVENTS: &str = "iot.events";
 

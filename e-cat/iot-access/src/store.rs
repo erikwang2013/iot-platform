@@ -1,5 +1,5 @@
-use crate::crypto::{decrypt, derive_key, encrypt};
 use ecat_data::RdbmsClient;
+use ecat_security::crypto::{decrypt, derive_key, encrypt};
 use ecat_data_sqlx::SqlxClient;
 use serde_json::{Value, json};
 use std::sync::Arc;

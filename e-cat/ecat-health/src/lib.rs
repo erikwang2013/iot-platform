@@ -92,6 +92,20 @@ struct CheckResult {
 
 // ── Built-in checks ──
 
+/// DB 健康检查（SELECT 1）。错误细节只进日志，客户端只收通用文案
+/// （/ready 无鉴权直接可达，避免泄露 DSN/库名等内部信息）。
+pub fn db_check(db: std::sync::Arc<dyn ecat_data::RdbmsClient>) -> impl HealthCheck {
+    FnCheck::new("db", move || {
+        let db = db.clone();
+        async move {
+            db.execute("SELECT 1").await.map(|_| ()).map_err(|e| {
+                tracing::warn!(error = %e, "health check db failed");
+                "db check failed".to_string()
+            })
+        }
+    })
+}
+
 pub struct FnCheck<F> {
     name: String,
     f: F,

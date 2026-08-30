@@ -1,4 +1,4 @@
-use iot_access::crypto::{decrypt, derive_key, encrypt};
+use ecat_security::crypto::{decrypt, derive_key, encrypt};
 use iot_access::oauth::{decode_state, encode_state, encode_state_at};
 use iot_access::store::creds_json;
 

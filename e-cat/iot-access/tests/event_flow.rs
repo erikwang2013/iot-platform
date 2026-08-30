@@ -6,8 +6,8 @@ use ecat_data_redis::RedisCache;
 use ecat_data_sqlx::SqlxClient;
 use ecat_mq::MessageQueue;
 use ecat_mq_kafka::KafkaMq;
+use ecat_security::crypto::derive_key;
 use futures_util::StreamExt;
-use iot_access::crypto::derive_key;
 use iot_access::events::shadow_key;
 use iot_access::store::Store;
 use iot_access::webhook::{WebhookState, router};
@@ -54,7 +54,7 @@ async fn setup() -> (Store, KafkaMq, RedisCache) {
     )
     .await
     .unwrap();
-    let enc = iot_access::crypto::encrypt(
+    let enc = ecat_security::crypto::encrypt(
         &derive_key("test-encrypt-key-0123456789"),
         b"{\"client_secret\":\"mock-client-secret\"}",
     )

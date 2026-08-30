@@ -1630,6 +1630,7 @@ version = "3.0.3"
 dependencies = [
  "async-trait",
  "axum 0.8.9",
+ "ecat-data",
  "serde",
  "serde_json",
  "tokio",
@@ -1842,10 +1843,16 @@ dependencies = [
 name = "ecat-security"
 version = "3.0.3"
 dependencies = [
+ "aes-gcm",
  "axum 0.8.9",
+ "base64",
+ "hex",
+ "hmac 0.12.1",
  "http",
  "http-body-util",
+ "rand 0.8.7",
  "security-rust 1.0.4",
+ "sha2 0.10.9",
  "thiserror 2.0.19",
  "tokio",
  "tower 0.5.3",
@@ -2880,7 +2887,6 @@ dependencies = [
 name = "iot-access"
 version = "0.1.0"
 dependencies = [
- "aes-gcm",
  "async-trait",
  "axum 0.8.9",
  "base64",
@@ -2894,6 +2900,7 @@ dependencies = [
  "ecat-mq",
  "ecat-mq-kafka",
  "ecat-mq-mqtt",
+ "ecat-security",
  "ecat-transport-http",
  "futures-util",
  "hex",

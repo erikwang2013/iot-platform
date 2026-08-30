@@ -2,6 +2,7 @@ use crate::events::{publish_event, shadow_apply};
 use crate::models::EventMessage;
 use crate::store::Store;
 use ecat_data_redis::RedisCache;
+use ecat_iot::now_ms;
 use ecat_mq::MessageQueue;
 use ecat_mq_kafka::KafkaMq;
 use ecat_mq_mqtt::MqttMq;
@@ -37,13 +38,6 @@ pub fn parse_payload(
         value: v["value"].clone(),
         ts: v["ts"].as_i64().unwrap_or_else(|| now_ms()),
     })
-}
-
-fn now_ms() -> i64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_millis() as i64
 }
 
 /// 指令下发（api.rs 直连分支调用）。
