@@ -20,3 +20,4 @@ rust_xlsxwriter = "0.99"
 
 [dev-dependencies]
 tower-util = "0.3"
+tower.workspace = true

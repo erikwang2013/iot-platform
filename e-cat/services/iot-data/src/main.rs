@@ -7,7 +7,6 @@ use axum::{
     routing::get,
 };
 use ecat_data::TsdbClient;
-use ecat_data_tdengine::TdengineClient;
 use ecat_mq_kafka::KafkaMq;
 use iot_data::api::{self, ApiState};
 use std::sync::Arc;
