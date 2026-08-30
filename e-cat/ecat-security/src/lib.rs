@@ -175,11 +175,11 @@ fn is_proxy_header(name: &http::header::HeaderName) -> bool {
     )
 }
 
-fn request_parts<B>(req: &Request<B>, strict: bool) -> Vec<String> {
+fn request_parts<B>(req: &Request<B>) -> Vec<String> {
     let mut parts: Vec<String> = Vec::new();
     parts.push(percent_decode(&req.uri().to_string()));
     for (name, value) in req.headers() {
-        if !strict && is_proxy_header(name) {
+        if is_proxy_header(name) {
             continue;
         }
         if let Ok(v) = value.to_str() {
@@ -205,8 +205,9 @@ impl SecurityLayer {
         }
     }
 
-    /// 严格模式：命中任意 severity（含 jwt_attack、代理头样本）即拦截，
-    /// 与网关原 scan.rs 语义一致；缺省宽松模式仅拦 High/Critical。
+    /// 严格模式：命中任意 severity（含 jwt_attack 样本）即拦截，与网关原
+    /// scan.rs 语义一致；代理头/Authorization 始终跳过不扫。缺省宽松模式
+    /// 仅拦 High/Critical。
     pub fn strict(mut self) -> Self {
         self.strict = true;
         self
@@ -260,7 +261,7 @@ where
 
     fn call(&mut self, req: Request<B>) -> Self::Future {
         let scanner = Arc::clone(&self.scanner);
-        let parts = request_parts(&req, self.strict);
+        let parts = request_parts(&req);
         let strings: Vec<&str> = parts.iter().map(|s| s.as_str()).collect();
         let results = scanner.scan_parts(&strings);
 
@@ -299,8 +300,9 @@ impl SecurityBodyLayer {
         }
     }
 
-    /// 严格模式：命中任意 severity（含 jwt_attack、代理头样本）即拦截，
-    /// 与网关原 scan.rs 语义一致；缺省宽松模式仅拦 High/Critical。
+    /// 严格模式：命中任意 severity（含 jwt_attack 样本）即拦截，与网关原
+    /// scan.rs 语义一致；代理头/Authorization 始终跳过不扫。缺省宽松模式
+    /// 仅拦 High/Critical。
     pub fn strict(mut self) -> Self {
         self.strict = true;
         self
@@ -363,7 +365,7 @@ where
         let body_limit = self.body_limit;
         let strict = self.strict;
         let mut inner = self.inner.clone();
-        let parts = request_parts(&req, strict);
+        let parts = request_parts(&req);
         let strings: Vec<&str> = parts.iter().map(|s| s.as_str()).collect();
         let header_results = scanner.scan_parts(&strings);
 
@@ -463,7 +465,16 @@ where
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
     fn poll_ready(&mut self, cx: &mut TaskCtx<'_>) -> Poll<Result<(), Self::Error>> {
-        self.inner.poll_ready(cx).map_err(|_| unreachable!())
+        // inner readiness 错误在挂载场景不可达（Route 为 Infallible）；即便
+        // 发生也不 panic，留到 call() 阶段经 SecurityError 映射为 500 响应
+        match self.inner.poll_ready(cx) {
+            Poll::Ready(Ok(())) => Poll::Ready(Ok(())),
+            Poll::Ready(Err(e)) => {
+                tracing::error!(error = %e, "security middleware not ready");
+                Poll::Ready(Ok(()))
+            }
+            Poll::Pending => Poll::Pending,
+        }
     }
 
     fn call(&mut self, req: Request<axum::body::Body>) -> Self::Future {
@@ -636,7 +647,7 @@ mod tests {
             .header("X-Custom", "val-1")
             .body(())
             .unwrap();
-        let parts = request_parts(&req, false);
+        let parts = request_parts(&req);
         assert_eq!(
             parts,
             vec!["/search?q=abc".to_string(), "val-1".to_string()]
@@ -667,7 +678,7 @@ mod tests {
             .header("X-Custom", "val%201")
             .body(())
             .unwrap();
-        let parts = request_parts(&req, false);
+        let parts = request_parts(&req);
         // URI 解码后进入扫描列表；header 原样保留（header 无编码层）
         assert_eq!(parts[0], "/search?q=SELECT * FROM users");
         assert_eq!(parts[1], "val%201");
@@ -936,22 +947,51 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn strict_layer_scans_proxy_headers() {
+    async fn strict_layer_passes_authorization_header_jwt() {
         use tower::Layer as _;
         use tower::ServiceExt;
 
         let layer = SecurityLayer::new().strict();
-        let svc = layer.layer(tower::service_fn(|_: Request<()>| async {
-            Ok::<_, std::convert::Infallible>(http::Response::new(axum::body::Body::empty()))
+        let svc = layer.layer(tower::service_fn(|req: Request<()>| async move {
+            Ok::<_, std::convert::Infallible>(http::Response::new(axum::body::Body::from(
+                req.uri().path().to_string(),
+            )))
         }));
 
-        // 非严格跳过代理头；严格模式照扫（网关语义）
+        // 严格模式同样不扫 Authorization：jwt_attack 正则 ey..ey.. 会误伤
+        // 合法 Bearer token（token 校验由鉴权层负责）
         let req = http::Request::builder()
-            .uri("/clean")
-            .header("X-Real-IP", "<script>alert(1)</script>")
+            .uri("/api/devices")
+            .header(
+                "authorization",
+                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1MSJ9.signature",
+            )
             .body(())
             .unwrap();
-        let resp = svc.oneshot(req).await.expect("blocked as response");
-        assert_eq!(resp.status(), StatusCode::FORBIDDEN);
+        let resp = svc
+            .oneshot(req)
+            .await
+            .expect("auth header passes in strict mode");
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn body_compat_strict_passes_authorization_header_jwt() {
+        use tower::ServiceExt;
+
+        let app = axum::Router::new()
+            .route("/devices", axum::routing::get(|| async { "ok" }))
+            .layer(SecurityBodyCompatLayer::new().strict());
+
+        let req = axum::http::Request::builder()
+            .uri("/devices")
+            .header(
+                "authorization",
+                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1MSJ9.signature",
+            )
+            .body(axum::body::Body::empty())
+            .unwrap();
+        let resp = app.oneshot(req).await.unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
     }
 }
