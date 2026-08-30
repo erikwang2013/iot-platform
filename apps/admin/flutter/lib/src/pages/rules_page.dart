@@ -3,7 +3,6 @@ import 'package:iot_shared/iot_shared.dart';
 import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../widgets/api_list.dart';
 
 /// 规则告警：阈值规则 CRUD（/api/rule/rules）+ 告警记录与确认（/api/rule/alerts）。
 class RulesPage extends StatelessWidget {
@@ -186,6 +185,7 @@ class RulesPage extends StatelessWidget {
           children: [
             ApiList<Rule>(
               load: () => _loadRules(context),
+              emptyText: l10n.commonEmpty,
               builder: (context, rules) => ListView.builder(
                 itemCount: rules.length,
                 itemBuilder: (context, i) {
@@ -220,6 +220,7 @@ class RulesPage extends StatelessWidget {
             ),
             ApiList<AlertRecord>(
               load: () => _loadAlerts(context),
+              emptyText: l10n.commonEmpty,
               builder: (context, alerts) => ListView.builder(
                 itemCount: alerts.length,
                 itemBuilder: (context, i) {

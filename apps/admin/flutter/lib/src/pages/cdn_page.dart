@@ -3,7 +3,6 @@ import 'package:iot_shared/iot_shared.dart';
 import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../widgets/api_list.dart';
 
 /// CDN 管理：厂商配置 CRUD、启停、连通测试、刷新预热任务、签名 URL。
 class CdnPage extends StatelessWidget {
@@ -192,6 +191,7 @@ class CdnPage extends StatelessWidget {
       appBar: AppBar(title: Text(l10n.navCdn)),
       body: ApiList<CdnVendor>(
         load: () => _load(context),
+        emptyText: l10n.commonEmpty,
         builder: (context, vendors) => ListView.builder(
           itemCount: vendors.length,
           itemBuilder: (context, i) {

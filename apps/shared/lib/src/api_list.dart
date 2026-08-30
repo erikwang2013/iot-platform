@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../../l10n/app_localizations.dart';
-
 /// 通用 API 列表：加载中 / 错误（可重试）/ 空态 / 下拉刷新。
 class ApiList<T> extends StatefulWidget {
-  const ApiList({super.key, required this.load, required this.builder});
+  const ApiList({
+    super.key,
+    required this.load,
+    required this.builder,
+    required this.emptyText,
+  });
 
   final Future<List<T>> Function() load;
   final Widget Function(BuildContext context, List<T> data) builder;
+  final String emptyText;
 
   @override
   State<ApiList<T>> createState() => _ApiListState<T>();
@@ -26,7 +30,6 @@ class _ApiListState<T> extends State<ApiList<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return FutureBuilder<List<T>>(
       future: _future,
       builder: (context, snap) {
@@ -38,7 +41,7 @@ class _ApiListState<T> extends State<ApiList<T>> {
         }
         final data = snap.data ?? <T>[];
         if (data.isEmpty) {
-          return Center(child: Text(l10n.commonEmpty));
+          return Center(child: Text(widget.emptyText));
         }
         return RefreshIndicator(
           onRefresh: () async => _reload(),
@@ -57,7 +60,6 @@ class _ErrorNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -72,7 +74,7 @@ class _ErrorNote extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: Text(l10n.commonRetry),
+              label: const Text('Retry'),
             ),
           ],
         ),

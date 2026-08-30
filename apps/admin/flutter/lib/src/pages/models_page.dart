@@ -3,7 +3,6 @@ import 'package:iot_shared/iot_shared.dart';
 import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../widgets/api_list.dart';
 
 /// 物模型建模：属性 / 事件 / 服务三个分类的 schema 列表 + 增删。
 /// 条目结构：{identifier, name, type: property|event|service, 字段类型, unit, rw}。
@@ -148,6 +147,7 @@ class ModelsPage extends StatelessWidget {
             for (final type in _types)
               ApiList<Map<String, dynamic>>(
                 load: () => _load(context, type),
+                emptyText: l10n.commonEmpty,
                 builder: (context, items) => ListView.builder(
                   itemCount: items.length,
                   itemBuilder: (context, i) {

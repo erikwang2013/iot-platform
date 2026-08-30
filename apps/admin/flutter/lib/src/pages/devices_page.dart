@@ -3,7 +3,6 @@ import 'package:iot_shared/iot_shared.dart';
 import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../widgets/api_list.dart';
 
 /// 设备管理：列表（本地搜索）+ 生命周期操作（启用/停用/解绑/删除）+ 详情。
 class DevicesPage extends StatefulWidget {
@@ -128,6 +127,7 @@ class _DevicesPageState extends State<DevicesPage> {
       ),
       body: ApiList<Device>(
         load: _load,
+        emptyText: l10n.commonEmpty,
         builder: (context, devices) {
           final filtered = _filter.isEmpty
               ? devices

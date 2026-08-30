@@ -3,7 +3,6 @@ import 'package:iot_shared/iot_shared.dart';
 import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../widgets/api_list.dart';
 
 /// 租户与用户管理：租户 CRUD（/api/tenants）+ 用户 CRUD（/api/users）。
 class TenantsPage extends StatelessWidget {
@@ -184,6 +183,7 @@ class TenantsPage extends StatelessWidget {
           children: [
             ApiList<Tenant>(
               load: () => _loadTenants(context),
+              emptyText: l10n.commonEmpty,
               builder: (context, tenants) => ListView.builder(
                 itemCount: tenants.length,
                 itemBuilder: (context, i) {
@@ -203,6 +203,7 @@ class TenantsPage extends StatelessWidget {
             ),
             ApiList<User>(
               load: () => _loadUsers(context),
+              emptyText: l10n.commonEmpty,
               builder: (context, users) => ListView.builder(
                 itemCount: users.length,
                 itemBuilder: (context, i) {

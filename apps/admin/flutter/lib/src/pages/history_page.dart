@@ -3,7 +3,6 @@ import 'package:iot_shared/iot_shared.dart';
 import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../widgets/api_list.dart';
 
 /// 历史曲线：TDengine 时序数据查询（/api/data/history）+ 折线图。
 class HistoryPage extends StatefulWidget {
