@@ -167,6 +167,28 @@ impl CdnStore {
         Ok(())
     }
 
+    /// 供应商统计：总数 + 已启用数。
+    pub async fn stats(&self, tenant_id: &str) -> Result<(i64, i64), String> {
+        let rows = self
+            .db
+            .query_with(
+                "SELECT status, COUNT(*) AS n FROM cdn_providers WHERE tenant_id = ? GROUP BY status",
+                &[json!(tenant_id)],
+            )
+            .await
+            .map_err(|e| format!("provider stats: {e}"))?;
+        let mut total = 0;
+        let mut enabled = 0;
+        for r in &rows {
+            let n = r.get("n").and_then(Value::as_i64).unwrap_or(0);
+            total += n;
+            if r.get("status").and_then(Value::as_str) == Some("enabled") {
+                enabled += n;
+            }
+        }
+        Ok((total, enabled))
+    }
+
     pub async fn list_tasks(&self, tenant_id: &str) -> Result<Vec<CdnTask>, String> {
         let rows = self
             .db

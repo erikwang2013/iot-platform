@@ -40,6 +40,7 @@ pub fn router(state: ApiState) -> Router {
         .route("/providers/{id}/purge", post(purge_provider))
         .route("/providers/{id}/prefetch", post(prefetch_provider))
         .route("/tasks", get(list_tasks))
+        .route("/stats", get(provider_stats))
         .with_state(state)
 }
 
@@ -253,6 +254,19 @@ async fn prefetch_provider(
     Json(req): Json<TaskReq>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
     run_task_impl(&st, &tenant, &id, "prefetch", req).await
+}
+
+/// GET /api/cdn/stats：供应商总数 + 已启用数。
+async fn provider_stats(
+    State(st): State<ApiState>,
+    Extension(tenant): Extension<String>,
+) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
+    let (total, enabled) = st
+        .store
+        .stats(&tenant)
+        .await
+        .map_err(|e| err_resp(e, StatusCode::INTERNAL_SERVER_ERROR))?;
+    Ok(Json(json!({ "total": total, "enabled": enabled })))
 }
 
 async fn list_tasks(
