@@ -124,6 +124,44 @@ grep -q "ts,value" /tmp/data_export.csv && grep -q "23.5" /tmp/data_export.csv \
   && pass=$((pass+1)) && echo "PASS: export csv has header + 23.5" \
   || { fail=$((fail+1)); echo "FAIL: export csv (got: $(head -c 200 /tmp/data_export.csv))"; }
 
+# 17. rule 服务健康（直连 8084）
+RULE=${RULE:-http://localhost:8084}
+body=$(curl -s "$RULE/health")
+check "rule /health 200" "OK" "$body"
+
+# 18. 经网关建阈值规则（JWT → 201 且含 rule id/tenant_id）
+code=$(curl -s -o /tmp/rule_create.json -w "%{http_code}" \
+  -X POST -H "x-api-version: v1" -H "authorization: Bearer $token" \
+  -H "content-type: application/json" \
+  -d '{"name":"smoke-temp-alert","device_id":"smoke-dev","code":"temp","operator":"gt","threshold":10}' \
+  "$GATEWAY/api/rule/rules")
+check "gateway -> rule create 201" 201 "$code"
+rule_id=$(grep -o '"id":"[^"]*"' /tmp/rule_create.json | head -1 | cut -d'"' -f4)
+tenant_id=$(grep -o '"tenant_id":"[^"]*"' /tmp/rule_create.json | head -1 | cut -d'"' -f4)
+[ -n "$rule_id" ] && pass=$((pass+1)) && echo "PASS: rule created ($rule_id)" \
+  || { fail=$((fail+1)); echo "FAIL: rule id missing (got: $(cat /tmp/rule_create.json))"; }
+
+# 19. 规则列表经网关可查
+code=$(curl -s -o /tmp/rule_list.json -w "%{http_code}" \
+  -H "x-api-version: v1" -H "authorization: Bearer $token" "$GATEWAY/api/rule/rules")
+check "gateway -> rule list 200" 200 "$code"
+grep -q '"id":"'"$rule_id"'"' /tmp/rule_list.json \
+  && pass=$((pass+1)) && echo "PASS: rule list contains created rule" \
+  || { fail=$((fail+1)); echo "FAIL: rule list (got: $(head -c 200 /tmp/rule_list.json))"; }
+
+# 20. 向 Kafka 发匹配事件 → 引擎消费 → 告警记录落库（等待消费异步；kafka 容器未起时此项 FAIL）
+ts=$(( $(date +%s) * 1000 ))
+echo "{\"device_id\":\"smoke-dev\",\"tenant_id\":\"$tenant_id\",\"kind\":\"property\",\"code\":\"temp\",\"value\":30,\"ts\":$ts}" | \
+  docker exec -i "$kafka_c" kafka-console-producer.sh \
+  --broker-list localhost:9092 --topic iot.events >/dev/null 2>&1
+sleep 5
+code=$(curl -s -o /tmp/rule_alerts.json -w "%{http_code}" \
+  -H "x-api-version: v1" -H "authorization: Bearer $token" "$GATEWAY/api/rule/alerts")
+check "gateway -> alerts list 200" 200 "$code"
+grep -q '"value":30' /tmp/rule_alerts.json \
+  && pass=$((pass+1)) && echo "PASS: alert fired with value 30" \
+  || { fail=$((fail+1)); echo "FAIL: alert not found (got: $(cat /tmp/rule_alerts.json))"; }
+
 echo "----"
 echo "smoke: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]
