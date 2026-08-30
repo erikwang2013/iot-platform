@@ -1258,6 +1258,35 @@ dependencies = [
 [[package]]
 name = "ecat-access"
 version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "axum 0.8.9",
+ "base64",
+ "ecat",
+ "ecat-data",
+ "ecat-data-redis",
+ "ecat-data-sqlx",
+ "ecat-health",
+ "ecat-iot",
+ "ecat-middleware",
+ "ecat-mq",
+ "ecat-mq-kafka",
+ "ecat-mq-mqtt",
+ "ecat-security",
+ "ecat-transport-http",
+ "futures-util",
+ "hex",
+ "hmac 0.12.1",
+ "rand 0.8.7",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "thiserror 2.0.19",
+ "tokio",
+ "tracing",
+ "uuid",
+]
 
 [[package]]
 name = "ecat-auth"
@@ -1554,6 +1583,24 @@ dependencies = [
 [[package]]
 name = "ecat-data-service"
 version = "0.1.0"
+dependencies = [
+ "axum 0.8.9",
+ "ecat",
+ "ecat-data",
+ "ecat-data-tdengine",
+ "ecat-health",
+ "ecat-iot",
+ "ecat-middleware",
+ "ecat-mq",
+ "ecat-mq-kafka",
+ "ecat-transport-http",
+ "futures-util",
+ "rust_xlsxwriter",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
 
 [[package]]
 name = "ecat-data-sqlx"
@@ -1587,6 +1634,13 @@ dependencies = [
 [[package]]
 name = "ecat-device"
 version = "0.1.0"
+dependencies = [
+ "axum 0.8.9",
+ "ecat-data",
+ "ecat-data-sqlx",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "ecat-encoding"
@@ -1857,6 +1911,26 @@ dependencies = [
 [[package]]
 name = "ecat-rule"
 version = "0.1.0"
+dependencies = [
+ "axum 0.8.9",
+ "ecat",
+ "ecat-auth",
+ "ecat-data",
+ "ecat-data-sqlx",
+ "ecat-health",
+ "ecat-iot",
+ "ecat-middleware",
+ "ecat-mq",
+ "ecat-mq-kafka",
+ "ecat-transport-http",
+ "futures-util",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "uuid",
+]
 
 [[package]]
 name = "ecat-scheduler"
@@ -2919,11 +2993,11 @@ dependencies = [
  "axum 0.8.9",
  "base64",
  "ecat",
+ "ecat-access",
  "ecat-data",
  "ecat-data-redis",
  "ecat-data-sqlx",
  "ecat-health",
- "ecat-iot",
  "ecat-middleware",
  "ecat-mq",
  "ecat-mq-kafka",
@@ -2933,17 +3007,11 @@ dependencies = [
  "futures-util",
  "hex",
  "hmac 0.12.1",
- "rand 0.8.7",
- "reqwest",
- "serde",
  "serde_json",
  "sha2 0.10.9",
- "thiserror 2.0.19",
  "tokio",
  "tower 0.5.3",
  "tower-util",
- "tracing",
- "uuid",
 ]
 
 [[package]]
@@ -2953,15 +3021,13 @@ dependencies = [
  "axum 0.8.9",
  "ecat",
  "ecat-data",
+ "ecat-data-service",
  "ecat-data-tdengine",
  "ecat-health",
- "ecat-iot",
  "ecat-middleware",
  "ecat-mq",
  "ecat-mq-kafka",
  "ecat-transport-http",
- "futures-util",
- "rust_xlsxwriter",
  "serde",
  "serde_json",
  "tokio",
@@ -2975,14 +3041,11 @@ version = "0.1.0"
 dependencies = [
  "axum 0.8.9",
  "ecat",
- "ecat-data",
  "ecat-data-sqlx",
+ "ecat-device",
  "ecat-health",
  "ecat-transport-http",
- "serde",
- "serde_json",
  "tokio",
- "tracing",
 ]
 
 [[package]]
@@ -3014,21 +3077,16 @@ dependencies = [
  "ecat-data",
  "ecat-data-sqlx",
  "ecat-health",
- "ecat-iot",
  "ecat-middleware",
- "ecat-mq",
  "ecat-mq-kafka",
+ "ecat-rule",
  "ecat-transport-http",
- "futures-util",
  "jsonwebtoken",
  "reqwest",
- "serde",
  "serde_json",
  "tokio",
  "tower 0.5.3",
  "tower-util",
- "tracing",
- "uuid",
 ]
 
 [[package]]
