@@ -1,6 +1,9 @@
-use axum::{Router, middleware, routing::get};
+use axum::{Router, middleware, routing::{delete, get, post, put}};
 use ecat_data_sqlx::SqlxClient;
-use ecat_device::{Db, list_devices, migrate};
+use ecat_device::{
+    Db, create_firmware, create_ota_task, delete_device, delete_firmware, list_devices,
+    list_firmwares, list_ota_tasks, migrate, unbind_device, update_device,
+};
 use std::sync::Arc;
 
 #[tokio::main]
@@ -17,11 +20,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     // 受保护路由：需网关 secret + x-tenant-id（与 ecat-access/rule/data 一致）
     let devices = Router::new()
-        .route("/api/devices", get(list_devices))
-        .with_state(Db(db))
+        .route("/", get(list_devices))
+        .route("/{id}", put(update_device).delete(delete_device))
+        .route("/{id}/unbind", post(unbind_device))
+        .with_state(Db(db.clone()));
+    let ota = Router::new()
+        .route("/firmwares", get(list_firmwares).post(create_firmware))
+        .route("/firmwares/{id}", delete(delete_firmware))
+        .route("/tasks", get(list_ota_tasks).post(create_ota_task))
+        .with_state(Db(db));
+    let protected = Router::new()
+        .nest("/api/devices", devices)
+        .nest("/api/ota", ota)
         .layer(middleware::from_fn(ecat_middleware::tenant_from_header));
 
-    let router = Router::new().merge(health_router).merge(devices);
+    let router = Router::new().merge(health_router).merge(protected);
 
     let srv = ecat_transport_http::HttpServer::new("0.0.0.0:8081").router(router);
     let mut app = ecat::App::builder()
