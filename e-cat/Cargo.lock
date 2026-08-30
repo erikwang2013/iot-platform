@@ -2906,6 +2906,7 @@ version = "0.1.0"
 dependencies = [
  "axum 0.8.9",
  "ecat",
+ "ecat-data",
  "ecat-data-tdengine",
  "ecat-mq",
  "ecat-mq-kafka",
@@ -2915,6 +2916,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "tower 0.5.3",
  "tower-util",
  "tracing",
 ]
