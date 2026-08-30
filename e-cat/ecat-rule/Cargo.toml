@@ -3,6 +3,10 @@ name = "ecat-rule"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "iot-rule"
+path = "src/main.rs"
+
 [dependencies]
 ecat = { path = "../ecat" }
 ecat-transport-http.workspace = true
@@ -22,3 +26,8 @@ tracing.workspace = true
 reqwest = { version = "0.12", features = ["json"] }
 uuid = { version = "1", features = ["v4"] }
 futures-util = "0.3"
+
+[dev-dependencies]
+tower-util = "0.3"
+tower.workspace = true
+jsonwebtoken = "9"

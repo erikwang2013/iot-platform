@@ -1938,10 +1938,13 @@ dependencies = [
  "ecat-mq-kafka",
  "ecat-transport-http",
  "futures-util",
+ "jsonwebtoken",
  "reqwest",
  "serde",
  "serde_json",
  "tokio",
+ "tower 0.5.3",
+ "tower-util",
  "tracing",
  "uuid",
 ]
