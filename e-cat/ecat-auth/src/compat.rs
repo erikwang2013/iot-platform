@@ -25,6 +25,12 @@ impl JwtAuthCompat {
             auth: JwtAuthLayer::new(secret)?.require_claims(claims),
         })
     }
+
+    /// 值级 RBAC：透传 JwtAuthLayer::role_policy（读方法角色 / 写方法角色）。
+    pub fn role_policy(mut self, read_roles: &[&str], write_roles: &[&str]) -> Self {
+        self.auth = self.auth.role_policy(read_roles, write_roles);
+        self
+    }
 }
 
 impl<S> Layer<S> for JwtAuthCompat {

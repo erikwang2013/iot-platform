@@ -1,7 +1,7 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 use super::claims::AuthClaims;
 use super::helpers::{error_response, extract_bearer};
-use http::{Request, Response, StatusCode};
+use http::{Method, Request, Response, StatusCode};
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
@@ -37,6 +37,10 @@ pub struct JwtAuthLayer {
     decoding_key: Arc<jsonwebtoken::DecodingKey>,
     /// 基准校验配置：每个请求 clone（Validation: Clone），避免重建。
     validation: jsonwebtoken::Validation,
+    /// 值级 RBAC：读方法（GET/HEAD/OPTIONS）允许的角色；空 = 不限制。
+    read_roles: Vec<String>,
+    /// 值级 RBAC：写方法（其余）允许的角色；空 = 不限制。
+    write_roles: Vec<String>,
 }
 
 impl JwtAuthLayer {
@@ -58,7 +62,18 @@ impl JwtAuthLayer {
             header_name: "Authorization".into(),
             required_issuer: None,
             required_audience: None,
+            read_roles: Vec::new(),
+            write_roles: Vec::new(),
         })
+    }
+
+    /// 值级 RBAC：GET/HEAD/OPTIONS 需 `read_roles` 之一，其余方法需 `write_roles`
+    /// 之一，角色不匹配返回 403（消费 AuthClaims::has_role）。
+    /// 任一列表为空则对应方法不做角色限制（保持向后兼容）。
+    pub fn role_policy(mut self, read_roles: &[&str], write_roles: &[&str]) -> Self {
+        self.read_roles = read_roles.iter().map(|s| s.to_string()).collect();
+        self.write_roles = write_roles.iter().map(|s| s.to_string()).collect();
+        self
     }
 
     pub fn require_claims(mut self, claims: &[&str]) -> Self {
@@ -185,6 +200,22 @@ where
                     return Ok(error_response(
                         StatusCode::FORBIDDEN,
                         format!(r#"{{"error":"missing required claim: {claim}"}}"#),
+                    ));
+                }
+            }
+
+            if !config.read_roles.is_empty() || !config.write_roles.is_empty() {
+                let is_read = matches!(
+                    req.method(),
+                    &Method::GET | &Method::HEAD | &Method::OPTIONS
+                );
+                let allowed = if is_read { &config.read_roles } else { &config.write_roles };
+                if !allowed.is_empty()
+                    && !allowed.iter().any(|r| token_data.claims.has_role(r))
+                {
+                    return Ok(error_response(
+                        StatusCode::FORBIDDEN,
+                        r#"{"error":"forbidden: insufficient role"}"#,
                     ));
                 }
             }
@@ -376,6 +407,117 @@ mod tests {
             .require_claims(&["sub", "role"]);
         let token = make_token("user-1", None, None); // 无 role 声明
         assert_eq!(call_layer(layer, &token).await, StatusCode::FORBIDDEN);
+    }
+
+    fn make_token_with_role(sub: &str, role: &str) -> String {
+        jsonwebtoken::encode(
+            &jsonwebtoken::Header::new(jsonwebtoken::Algorithm::HS256),
+            &serde_json::json!({ "sub": sub, "role": role, "exp": 4_102_444_800u64 }),
+            &jsonwebtoken::EncodingKey::from_secret(SECRET.as_bytes()),
+        )
+        .unwrap()
+    }
+
+    async fn call_layer_method(
+        layer: JwtAuthLayer,
+        method: axum::http::Method,
+        token: &str,
+    ) -> axum::http::StatusCode {
+        let svc = layer.layer(
+            axum::routing::get(|| async { "ok" }).post(|| async { "ok" }),
+        );
+        svc.oneshot(
+            axum::http::Request::builder()
+                .method(method)
+                .header("Authorization", format!("Bearer {token}"))
+                .body(axum::body::Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap()
+        .status()
+    }
+
+    /// 值级 RBAC：read-only 可读不可写，admin/operator 读写均可。
+    #[tokio::test]
+    async fn role_policy_blocks_read_only_writes() {
+        let layer = JwtAuthLayer::new(SECRET)
+            .unwrap()
+            .require_claims(&["sub", "role"])
+            .role_policy(&["admin", "operator", "read-only"], &["admin", "operator"]);
+
+        let ro = make_token_with_role("u1", "read-only");
+        assert_eq!(
+            call_layer_method(layer.clone(), axum::http::Method::GET, &ro).await,
+            StatusCode::OK
+        );
+        assert_eq!(
+            call_layer_method(layer.clone(), axum::http::Method::POST, &ro).await,
+            StatusCode::FORBIDDEN
+        );
+
+        let op = make_token_with_role("u1", "operator");
+        assert_eq!(
+            call_layer_method(layer.clone(), axum::http::Method::POST, &op).await,
+            StatusCode::OK
+        );
+        let admin = make_token_with_role("u1", "admin");
+        assert_eq!(
+            call_layer_method(layer, axum::http::Method::POST, &admin).await,
+            StatusCode::OK
+        );
+    }
+
+    /// admin-only 写策略：operator 写被拒，读不受影响。
+    #[tokio::test]
+    async fn role_policy_admin_only_blocks_operator_writes() {
+        let layer = JwtAuthLayer::new(SECRET)
+            .unwrap()
+            .require_claims(&["sub", "role"])
+            .role_policy(&["admin", "operator", "read-only"], &["admin"]);
+
+        let op = make_token_with_role("u1", "operator");
+        assert_eq!(
+            call_layer_method(layer.clone(), axum::http::Method::POST, &op).await,
+            StatusCode::FORBIDDEN
+        );
+        assert_eq!(
+            call_layer_method(layer.clone(), axum::http::Method::GET, &op).await,
+            StatusCode::OK
+        );
+
+        let admin = make_token_with_role("u1", "admin");
+        assert_eq!(
+            call_layer_method(layer, axum::http::Method::POST, &admin).await,
+            StatusCode::OK
+        );
+    }
+
+    /// 值级校验：未列入任何角色列表的未知角色值直接 403（即使 role claim 存在）。
+    #[tokio::test]
+    async fn role_policy_unknown_role_value_is_denied() {
+        let layer = JwtAuthLayer::new(SECRET)
+            .unwrap()
+            .require_claims(&["sub", "role"])
+            .role_policy(&["admin", "operator", "read-only"], &["admin", "operator"]);
+        let token = make_token_with_role("u1", "hacker");
+        assert_eq!(
+            call_layer_method(layer, axum::http::Method::GET, &token).await,
+            StatusCode::FORBIDDEN
+        );
+    }
+
+    /// 未配置 role_policy 时保持向后兼容：任意角色值均放行。
+    #[tokio::test]
+    async fn no_role_policy_is_backward_compatible() {
+        let layer = JwtAuthLayer::new(SECRET)
+            .unwrap()
+            .require_claims(&["sub", "role"]);
+        let token = make_token_with_role("u1", "legacy-role");
+        assert_eq!(
+            call_layer_method(layer, axum::http::Method::POST, &token).await,
+            StatusCode::OK
+        );
     }
 
     #[tokio::test]

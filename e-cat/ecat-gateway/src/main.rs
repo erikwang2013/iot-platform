@@ -17,6 +17,13 @@ async fn submit() -> &'static str {
     "ok"
 }
 
+/// 值级 RBAC 角色表（与登录签发的 role claim 对齐）：
+/// 读操作（GET/HEAD/OPTIONS）三角色均可；写操作 admin/operator；
+/// 租户/用户/固件管理仅 admin。
+const ROLES_ALL: &[&str] = &["admin", "operator", "read-only"];
+const ROLES_WRITE: &[&str] = &["admin", "operator"];
+const ROLES_ADMIN: &[&str] = &["admin"];
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let secret = std::env::var("JWT_SECRET")
@@ -38,13 +45,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/oauth/authorize-url", post(access_proxy))
         .route("/vendors/{vendor}/import", post(access_proxy))
         .route("/devices/{device_id}/command", post(access_proxy))
-        .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
+        // 全写操作：设备命令/厂商导入属于"设备操作"，operator 可做
+        .layer(
+            JwtAuthCompat::new(&secret, &["sub", "role"])?
+                .role_policy(ROLES_ALL, ROLES_WRITE),
+        )
         .with_state(proxy_state.clone());
     // /api/data/* 受保护路径：历史曲线 / 导出（GET，query 透传）
     let data_admin = Router::new()
         .route("/data/history", get(data_proxy))
         .route("/data/export", get(data_proxy))
-        .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
+        .layer(
+            JwtAuthCompat::new(&secret, &["sub", "role"])?
+                .role_policy(ROLES_ALL, &[]),
+        )
         .with_state(proxy_state.clone());
     // /api/rule/* 受保护路径：规则 CRUD / 告警记录（REST，WS 直连 8084 不走网关）
     let rule_admin = Router::new()
@@ -53,7 +67,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/rule/alerts", get(rule_proxy))
         .route("/rule/alerts/{id}/ack", post(rule_proxy))
         .route("/rule/stats", get(rule_proxy))
-        .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
+        .layer(
+            JwtAuthCompat::new(&secret, &["sub", "role"])?
+                .role_policy(ROLES_ALL, ROLES_WRITE),
+        )
         .with_state(proxy_state.clone());
     // /api/cdn/* 受保护路径：供应商 CRUD / 启停 / 刷新预热 / 签名 URL
     let cdn_admin = Router::new()
@@ -70,30 +87,53 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/cdn/providers/{id}/prefetch", post(cdn_proxy))
         .route("/cdn/tasks", get(cdn_proxy))
         .route("/cdn/stats", get(cdn_proxy))
-        .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
+        .layer(
+            JwtAuthCompat::new(&secret, &["sub", "role"])?
+                .role_policy(ROLES_ALL, ROLES_WRITE),
+        )
         .with_state(proxy_state.clone());
 
     // 管理面（/api/*）：租户/用户/物模型 → iot-access；设备/OTA → iot-device。
     // 双面都要求 sub+role：客户端登录 token 也带 role（P5 401 根因），
     // 客户端设备列表走 /api/devices 同样受此校验。
+    // 租户/用户管理仅 admin（读三角色均可）；物模型属设备能力定义，operator 可写
     let console_admin = Router::new()
         .route("/tenants", get(console_proxy).post(console_proxy))
         .route("/tenants/{id}", delete(console_proxy))
         .route("/users", get(console_proxy).post(console_proxy))
         .route("/users/{id}", delete(console_proxy))
+        .layer(
+            JwtAuthCompat::new(&secret, &["sub", "role"])?
+                .role_policy(ROLES_ALL, ROLES_ADMIN),
+        )
+        .with_state(proxy_state.clone());
+    let models_admin = Router::new()
         .route("/models/things", get(console_proxy).post(console_proxy))
         .route("/models/things/{id}", get(console_proxy).delete(console_proxy))
-        .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
+        .layer(
+            JwtAuthCompat::new(&secret, &["sub", "role"])?
+                .role_policy(ROLES_ALL, ROLES_WRITE),
+        )
         .with_state(proxy_state.clone());
+    // 设备生命周期 operator 可写；OTA 固件管理仅 admin
     let device_admin = Router::new()
         .route("/devices", get(device_proxy))
         .route("/devices/stats", get(device_proxy))
         .route("/devices/{id}", put(device_proxy).delete(device_proxy))
         .route("/devices/{id}/unbind", post(device_proxy))
+        .layer(
+            JwtAuthCompat::new(&secret, &["sub", "role"])?
+                .role_policy(ROLES_ALL, ROLES_WRITE),
+        )
+        .with_state(proxy_state.clone());
+    let ota_admin = Router::new()
         .route("/ota/firmwares", get(device_proxy).post(device_proxy))
         .route("/ota/firmwares/{id}", delete(device_proxy))
         .route("/ota/tasks", get(device_proxy).post(device_proxy))
-        .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
+        .layer(
+            JwtAuthCompat::new(&secret, &["sub", "role"])?
+                .role_policy(ROLES_ALL, ROLES_ADMIN),
+        )
         .with_state(proxy_state.clone());
     // 登录端点：管理端 /api/auth/login 与客户端 /admin/auth/login 同一 handler，
     // 独立更严的按 IP 限流（10 次/分钟）防爆破；全局 100 次/分钟限流仍叠加生效
@@ -116,7 +156,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .nest("/api", rule_admin)
         .nest("/api", cdn_admin)
         .nest("/api", console_admin)
+        .nest("/api", models_admin)
         .nest("/api", device_admin)
+        .nest("/api", ota_admin)
         .nest("/api", login_router.clone())
         .nest("/admin", login_router)
         .layer(ApiVersionLayer)
