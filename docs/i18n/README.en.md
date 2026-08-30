@@ -56,9 +56,8 @@ A one-stop SaaS IoT platform that unifies access to major device vendors at home
 ├── apps/            # Frontend apps
 │   ├── admin/       # Admin console (Flutter + HarmonyOS)
 │   └── client/      # Client app (Flutter + HarmonyOS)
-├── e-cat/           # Rust 工作区（Rust workspace (framework + business microservices)）
-│   ├── ecat*/       # framework shared crates (ecat · ecat-auth · ecat-data-* …)
-│   └── iot-*/       # business microservices (iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn)
+├── e-cat/           # Rust workspace (framework + business services as one)
+│   └── ecat*/       # Framework crates & business services (ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …)
 ├── ../            # Docs, diagrams, donation images
 ├── scripts/         # Build / validation / smoke-test scripts
 └── docker-compose.yml  # Infrastructure (MySQL / Redis / EMQX / Kafka / MinIO)

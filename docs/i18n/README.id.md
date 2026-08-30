@@ -56,9 +56,8 @@ Platform SaaS IoT satu atap yang menyatukan akses ke vendor perangkat utama dala
 ├── apps/            # Aplikasi frontend
 │   ├── admin/       # Konsol admin (Flutter + HarmonyOS)
 │   └── client/      # Aplikasi klien (Flutter + HarmonyOS)
-├── e-cat/           # Rust 工作区（Ruang kerja Rust (framework + layanan mikro bisnis)）
-│   ├── ecat*/       # pustaka bersama framework (ecat · ecat-auth · ecat-data-* …)
-│   └── iot-*/       # layanan mikro bisnis (iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn)
+├── e-cat/           # Ruang kerja Rust (framework + layanan bisnis terpadu)
+│   └── ecat*/       # Crate framework & layanan bisnis (ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …)
 ├── ../            # Dokumen, diagram, gambar donasi
 ├── scripts/         # Skrip build / validasi / smoke test
 └── docker-compose.yml  # Orkestrasi infrastruktur (MySQL / Redis / EMQX / Kafka / MinIO)

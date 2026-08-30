@@ -56,9 +56,8 @@
 ├── apps/            # फ्रंटएंड ऐप्स
 │   ├── admin/       # एडमिन कंसोल (Flutter + HarmonyOS)
 │   └── client/      # क्लाइंट ऐप (Flutter + HarmonyOS)
-├── e-cat/           # Rust 工作区（Rust वर्कस्पेस (फ्रेमवर्क + व्यावसायिक माइक्रोसर्विसेस)）
-│   ├── ecat*/       # फ्रेमवर्क साझा लाइब्रेरी (ecat · ecat-auth · ecat-data-* …)
-│   └── iot-*/       # व्यावसायिक माइक्रोसर्विसेस (iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn)
+├── e-cat/           # Rust वर्कस्पेस (फ्रेमवर्क + व्यावसायिक सेवाएँ एक साथ)
+│   └── ecat*/       # फ्रेमवर्क क्रेट्स और व्यावसायिक सेवाएँ (ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …)
 ├── ../            # दस्तावेज़, डायग्राम, दान छवियाँ
 ├── scripts/         # बिल्ड / वैलिडेशन / स्मोक-टेस्ट स्क्रिप्ट्स
 └── docker-compose.yml  # इंफ्रास्ट्रक्चर (MySQL / Redis / EMQX / Kafka / MinIO)
