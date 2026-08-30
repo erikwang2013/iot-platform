@@ -118,31 +118,18 @@
 
 ### 虚拟币打赏（加密货币）
 
-<p align="center">
-  <img src="docs/coin/1.jpg" width="40" height="40" alt="BNB" />
-  <img src="docs/coin/2.jpg" width="40" height="40" alt="Tron" />
-  <img src="docs/coin/3.jpg" width="40" height="40" alt="Ethereum" />
-  <img src="docs/coin/4.jpg" width="40" height="40" alt="Aptos" />
-  <img src="docs/coin/5.jpg" width="40" height="40" alt="Plasma" />
-  <img src="docs/coin/6.jpg" width="40" height="40" alt="Polygon" />
-  <img src="docs/coin/7.jpg" width="40" height="40" alt="Solana" />
-  <img src="docs/coin/8.jpg" width="40" height="40" alt="TON" />
-  <img src="docs/coin/9.jpg" width="40" height="40" alt="Arbitrum" />
-  <img src="docs/coin/10.jpg" width="40" height="40" alt="AVAX" />
-</p>
-
-| 主网 | 钱包地址 |
-|------|----------|
-| BNB Smart Chain (BEP20) | `0x355d429f97511897ccb4e271ec888205f9ab6629` |
-| Tron (TRC20) | `TEdDHWLajt1XvqtPDWmQctdrJaC3pzZZzz` |
-| Ethereum (ERC20) | `0x355d429f97511897ccb4e271ec888205f9ab6629` |
-| Aptos | `0x836e3780edfc3f7b2372b39e2a1a3a5d7adfaccd96c726f21cfde1b50dd68030` |
-| Plasma | `0x355d429f97511897ccb4e271ec888205f9ab6629` |
-| Polygon POS | `0x355d429f97511897ccb4e271ec888205f9ab6629` |
-| Solana | `2hfhboHdmdrYsY25XfQSsEWxq5ip4EQsR7f4AzSRMUyr` |
-| The Open Network (TON) | `UQB9kFQohzmXUir9QSSZq01iwl9aQZIDdBpNmDklljRtCoGK` |
-| Arbitrum One | `0x355d429f97511897ccb4e271ec888205f9ab6629` |
-| AVAX C-Chain | `0x355d429f97511897ccb4e271ec888205f9ab6629` |
+| Coin | Network | Wallet Address |
+|------|---------|----------------|
+| [![BNB](docs/coin/1.jpg)](docs/coin/1.jpg) | BNB Smart Chain (BEP20) | `0x355d429f97511897ccb4e271ec888205f9ab6629` |
+| [![Tron](docs/coin/2.jpg)](docs/coin/2.jpg) | Tron (TRC20) | `TEdDHWLajt1XvqtPDWmQctdrJaC3pzZZzz` |
+| [![Ethereum](docs/coin/3.jpg)](docs/coin/3.jpg) | Ethereum (ERC20) | `0x355d429f97511897ccb4e271ec888205f9ab6629` |
+| [![Aptos](docs/coin/4.jpg)](docs/coin/4.jpg) | Aptos | `0x836e3780edfc3f7b2372b39e2a1a3a5d7adfaccd96c726f21cfde1b50dd68030` |
+| [![Plasma](docs/coin/5.jpg)](docs/coin/5.jpg) | Plasma | `0x355d429f97511897ccb4e271ec888205f9ab6629` |
+| [![Polygon](docs/coin/6.jpg)](docs/coin/6.jpg) | Polygon POS | `0x355d429f97511897ccb4e271ec888205f9ab6629` |
+| [![Solana](docs/coin/7.jpg)](docs/coin/7.jpg) | Solana | `2hfhboHdmdrYsY25XfQSsEWxq5ip4EQsR7f4AzSRMUyr` |
+| [![TON](docs/coin/8.jpg)](docs/coin/8.jpg) | The Open Network (TON) | `UQB9kFQohzmXUir9QSSZq01iwl9aQZIDdBpNmDklljRtCoGK` |
+| [![Arbitrum](docs/coin/9.jpg)](docs/coin/9.jpg) | Arbitrum One | `0x355d429f97511897ccb4e271ec888205f9ab6629` |
+| [![AVAX](docs/coin/10.jpg)](docs/coin/10.jpg) | AVAX C-Chain | `0x355d429f97511897ccb4e271ec888205f9ab6629` |
 
 ## 许可
 
