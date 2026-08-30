@@ -23,6 +23,19 @@ async fn health() -> &'static str {
     "OK"
 }
 
+/// 恒定时间比较，避免通过响应时序探测 secret（长度提前返回只泄露长度）。
+fn secret_eq(a: &str, b: &str) -> bool {
+    let (a, b) = (a.as_bytes(), b.as_bytes());
+    if a.len() != b.len() {
+        return false;
+    }
+    let mut diff = 0u8;
+    for (x, y) in a.iter().zip(b.iter()) {
+        diff |= x ^ y;
+    }
+    diff == 0
+}
+
 async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     for file in ["migrations/0001_init.sql", "migrations/0002_vendor_auth.sql"] {
         let sql = std::fs::read_to_string(file)?;
@@ -43,7 +56,7 @@ async fn tenant_from_header(mut req: Request, next: Next) -> Response {
         .headers()
         .get("x-gateway-secret")
         .and_then(|v| v.to_str().ok())
-        == Some(expected.as_str());
+        .is_some_and(|v| secret_eq(v, expected.as_str()));
     if !secret_ok {
         return (StatusCode::UNAUTHORIZED, "missing or bad x-gateway-secret").into_response();
     }

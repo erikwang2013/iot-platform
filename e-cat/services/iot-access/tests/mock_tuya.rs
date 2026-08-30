@@ -1,16 +1,13 @@
 //! 涂鸦 OpenAPI mock：绑定 127.0.0.1:18084，校验 HMAC 签名后返回固定数据。
 use axum::{Json, Router, extract::State, http::HeaderMap, routing::get};
 use serde_json::{Value, json};
-use std::sync::Arc;
 
 pub const BASE: &str = "http://127.0.0.1:18084";
 pub const CLIENT_ID: &str = "mock-client-id";
 pub const CLIENT_SECRET: &str = "mock-client-secret";
 
 #[derive(Clone)]
-struct MockState {
-    tokens: Arc<std::sync::Mutex<Vec<(String, String)>>>, // (code, access_token)
-}
+struct MockState;
 
 pub fn sign(secret: &str, client_id: &str, t: &str, token: &str) -> String {
     use hmac::{Hmac, Mac};
@@ -34,7 +31,7 @@ fn check_sign(headers: &HeaderMap, token: &str) -> bool {
     cid == CLIENT_ID && sign(CLIENT_SECRET, CLIENT_ID, t, token) == sig
 }
 
-async fn token(State(s): State<MockState>, headers: HeaderMap, query: axum::extract::Query<Value>) -> Json<Value> {
+async fn token(State(_): State<MockState>, headers: HeaderMap, query: axum::extract::Query<Value>) -> Json<Value> {
     // 签名校验（token 交换阶段 access_token 为空串）
     if !check_sign(&headers, "") {
         return Json(json!({"success": false, "code": "BAD_SIGN"}));
@@ -44,7 +41,6 @@ async fn token(State(s): State<MockState>, headers: HeaderMap, query: axum::extr
         "authorization_code" => {
             let code = query.0.get("code").and_then(Value::as_str).unwrap_or("");
             let at = format!("mock-at-{code}");
-            s.tokens.lock().unwrap().push((code.to_string(), at.clone()));
             Json(json!({
                 "success": true,
                 "result": {
@@ -114,20 +110,35 @@ async fn commands(State(_): State<MockState>, headers: HeaderMap, body: axum::bo
     Json(json!({"success": true, "result": true}))
 }
 
-/// 两个测试并行运行，18084 已被占用说明 mock 已在跑，直接复用。
-pub async fn spawn() -> tokio::task::JoinHandle<()> {
-    let state = MockState { tokens: Arc::new(std::sync::Mutex::new(Vec::new())) };
-    let router = Router::new()
-        .route("/v1.0/token", get(token))
-        .route("/v1.0/users/{uid}/devices", get(devices))
-        .route("/v1.0/devices/{device_id}/status", get(status))
-        .route("/v1.0/devices/{device_id}/commands", axum::routing::post(commands))
-        .with_state(state);
-    if let Ok(listener) = tokio::net::TcpListener::bind("127.0.0.1:18084").await {
-        tokio::spawn(async move {
-            axum::serve(listener, router).await.unwrap();
-        })
-    } else {
-        tokio::spawn(async {})
-    }
+/// 并行测试复用同一进程内的 mock（进程内只绑一次，服务器跑在独立线程+自有
+/// runtime 上，不随某个测试的 runtime 销毁）；端口被其他进程占用时立刻
+/// panic 并带地址与 os error，避免测试打到错误服务器。
+static MOCK: std::sync::OnceLock<()> = std::sync::OnceLock::new();
+
+pub fn spawn() {
+    MOCK.get_or_init(|| {
+        // bind 在调用线程同步完成：失败立刻 panic（含地址与 os error），且无竞态
+        let listener = std::net::TcpListener::bind("127.0.0.1:18084")
+            .unwrap_or_else(|e| panic!("mock tuya: bind 127.0.0.1:18084 failed (端口被其他进程占用？): {e}"));
+        listener.set_nonblocking(true).unwrap();
+        let state = MockState;
+        let router = Router::new()
+            .route("/v1.0/token", get(token))
+            .route("/v1.0/users/{uid}/devices", get(devices))
+            .route("/v1.0/devices/{device_id}/status", get(status))
+            .route("/v1.0/devices/{device_id}/commands", axum::routing::post(commands))
+            .with_state(state);
+        std::thread::spawn(move || {
+            let rt = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap();
+            rt.block_on(async move {
+                // from_std 必须在驱动它的 runtime 内调用，否则 fd 注册到别的
+                // runtime 的 reactor，那个 runtime 一销毁，连接就再也无人唤醒
+                let listener = tokio::net::TcpListener::from_std(listener).unwrap();
+                axum::serve(listener, router).await.unwrap();
+            });
+        });
+    });
 }

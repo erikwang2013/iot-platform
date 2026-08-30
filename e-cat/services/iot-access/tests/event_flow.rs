@@ -34,38 +34,38 @@ async fn setup() -> (Store, KafkaMq, RedisCache) {
     let store = Store::new(db, "test-encrypt-key-0123456789");
     // 种子：租户 + 涂鸦设备 + 凭据（REPLACE 保证覆盖历史残留行，密文始终为本测试密钥所写）
     let db = store.db.clone();
-    let _ = db
-        .execute_with(
-            "REPLACE INTO tenants (id, name) VALUES ('t1', 'mock-tenant')",
-            &[],
-        )
-        .await;
-    let _ = db
-        .execute_with(
-            "REPLACE INTO devices (id, tenant_id, name, vendor, status) \
-             VALUES ('p1', 't1', 'mock-tuya-1', 'tuya', 'online')",
-            &[],
-        )
-        .await;
-    let _ = db
-        .execute_with(
-            "REPLACE INTO device_links (device_id, tenant_id, vendor, vendor_id, vendor_name, category) \
-             VALUES ('p1', 't1', 'tuya', 'tuya-dev-1', 'mock-tuya-1', 'temp_sensor')",
-            &[],
-        )
-        .await;
+    db.execute_with(
+        "REPLACE INTO tenants (id, name) VALUES ('t1', 'mock-tenant')",
+        &[],
+    )
+    .await
+    .unwrap();
+    db.execute_with(
+        "REPLACE INTO devices (id, tenant_id, name, vendor, status) \
+         VALUES ('p1', 't1', 'mock-tuya-1', 'tuya', 'online')",
+        &[],
+    )
+    .await
+    .unwrap();
+    db.execute_with(
+        "REPLACE INTO device_links (device_id, tenant_id, vendor, vendor_id, vendor_name, category) \
+         VALUES ('p1', 't1', 'tuya', 'tuya-dev-1', 'mock-tuya-1', 'temp_sensor')",
+        &[],
+    )
+    .await
+    .unwrap();
     let enc = iot_access::crypto::encrypt(
         &derive_key("test-encrypt-key-0123456789"),
         b"{\"client_secret\":\"mock-client-secret\"}",
     )
     .unwrap();
-    let _ = db
-        .execute_with(
-            "REPLACE INTO vendor_credentials (id, tenant_id, vendor, config_encrypted, status) \
-             VALUES ('c1', 't1', 'tuya', ?, 'active')",
-            &[serde_json::json!(enc)],
-        )
-        .await;
+    db.execute_with(
+        "REPLACE INTO vendor_credentials (id, tenant_id, vendor, config_encrypted, status) \
+         VALUES ('c1', 't1', 'tuya', ?, 'active')",
+        &[serde_json::json!(enc)],
+    )
+    .await
+    .unwrap();
     let kafka = KafkaMq::connect(&std::env::var("KAFKA_BROKERS").unwrap_or_else(|_| "localhost:9092".into()))
         .await
         .unwrap();
