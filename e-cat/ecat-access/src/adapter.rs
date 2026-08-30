@@ -46,10 +46,11 @@ pub trait VendorAdapter: Send + Sync {
     async fn subscribe_events(&self, creds: &VendorCreds) -> Result<(), AdapterError>;
 }
 
-/// 注册表：vendor 名（devices.vendor 列的值）→ 适配器。P4 补 miot/huawei/aws/azure。
+/// 注册表：vendor 名（devices.vendor 列的值）→ 适配器。
 pub fn adapter_for(vendor: &str) -> Result<Box<dyn VendorAdapter>, AdapterError> {
     match vendor {
         "tuya" => Ok(Box::new(crate::adapters::tuya::TuyaAdapter::new())),
+        "miot" => Ok(Box::new(crate::adapters::miot::MiAdapter::new())),
         v => Err(AdapterError::UnknownVendor(v.to_string())),
     }
 }
