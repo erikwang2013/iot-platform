@@ -11,6 +11,8 @@ use ecat_auth::AuthClaims;
 const ACCESS_BASE: &str = "http://localhost:8082";
 /// iot-data 内部地址（DATA_BASE 环境变量可覆盖）。
 const DATA_BASE: &str = "http://localhost:8083";
+/// iot-rule 内部地址（RULE_BASE 环境变量可覆盖）。
+const RULE_BASE: &str = "http://localhost:8084";
 
 #[derive(Clone)]
 pub struct ProxyState {
@@ -42,6 +44,19 @@ pub async fn data_proxy(State(ps): State<ProxyState>, req: Request) -> Response 
         .map(|c| c.sub.clone())
         .unwrap_or_default();
     forward(&ps, req, &tenant, "/api", "DATA_BASE", DATA_BASE).await
+}
+
+/// /api/rule/* 受保护转发：JWT sub → x-tenant-id + x-gateway-secret，
+/// 路径/query/body 原样透传（rules/alerts CRUD 由 iot-rule 处理）。
+pub async fn rule_proxy(State(ps): State<ProxyState>, req: Request) -> Response {
+    let tenant = req
+        .extensions()
+        .get::<AuthClaims>()
+        .map(|c| c.sub.clone())
+        .unwrap_or_default();
+    // 与 data_proxy 同构：nest 在 /api 下、路由为 /rule/...，handler 看到的
+    // 路径是 /rule/rules 等剩余段，prefix "/api" 补回后即 /api/rule/rules
+    forward(&ps, req, &tenant, "/api", "RULE_BASE", RULE_BASE).await
 }
 
 /// 原样转发到上游服务：方法/路径/query/body 透传，注入 x-gateway-secret

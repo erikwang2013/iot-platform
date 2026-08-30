@@ -56,8 +56,10 @@ impl RuleStore {
         let rows = self
             .db
             .query_with(
+                // sqlx Any 不支持 Timestamp 类型，时间列须 CAST 成文本
                 "SELECT id, tenant_id, name, device_id, code, operator, threshold, webhook_url, \
-                 enabled, created_at, updated_at FROM rules WHERE tenant_id = ? ORDER BY created_at DESC",
+                 enabled, CAST(created_at AS CHAR), CAST(updated_at AS CHAR) \
+                 FROM rules WHERE tenant_id = ? ORDER BY created_at DESC",
                 &[json!(tenant_id)],
             )
             .await
@@ -162,12 +164,14 @@ impl RuleStore {
     pub async fn list_alerts(&self, tenant_id: &str, status: Option<&str>) -> Result<Vec<AlertRecord>, String> {
         let (sql, params) = match status {
             Some(s) => (
-                "SELECT id, rule_id, tenant_id, device_id, code, operator, threshold, value, status, created_at \
+                "SELECT id, rule_id, tenant_id, device_id, code, operator, threshold, value, status, \
+                 CAST(created_at AS CHAR) \
                  FROM alert_records WHERE tenant_id = ? AND status = ? ORDER BY created_at DESC LIMIT 100",
                 vec![json!(tenant_id), json!(s)],
             ),
             None => (
-                "SELECT id, rule_id, tenant_id, device_id, code, operator, threshold, value, status, created_at \
+                "SELECT id, rule_id, tenant_id, device_id, code, operator, threshold, value, status, \
+                 CAST(created_at AS CHAR) \
                  FROM alert_records WHERE tenant_id = ? ORDER BY created_at DESC LIMIT 100",
                 vec![json!(tenant_id)],
             ),

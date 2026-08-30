@@ -1,9 +1,9 @@
-use axum::{Router, routing::{get, post}};
+use axum::{Router, routing::{get, post, put}};
 use ecat_health::HealthRegistry;
 use iot_gateway::{
     api_version::ApiVersionLayer,
     auth_compat::JwtAuthCompat,
-    proxy::{ProxyState, access_proxy, access_proxy_open, data_proxy},
+    proxy::{ProxyState, access_proxy, access_proxy_open, data_proxy, rule_proxy},
     scan::ScanLayer,
 };
 
@@ -45,6 +45,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/data/history", get(data_proxy))
         .route("/data/export", get(data_proxy))
         .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
+        .with_state(proxy_state.clone());
+    // /api/rule/* 受保护路径：规则 CRUD / 告警记录（REST，WS 直连 8084 不走网关）
+    let rule_admin = Router::new()
+        .route("/rule/rules", get(rule_proxy).post(rule_proxy))
+        .route("/rule/rules/{id}", put(rule_proxy).delete(rule_proxy))
+        .route("/rule/alerts", get(rule_proxy))
+        .route("/rule/alerts/{id}/ack", post(rule_proxy))
+        .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
         .with_state(proxy_state);
 
     let admin_api = Router::new()
@@ -61,6 +69,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .nest("/api/access", access_public)
         .nest("/api/access", access_admin)
         .nest("/api", data_admin)
+        .nest("/api", rule_admin)
         .nest("/api", admin_api)
         .nest("/admin", client_api)
         .layer(ApiVersionLayer)
