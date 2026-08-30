@@ -24,10 +24,10 @@ esac
 tag="v${major}.${minor}.${patch}"
 
 notes=$(git log --oneline "$latest..HEAD" 2>/dev/null || echo "初始版本")
-git tag -a "$tag" -m "IoT 平台 $tag"
+git tag -a "$tag" -m "$tag"
 git push origin "$tag"
 if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
-    gh release create "$tag" --title "IoT 平台 $tag" --notes "$notes"
+    gh release create "$tag" --title "$tag" --notes "$notes"
 else
     echo "gh 不可用或未认证：标签 $tag 已推送，请手动创建 Release"
 fi
