@@ -3,6 +3,7 @@ pub mod crypto;
 
 use http::{Request, StatusCode};
 use security_rust::Scanner;
+use std::convert::Infallible;
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
@@ -96,7 +97,8 @@ impl Default for SecurityScanner {
 
 /// Logs detections and returns a blocking error when a High/Critical attack
 /// was found. Shared by the header-scanning and body-scanning middlewares.
-fn evaluate(results: &[DetectionResult]) -> Option<SecurityError> {
+/// 严格模式命中任意 severity 即拦（网关语义：jwt_attack 样本同样 403）。
+fn evaluate(results: &[DetectionResult], strict: bool) -> Option<SecurityError> {
     let mut blocked = false;
     for r in results {
         tracing::warn!(
@@ -109,7 +111,9 @@ fn evaluate(results: &[DetectionResult]) -> Option<SecurityError> {
         // jwt_attack 的宽正则（ey..ey.. 匹配一切标准 JWT）会误伤合法 token：
         // 服务端鉴权由 JwtAuthLayer 验签把关（alg:none/伪造签名在验签层拒绝），
         // 此处仅记日志不拦截。
-        if r.attack_type != "jwt_attack" && matches!(r.severity, Severity::High | Severity::Critical)
+        if strict
+            || (r.attack_type != "jwt_attack"
+                && matches!(r.severity, Severity::High | Severity::Critical))
         {
             blocked = true;
         }
@@ -171,11 +175,11 @@ fn is_proxy_header(name: &http::header::HeaderName) -> bool {
     )
 }
 
-fn request_parts<B>(req: &Request<B>) -> Vec<String> {
+fn request_parts<B>(req: &Request<B>, strict: bool) -> Vec<String> {
     let mut parts: Vec<String> = Vec::new();
     parts.push(percent_decode(&req.uri().to_string()));
     for (name, value) in req.headers() {
-        if is_proxy_header(name) {
+        if !strict && is_proxy_header(name) {
             continue;
         }
         if let Ok(v) = value.to_str() {
@@ -190,13 +194,22 @@ fn request_parts<B>(req: &Request<B>) -> Vec<String> {
 #[derive(Clone)]
 pub struct SecurityLayer {
     scanner: Arc<SecurityScanner>,
+    strict: bool,
 }
 
 impl SecurityLayer {
     pub fn new() -> Self {
         Self {
             scanner: Arc::new(SecurityScanner::new()),
+            strict: false,
         }
+    }
+
+    /// 严格模式：命中任意 severity（含 jwt_attack、代理头样本）即拦截，
+    /// 与网关原 scan.rs 语义一致；缺省宽松模式仅拦 High/Critical。
+    pub fn strict(mut self) -> Self {
+        self.strict = true;
+        self
     }
 }
 
@@ -213,6 +226,7 @@ impl<S> tower::Layer<S> for SecurityLayer {
         SecurityService {
             inner,
             scanner: Arc::clone(&self.scanner),
+            strict: self.strict,
         }
     }
 }
@@ -221,6 +235,7 @@ impl<S> tower::Layer<S> for SecurityLayer {
 pub struct SecurityService<S> {
     inner: S,
     scanner: Arc<SecurityScanner>,
+    strict: bool,
 }
 
 impl<S, B> tower::Service<Request<B>> for SecurityService<S>
@@ -245,11 +260,11 @@ where
 
     fn call(&mut self, req: Request<B>) -> Self::Future {
         let scanner = Arc::clone(&self.scanner);
-        let parts = request_parts(&req);
+        let parts = request_parts(&req, self.strict);
         let strings: Vec<&str> = parts.iter().map(|s| s.as_str()).collect();
         let results = scanner.scan_parts(&strings);
 
-        if let Some(err) = evaluate(&results) {
+        if let Some(err) = evaluate(&results, self.strict) {
             use axum::response::IntoResponse;
             let resp: S::Response = err.into_response().into();
             return Box::pin(async move { Ok(resp) });
@@ -272,6 +287,7 @@ where
 pub struct SecurityBodyLayer {
     scanner: Arc<SecurityScanner>,
     body_limit: usize,
+    strict: bool,
 }
 
 impl SecurityBodyLayer {
@@ -279,7 +295,15 @@ impl SecurityBodyLayer {
         Self {
             scanner: Arc::new(SecurityScanner::new()),
             body_limit: 10 * 1024 * 1024,
+            strict: false,
         }
+    }
+
+    /// 严格模式：命中任意 severity（含 jwt_attack、代理头样本）即拦截，
+    /// 与网关原 scan.rs 语义一致；缺省宽松模式仅拦 High/Critical。
+    pub fn strict(mut self) -> Self {
+        self.strict = true;
+        self
     }
 
     /// Maximum body size (in bytes) that will be buffered and scanned.
@@ -305,6 +329,7 @@ impl<S> tower::Layer<S> for SecurityBodyLayer {
             inner,
             scanner: Arc::clone(&self.scanner),
             body_limit: self.body_limit,
+            strict: self.strict,
         }
     }
 }
@@ -314,6 +339,7 @@ pub struct SecurityBodyService<S> {
     inner: S,
     scanner: Arc<SecurityScanner>,
     body_limit: usize,
+    strict: bool,
 }
 
 impl<S> tower::Service<Request<axum::body::Body>> for SecurityBodyService<S>
@@ -335,8 +361,9 @@ where
     fn call(&mut self, req: Request<axum::body::Body>) -> Self::Future {
         let scanner = Arc::clone(&self.scanner);
         let body_limit = self.body_limit;
+        let strict = self.strict;
         let mut inner = self.inner.clone();
-        let parts = request_parts(&req);
+        let parts = request_parts(&req, strict);
         let strings: Vec<&str> = parts.iter().map(|s| s.as_str()).collect();
         let header_results = scanner.scan_parts(&strings);
 
@@ -362,7 +389,7 @@ where
             let mut results = header_results;
             results.extend(scanner.scan_body(&bytes));
 
-            if let Some(err) = evaluate(&results) {
+            if let Some(err) = evaluate(&results, strict) {
                 return Err(err);
             }
 
@@ -371,6 +398,85 @@ where
                 .call(req)
                 .await
                 .map_err(|e| SecurityError::Inner(e.into()))
+        })
+    }
+}
+
+// ── Router 挂载适配（错误擦除）──
+
+/// 把 SecurityBodyService 的错误擦除为 Infallible，使其可直接用于 axum
+/// Router::layer（Router 要求 Error: Into<Infallible>）。SecurityError 经
+/// IntoResponse 映射为 403/413/500 响应，语义与直接使用一致。
+#[derive(Clone)]
+pub struct SecurityBodyCompatLayer {
+    inner: SecurityBodyLayer,
+}
+
+impl SecurityBodyCompatLayer {
+    pub fn new() -> Self {
+        Self {
+            inner: SecurityBodyLayer::new(),
+        }
+    }
+
+    pub fn strict(mut self) -> Self {
+        self.inner = self.inner.strict();
+        self
+    }
+
+    pub fn body_limit(mut self, limit: usize) -> Self {
+        self.inner = self.inner.body_limit(limit);
+        self
+    }
+}
+
+impl Default for SecurityBodyCompatLayer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<S> tower::Layer<S> for SecurityBodyCompatLayer {
+    type Service = SecurityBodyCompat<S>;
+
+    fn layer(&self, inner: S) -> Self::Service {
+        SecurityBodyCompat {
+            inner: self.inner.layer(inner),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct SecurityBodyCompat<S> {
+    inner: SecurityBodyService<S>,
+}
+
+impl<S> tower::Service<Request<axum::body::Body>> for SecurityBodyCompat<S>
+where
+    S: tower::Service<Request<axum::body::Body>> + Clone + Send + 'static,
+    S::Future: Send + 'static,
+    S::Error: Into<Box<dyn std::error::Error + Send + Sync>>,
+    S::Response: From<axum::response::Response> + Send,
+{
+    type Response = S::Response;
+    type Error = Infallible;
+    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
+
+    fn poll_ready(&mut self, cx: &mut TaskCtx<'_>) -> Poll<Result<(), Self::Error>> {
+        self.inner.poll_ready(cx).map_err(|_| unreachable!())
+    }
+
+    fn call(&mut self, req: Request<axum::body::Body>) -> Self::Future {
+        let mut inner = self.inner.clone();
+        Box::pin(async move {
+            match inner.call(req).await {
+                Ok(resp) => Ok(resp),
+                Err(e) => {
+                    use axum::response::IntoResponse;
+                    let resp: axum::response::Response = e.into_response();
+                    Ok(resp.into())
+                }
+            }
         })
     }
 }
@@ -530,7 +636,7 @@ mod tests {
             .header("X-Custom", "val-1")
             .body(())
             .unwrap();
-        let parts = request_parts(&req);
+        let parts = request_parts(&req, false);
         assert_eq!(
             parts,
             vec!["/search?q=abc".to_string(), "val-1".to_string()]
@@ -561,7 +667,7 @@ mod tests {
             .header("X-Custom", "val%201")
             .body(())
             .unwrap();
-        let parts = request_parts(&req);
+        let parts = request_parts(&req, false);
         // URI 解码后进入扫描列表；header 原样保留（header 无编码层）
         assert_eq!(parts[0], "/search?q=SELECT * FROM users");
         assert_eq!(parts[1], "val%201");
@@ -734,5 +840,118 @@ mod tests {
         let (_, body) = resp.into_parts();
         let bytes = axum::body::to_bytes(body, 1024).await.unwrap();
         assert_eq!(&bytes[..], b"hello world");
+    }
+
+    #[tokio::test]
+    async fn body_compat_mounts_on_router_and_blocks_strict() {
+        use tower::ServiceExt;
+
+        let app = axum::Router::new()
+            .route("/submit", axum::routing::post(|| async { "ok" }))
+            .layer(SecurityBodyCompatLayer::new().strict());
+
+        let req = axum::http::Request::builder()
+            .method("POST")
+            .uri("/submit")
+            .body(axum::body::Body::from(r#"{"q":"'; DROP TABLE users; --"}"#))
+            .unwrap();
+        let resp = app.clone().oneshot(req).await.unwrap();
+        assert_eq!(resp.status(), StatusCode::FORBIDDEN);
+
+        let req = axum::http::Request::builder()
+            .method("POST")
+            .uri("/submit")
+            .body(axum::body::Body::from(r#"{"name":"room1"}"#))
+            .unwrap();
+        let resp = app.oneshot(req).await.unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[test]
+    fn evaluate_strict_blocks_medium_severity() {
+        let s = SecurityScanner::new();
+        let results = s.scan("//evil.com");
+        assert!(results.iter().any(|r| r.attack_type == "open_redirect"));
+        assert!(evaluate(&results, false).is_none(), "非严格放行 Medium");
+        assert!(matches!(
+            evaluate(&results, true),
+            Some(SecurityError::AttackBlocked(_))
+        ));
+    }
+
+    #[test]
+    fn evaluate_non_strict_skips_jwt_attack() {
+        let s = SecurityScanner::new();
+        let results = s.scan(r#"{"alg":"none"}"#);
+        assert!(results.iter().any(|r| r.attack_type == "jwt_attack"));
+        assert!(evaluate(&results, false).is_none(), "非严格跳过 jwt_attack");
+        assert!(matches!(
+            evaluate(&results, true),
+            Some(SecurityError::AttackBlocked(_))
+        ));
+    }
+
+    #[tokio::test]
+    async fn body_layer_passes_jwt_attack_body_in_non_strict() {
+        use tower::Layer as _;
+        use tower::ServiceExt;
+
+        let layer = SecurityBodyLayer::new();
+        let svc = layer.layer(tower::service_fn(
+            |req: Request<axum::body::Body>| async move {
+                let (_, body) = req.into_parts();
+                let bytes = axum::body::to_bytes(body, 1024).await.unwrap();
+                Ok::<_, std::convert::Infallible>(http::Response::new(axum::body::Body::from(
+                    bytes,
+                )))
+            },
+        ));
+
+        let req = http::Request::builder()
+            .method("POST")
+            .uri("/submit")
+            .body(axum::body::Body::from(r#"{"alg":"none"}"#))
+            .unwrap();
+        let resp = svc.oneshot(req).await.expect("jwt_attack 非严格放行");
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn strict_body_layer_blocks_jwt_attack_in_body() {
+        use tower::Layer as _;
+        use tower::ServiceExt;
+
+        let layer = SecurityBodyLayer::new().strict();
+        let svc = layer.layer(tower::service_fn(|_: Request<axum::body::Body>| async {
+            Ok::<_, std::convert::Infallible>(http::Response::new(axum::body::Body::empty()))
+        }));
+
+        let req = http::Request::builder()
+            .method("POST")
+            .uri("/submit")
+            .body(axum::body::Body::from(r#"{"alg":"none"}"#))
+            .unwrap();
+        let result = svc.oneshot(req).await;
+        assert!(matches!(result, Err(SecurityError::AttackBlocked(_))));
+    }
+
+    #[tokio::test]
+    async fn strict_layer_scans_proxy_headers() {
+        use tower::Layer as _;
+        use tower::ServiceExt;
+
+        let layer = SecurityLayer::new().strict();
+        let svc = layer.layer(tower::service_fn(|_: Request<()>| async {
+            Ok::<_, std::convert::Infallible>(http::Response::new(axum::body::Body::empty()))
+        }));
+
+        // 非严格跳过代理头；严格模式照扫（网关语义）
+        let req = http::Request::builder()
+            .uri("/clean")
+            .header("X-Real-IP", "<script>alert(1)</script>")
+            .body(())
+            .unwrap();
+        let resp = svc.oneshot(req).await.expect("blocked as response");
+        assert_eq!(resp.status(), StatusCode::FORBIDDEN);
     }
 }

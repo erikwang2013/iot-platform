@@ -1851,7 +1851,7 @@ dependencies = [
  "http",
  "http-body-util",
  "rand 0.8.7",
- "security-rust 1.0.4",
+ "security-rust",
  "sha2 0.10.9",
  "thiserror 2.0.19",
  "tokio",
@@ -2965,11 +2965,11 @@ dependencies = [
  "ecat",
  "ecat-auth",
  "ecat-health",
+ "ecat-security",
  "ecat-transport-http",
  "http",
  "jsonwebtoken",
  "reqwest",
- "security-rust 1.0.8",
  "serde",
  "serde_json",
  "tokio",
@@ -4869,13 +4869,6 @@ checksum = "65999385099ea7718f7aba9995270b82877d2132309c17278bc7338e93d9a7da"
 dependencies = [
  "regex",
  "thiserror 2.0.19",
-]
-
-[[package]]
-name = "security-rust"
-version = "1.0.8"
-dependencies = [
- "regex",
 ]
 
 [[package]]

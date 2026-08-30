@@ -142,7 +142,10 @@ pub async fn export(
     };
     let points = match parse_points(&resp) {
         Ok(p) => p,
-        Err(e) => return (StatusCode::BAD_GATEWAY, e).into_response(),
+        Err(e) => {
+            tracing::warn!(error = %e, "export: parse points failed");
+            return (StatusCode::BAD_GATEWAY, "tdengine query failed".to_string()).into_response();
+        }
     };
     match fmt {
         "xlsx" => match crate::export::xlsx_of_points(&points) {

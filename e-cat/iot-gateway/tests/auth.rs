@@ -4,7 +4,7 @@ use axum::{
     http::{Request, StatusCode},
     routing::get,
 };
-use iot_gateway::auth_compat::JwtAuthCompat;
+use ecat_auth::JwtAuthCompat;
 use jsonwebtoken::{Algorithm, EncodingKey, Header};
 use serde::Serialize;
 use tower::ServiceExt;

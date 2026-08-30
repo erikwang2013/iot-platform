@@ -1,10 +1,10 @@
 use axum::{Router, routing::{get, post, put}};
+use ecat_auth::JwtAuthCompat;
 use ecat_health::HealthRegistry;
+use ecat_security::SecurityBodyCompatLayer;
 use iot_gateway::{
     api_version::ApiVersionLayer,
-    auth_compat::JwtAuthCompat,
     proxy::{ProxyState, access_proxy, access_proxy_open, data_proxy, rule_proxy},
-    scan::ScanLayer,
 };
 
 async fn submit() -> &'static str {
@@ -73,7 +73,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .nest("/api", admin_api)
         .nest("/admin", client_api)
         .layer(ApiVersionLayer)
-        .layer(ScanLayer::new());
+        // 严格模式 + 1MB 体上限：与原 scan.rs 语义一致（任意 severity 即 403）
+        .layer(
+            SecurityBodyCompatLayer::new()
+                .strict()
+                .body_limit(1024 * 1024),
+        );
 
     let srv = ecat_transport_http::HttpServer::new("0.0.0.0:8080").router(router);
     let mut app = ecat::App::builder()

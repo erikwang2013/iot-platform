@@ -1,12 +1,14 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 mod apikey;
 mod claims;
+mod compat;
 mod helpers;
 mod jwt;
 mod oauth2;
 
 pub use apikey::{ApiKeyLayer, ApiKeyService};
 pub use claims::AuthClaims;
+pub use compat::JwtAuthCompat;
 pub use helpers::claims_from_request;
 pub use jwt::{verify_token, JwtAuthError, JwtAuthLayer, JwtAuthService};
 pub use oauth2::{OAuth2Layer, OAuth2Service};
