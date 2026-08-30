@@ -1256,6 +1256,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ecat-access"
+version = "0.1.0"
+
+[[package]]
 name = "ecat-auth"
 version = "3.0.3"
 dependencies = [
@@ -1548,6 +1552,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ecat-data-service"
+version = "0.1.0"
+
+[[package]]
 name = "ecat-data-sqlx"
 version = "3.0.3"
 dependencies = [
@@ -1575,6 +1583,10 @@ dependencies = [
  "serde_json",
  "tokio",
 ]
+
+[[package]]
+name = "ecat-device"
+version = "0.1.0"
 
 [[package]]
 name = "ecat-encoding"
@@ -1610,6 +1622,18 @@ dependencies = [
  "thiserror 2.0.19",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "ecat-gateway"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.9",
+ "ecat-auth",
+ "http",
+ "reqwest",
+ "serde_json",
+ "tower 0.5.3",
 ]
 
 [[package]]
@@ -1829,6 +1853,10 @@ dependencies = [
  "tokio",
  "uuid",
 ]
+
+[[package]]
+name = "ecat-rule"
+version = "0.1.0"
 
 [[package]]
 name = "ecat-scheduler"
@@ -2964,18 +2992,16 @@ dependencies = [
  "axum 0.8.9",
  "ecat",
  "ecat-auth",
+ "ecat-gateway",
  "ecat-health",
  "ecat-security",
  "ecat-transport-http",
- "http",
  "jsonwebtoken",
  "reqwest",
  "serde",
- "serde_json",
  "tokio",
  "tower 0.5.3",
  "tower-util",
- "tracing",
 ]
 
 [[package]]

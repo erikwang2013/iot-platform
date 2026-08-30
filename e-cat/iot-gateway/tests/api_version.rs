@@ -1,5 +1,5 @@
 use axum::{Router, routing::get};
-use iot_gateway::api_version::ApiVersionLayer;
+use ecat_gateway::api_version::ApiVersionLayer;
 use tower::ServiceExt;
 
 async fn root() -> &'static str {

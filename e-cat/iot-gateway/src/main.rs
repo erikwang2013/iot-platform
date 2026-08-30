@@ -1,11 +1,11 @@
 use axum::{Router, routing::{get, post, put}};
 use ecat_auth::JwtAuthCompat;
 use ecat_health::HealthRegistry;
-use ecat_security::SecurityBodyCompatLayer;
-use iot_gateway::{
+use ecat_gateway::{
     api_version::ApiVersionLayer,
     proxy::{ProxyState, access_proxy, access_proxy_open, data_proxy, rule_proxy},
 };
+use ecat_security::SecurityBodyCompatLayer;
 
 async fn submit() -> &'static str {
     "ok"
