@@ -15,6 +15,7 @@ ecat-data = { path = "../ecat-data" }
 ecat-middleware = { path = "../ecat-middleware" }
 ecat-iot = { path = "../ecat-iot" }
 ecat-health = { path = "../ecat-health" }
+ecat-auth = { path = "../ecat-auth" }
 ecat-security = { path = "../ecat-security" }
 ecat-data-redis = { path = "../ecat-data-redis" }
 ecat-mq = { path = "../ecat-mq" }

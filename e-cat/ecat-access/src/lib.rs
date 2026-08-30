@@ -1,6 +1,8 @@
 pub mod adapter;
 pub mod adapters;
 pub mod api;
+pub mod auth;
+pub mod console;
 pub mod events;
 pub mod mqtt;
 pub mod models;

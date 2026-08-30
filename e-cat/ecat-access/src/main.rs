@@ -5,6 +5,8 @@ use ecat_mq_kafka::KafkaMq;
 use ecat_mq_mqtt::MqttMq;
 use ecat_access::{
     api::{self, ApiState},
+    auth::{self, AuthState},
+    console::{self, ConsoleState},
     oauth::{self, OauthState},
     store::Store,
     webhook::{self, WebhookState},
@@ -16,9 +18,25 @@ async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send
     for sql in [
         include_str!("../migrations/0001_init.sql"),
         include_str!("../migrations/0002_vendor_auth.sql"),
+        include_str!("../migrations/0003_platform.sql"),
     ] {
         db.execute_script(sql).await?;
     }
+    Ok(())
+}
+
+/// 首次启动播种约定初始账号：租户 tenant-1 + 管理员 admin/admin123
+/// （哈希随运行时 pepper 计算，不硬编码进 SQL）。
+async fn seed_admin(store: &Store) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    store.ensure_tenant("tenant-1", "默认租户").await?;
+    if store.find_user("admin").await?.is_some() {
+        return Ok(());
+    }
+    let pepper = std::env::var("IOT_PASSWORD_PEPPER")
+        .unwrap_or_else(|_| "iot-password-pepper-v1".into());
+    let hash = ecat_security::crypto::hmac_sha256_hex(&pepper, b"admin123");
+    store.create_user("tenant-1", "admin", &hash, "admin").await?;
+    tracing::info!("seeded initial admin account: admin / admin123 (tenant-1)");
     Ok(())
 }
 
@@ -50,6 +68,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let kafka = Arc::new(KafkaMq::connect(&kafka_brokers).await?);
     let mqtt = Arc::new(MqttMq::connect(&mqtt_url).await?);
     let store = Arc::new(Store::new(db.clone(), &enc_key));
+    seed_admin(&store).await?;
 
     let callback_base = std::env::var("ACCESS_CALLBACK_BASE")
         .unwrap_or_else(|_| "http://localhost:8080/api/access/oauth/callback".into());
@@ -71,6 +90,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         kafka: kafka.clone(),
         redis: redis.clone(),
     };
+    let auth_state = AuthState {
+        store: store.clone(),
+        jwt_secret: std::env::var("JWT_SECRET")
+            .unwrap_or_else(|_| "dev-secret-key-0123456789abcdefghijklmn".into()),
+        token_ttl_secs: std::env::var("JWT_TTL_SECS")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(24 * 3600),
+    };
+    let console_state = ConsoleState { store: store.clone() };
 
     // 后台任务：直连 MQTT 订阅
     let (mqtt_run_mqtt, mqtt_run_store, mqtt_run_redis, mqtt_run_kafka) =
@@ -80,7 +109,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             .await;
     });
 
-    // 公开路由：涂鸦 webhook、OAuth 回调（浏览器跳回，无 JWT/租户）
+    // 公开路由：涂鸦 webhook、OAuth 回调、登录（浏览器跳回/登录前置，无 JWT/租户）
+    let login = Router::new().route("/login", axum::routing::post(auth::login)).with_state(auth_state);
     let public = Router::new()
         .merge(webhook::router(webhook_state))
         .merge(oauth::router_public(oauth_state.clone()));
@@ -88,6 +118,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let protected = Router::new()
         .merge(oauth::router(oauth_state))
         .merge(api::router(api_state))
+        .merge(console::router(console_state))
         .layer(middleware::from_fn(ecat_middleware::tenant_from_header));
 
     let health_router = ecat_health::HealthRegistry::new()
@@ -97,7 +128,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let router = Router::new()
         .merge(health_router)
         .nest("/api/access", public)
-        .nest("/api/access", protected);
+        .nest("/api/access", protected)
+        // 登录（管理端 /api/auth/login 与客户端 /admin/auth/login）走网关节流，
+        // 顶层挂载避开 /api/access 前缀
+        .nest("/api/auth", login.clone())
+        .nest("/admin/auth", login);
 
     let bind = std::env::var("HTTP_BIND").unwrap_or_else(|_| "0.0.0.0:8082".into());
     let srv = ecat_transport_http::HttpServer::new(bind).router(router);

@@ -1263,6 +1263,7 @@ dependencies = [
  "axum 0.8.9",
  "base64",
  "ecat",
+ "ecat-auth",
  "ecat-data",
  "ecat-data-redis",
  "ecat-data-sqlx",

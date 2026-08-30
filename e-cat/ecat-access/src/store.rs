@@ -1,8 +1,25 @@
 use ecat_data::RdbmsClient;
 use ecat_security::crypto::{decrypt, derive_key, encrypt};
 use ecat_data_sqlx::SqlxClient;
+use serde::Serialize;
 use serde_json::{Value, json};
 use std::sync::Arc;
+
+#[derive(Debug, Clone)]
+pub struct UserRow {
+    pub id: String,
+    pub tenant_id: String,
+    pub username: String,
+    pub password_hash: String,
+    pub role: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct TenantRow {
+    pub id: String,
+    pub name: String,
+    pub quota: i64,
+}
 
 /// 凭据密文 JSON 序列化：字段顺序固定，VendorCreds 的存盘形态。
 pub fn creds_json(cfg: &Value) -> Vec<u8> {
@@ -145,6 +162,208 @@ impl Store {
                 r.get("vendor_id")?.as_str()?.to_string(),
             ))
         }))
+    }
+
+    pub async fn ensure_tenant(&self, id: &str, name: &str) -> Result<(), String> {
+        self.db
+            .execute_with(
+                "INSERT IGNORE INTO tenants (id, name) VALUES (?, ?)",
+                &[json!(id), json!(name)],
+            )
+            .await
+            .map_err(|e| format!("ensure tenant: {e}"))?;
+        Ok(())
+    }
+
+    pub async fn find_user(&self, username: &str) -> Result<Option<UserRow>, String> {
+        let rows = self
+            .db
+            .query_with(
+                "SELECT id, tenant_id, username, password_hash, role FROM users WHERE username = ?",
+                &[json!(username)],
+            )
+            .await
+            .map_err(|e| format!("find user: {e}"))?;
+        Ok(rows.first().map(|r| UserRow {
+            id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
+            tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or("").to_string(),
+            username: r.get("username").and_then(Value::as_str).unwrap_or("").to_string(),
+            password_hash: r.get("password_hash").and_then(Value::as_str).unwrap_or("").to_string(),
+            role: r.get("role").and_then(Value::as_str).unwrap_or("").to_string(),
+        }))
+    }
+
+    pub async fn create_user(
+        &self,
+        tenant_id: &str,
+        username: &str,
+        password_hash: &str,
+        role: &str,
+    ) -> Result<String, String> {
+        let id = uuid::Uuid::new_v4().to_string();
+        self.db
+            .execute_with(
+                "INSERT INTO users (id, tenant_id, username, password_hash, role) VALUES (?, ?, ?, ?, ?)",
+                &[json!(id), json!(tenant_id), json!(username), json!(password_hash), json!(role)],
+            )
+            .await
+            .map_err(|e| format!("create user: {e}"))?;
+        Ok(id)
+    }
+
+    pub async fn list_users(&self, tenant_id: &str) -> Result<Vec<UserRow>, String> {
+        let rows = self
+            .db
+            .query_with(
+                "SELECT id, tenant_id, username, password_hash, role FROM users WHERE tenant_id = ?",
+                &[json!(tenant_id)],
+            )
+            .await
+            .map_err(|e| format!("list users: {e}"))?;
+        Ok(rows
+            .iter()
+            .map(|r| UserRow {
+                id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
+                tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or("").to_string(),
+                username: r.get("username").and_then(Value::as_str).unwrap_or("").to_string(),
+                password_hash: r.get("password_hash").and_then(Value::as_str).unwrap_or("").to_string(),
+                role: r.get("role").and_then(Value::as_str).unwrap_or("").to_string(),
+            })
+            .collect())
+    }
+
+    pub async fn delete_user(&self, tenant_id: &str, user_id: &str) -> Result<bool, String> {
+        let n = self
+            .db
+            .execute_with(
+                "DELETE FROM users WHERE id = ? AND tenant_id = ?",
+                &[json!(user_id), json!(tenant_id)],
+            )
+            .await
+            .map_err(|e| format!("delete user: {e}"))?;
+        Ok(n > 0)
+    }
+
+    pub async fn list_tenants(&self) -> Result<Vec<TenantRow>, String> {
+        let rows = self
+            .db
+            .query_with("SELECT id, name, quota FROM tenants ORDER BY created_at", &[])
+            .await
+            .map_err(|e| format!("list tenants: {e}"))?;
+        Ok(rows
+            .iter()
+            .map(|r| TenantRow {
+                id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
+                name: r.get("name").and_then(Value::as_str).unwrap_or("").to_string(),
+                quota: r.get("quota").and_then(Value::as_i64).unwrap_or(0),
+            })
+            .collect())
+    }
+
+    pub async fn create_tenant(&self, name: &str, quota: i64) -> Result<String, String> {
+        let id = uuid::Uuid::new_v4().to_string();
+        self.db
+            .execute_with(
+                "INSERT INTO tenants (id, name, quota) VALUES (?, ?, ?)",
+                &[json!(id), json!(name), json!(quota)],
+            )
+            .await
+            .map_err(|e| format!("create tenant: {e}"))?;
+        Ok(id)
+    }
+
+    /// 级联清理：用户/设备/凭据等 FK 引用先删，再删租户本体。
+    pub async fn delete_tenant(&self, tenant_id: &str) -> Result<bool, String> {
+        for table in ["users", "device_links", "devices", "vendor_credentials", "thing_models"] {
+            self.db
+                .execute_with(
+                    &format!("DELETE FROM {table} WHERE tenant_id = ?"),
+                    &[json!(tenant_id)],
+                )
+                .await
+                .map_err(|e| format!("delete tenant {table}: {e}"))?;
+        }
+        let n = self
+            .db
+            .execute_with("DELETE FROM tenants WHERE id = ?", &[json!(tenant_id)])
+            .await
+            .map_err(|e| format!("delete tenant: {e}"))?;
+        Ok(n > 0)
+    }
+
+    /// schema_json 是 JSON 列，经 sqlx Any 层按文本（Blob→UTF-8）返回，需再解析。
+    fn parse_schema(cell: Option<Value>) -> Option<Value> {
+        let s = cell?.as_str()?.to_owned();
+        serde_json::from_str(&s).ok()
+    }
+
+    pub async fn list_models(&self, tenant_id: &str) -> Result<Vec<(String, Value)>, String> {
+        let rows = self
+            .db
+            .query_with(
+                "SELECT id, schema_json FROM thing_models WHERE tenant_id = ? ORDER BY created_at",
+                &[json!(tenant_id)],
+            )
+            .await
+            .map_err(|e| format!("list models: {e}"))?;
+        Ok(rows
+            .iter()
+            .filter_map(|r| {
+                let id = r.get("id").and_then(Value::as_str)?.to_string();
+                Some((id, Self::parse_schema(r.get("schema_json").cloned())?))
+            })
+            .collect())
+    }
+
+    /// 设备物模型：全局（device_id 为空）+ 该设备私有，按创建序合并。
+    pub async fn device_models(
+        &self,
+        tenant_id: &str,
+        device_id: &str,
+    ) -> Result<Vec<Value>, String> {
+        let rows = self
+            .db
+            .query_with(
+                "SELECT schema_json FROM thing_models \
+                 WHERE tenant_id = ? AND (device_id IS NULL OR device_id = ?) ORDER BY created_at",
+                &[json!(tenant_id), json!(device_id)],
+            )
+            .await
+            .map_err(|e| format!("device models: {e}"))?;
+        Ok(rows
+            .iter()
+            .filter_map(|r| Self::parse_schema(r.get("schema_json").cloned()))
+            .collect())
+    }
+
+    pub async fn create_model(
+        &self,
+        tenant_id: &str,
+        device_id: Option<&str>,
+        schema: &Value,
+    ) -> Result<String, String> {
+        let id = uuid::Uuid::new_v4().to_string();
+        let schema_str = serde_json::to_string(schema).map_err(|e| e.to_string())?;
+        self.db
+            .execute_with(
+                "INSERT INTO thing_models (id, tenant_id, device_id, schema_json) VALUES (?, ?, ?, ?)",
+                &[json!(id), json!(tenant_id), json!(device_id), json!(schema_str)],
+            )
+            .await
+            .map_err(|e| format!("create model: {e}"))?;
+        Ok(id)
+    }
+
+    pub async fn delete_model(&self, tenant_id: &str, model_id: &str) -> Result<bool, String> {
+        let n = self
+            .db
+            .execute_with(
+                "DELETE FROM thing_models WHERE id = ? AND tenant_id = ?",
+                &[json!(model_id), json!(tenant_id)],
+            )
+            .await
+            .map_err(|e| format!("delete model: {e}"))?;
+        Ok(n > 0)
     }
 
     /// 导入设备（Task 5 用）：platform_id 已存在则复用，否则新建。
