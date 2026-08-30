@@ -26,6 +26,7 @@ pub fn router(api: ApiState) -> axum::Router {
         .route("/rules/{id}", axum::routing::put(update_rule).delete(delete_rule))
         .route("/alerts", axum::routing::get(list_alerts))
         .route("/alerts/{id}/ack", axum::routing::post(ack_alert))
+        .route("/stats", axum::routing::get(alert_stats))
         .with_state(api)
 }
 
@@ -95,6 +96,19 @@ pub async fn delete_rule(
         .await
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
     if ok { Ok(StatusCode::NO_CONTENT) } else { Err((StatusCode::NOT_FOUND, "rule not found".into())) }
+}
+
+/// GET /api/rule/stats：告警总数 + 未处理数。
+pub async fn alert_stats(
+    State(api): State<ApiState>,
+    tenant: axum::Extension<String>,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    let (total, active) = api
+        .store
+        .stats(&tenant)
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    Ok(Json(serde_json::json!({ "total": total, "active": active })))
 }
 
 /// GET /api/rule/alerts?status=active|acknowledged
