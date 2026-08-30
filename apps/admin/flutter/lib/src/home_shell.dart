@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import 'pages/audit_page.dart';
 import 'pages/cdn_page.dart';
 import 'pages/dashboard_page.dart';
 import 'pages/devices_page.dart';
+import 'pages/groups_page.dart';
 import 'pages/history_page.dart';
 import 'pages/models_page.dart';
 import 'pages/reports_page.dart';
@@ -31,6 +33,7 @@ class _HomeShellState extends State<HomeShell> {
       const DashboardPage(),
       const ScreenPage(),
       const DevicesPage(),
+      const GroupsPage(),
       const ModelsPage(),
       const RulesPage(),
       const OtaPage(),
@@ -38,6 +41,7 @@ class _HomeShellState extends State<HomeShell> {
       const ReportsPage(),
       const CdnPage(),
       const TenantsPage(),
+      const AuditPage(),
       const SettingsPage(),
     ];
     return Scaffold(
@@ -71,6 +75,11 @@ class _HomeShellState extends State<HomeShell> {
             label: Text(l10n.navDevices),
           ),
           NavigationDrawerDestination(
+            icon: const Icon(Icons.folder_copy_outlined),
+            selectedIcon: const Icon(Icons.folder_copy),
+            label: const Text('分组 / 批量'),
+          ),
+          NavigationDrawerDestination(
             icon: const Icon(Icons.view_in_ar_outlined),
             selectedIcon: const Icon(Icons.view_in_ar),
             label: Text(l10n.navModels),
@@ -102,6 +111,11 @@ class _HomeShellState extends State<HomeShell> {
             icon: const Icon(Icons.business_outlined),
             selectedIcon: const Icon(Icons.business),
             label: Text(l10n.navTenants),
+          ),
+          NavigationDrawerDestination(
+            icon: const Icon(Icons.history_outlined),
+            selectedIcon: const Icon(Icons.history),
+            label: const Text('操作日志'),
           ),
           NavigationDrawerDestination(
             icon: const Icon(Icons.settings_outlined),
