@@ -54,6 +54,11 @@ services:
     volumes:
       - miniodata:/data
 
+  tdengine:
+    image: tdengine/tdengine:3.3
+    ports:
+      - "${TDENGINE_PORT:-6041}:6041"
+
 volumes:
   mysqldata:
   kafkadata:

@@ -3,7 +3,7 @@ use ecat_health::HealthRegistry;
 use iot_gateway::{
     api_version::ApiVersionLayer,
     auth_compat::JwtAuthCompat,
-    proxy::{ProxyState, access_proxy, access_proxy_open},
+    proxy::{ProxyState, access_proxy, access_proxy_open, data_proxy},
     scan::ScanLayer,
 };
 
@@ -39,6 +39,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/vendors/{vendor}/import", post(access_proxy))
         .route("/devices/{device_id}/command", post(access_proxy))
         .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
+        .with_state(proxy_state.clone());
+    // /api/data/* 受保护路径：历史曲线 / 导出（GET，query 透传）
+    let data_admin = Router::new()
+        .route("/data/history", get(data_proxy))
+        .route("/data/export", get(data_proxy))
+        .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
         .with_state(proxy_state);
 
     let admin_api = Router::new()
@@ -54,6 +60,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/api/submit", post(submit))
         .nest("/api/access", access_public)
         .nest("/api/access", access_admin)
+        .nest("/api", data_admin)
         .nest("/api", admin_api)
         .nest("/admin", client_api)
         .layer(ApiVersionLayer)
