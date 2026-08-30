@@ -51,6 +51,7 @@ pub fn adapter_for(vendor: &str) -> Result<Box<dyn VendorAdapter>, AdapterError>
     match vendor {
         "tuya" => Ok(Box::new(crate::adapters::tuya::TuyaAdapter::new())),
         "miot" => Ok(Box::new(crate::adapters::miot::MiAdapter::new())),
+        "huawei" => Ok(Box::new(crate::adapters::huawei::HuaweiAdapter::new())),
         v => Err(AdapterError::UnknownVendor(v.to_string())),
     }
 }
