@@ -56,12 +56,65 @@
 ├── apps/            # 프론트엔드 앱
 │   ├── admin/       # 관리자 콘솔(Flutter + HarmonyOS)
 │   └── client/      # 클라이언트 앱(Flutter + HarmonyOS)
-├── e-cat/           # Rust 작업 공간(프레임워크 + 비즈니스 서비스 일체)
-│   └── ecat*/       # 프레임워크 크레이트 + 비즈니스 서비스(ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …)
+├── e-cat/           # Rust 工作区（框架 + 业务微服务一体）
+│   └── ecat*/       # 框架公共库 + 业务微服务（ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …）
 ├── ../            # 문서, 다이어그램, 후원 이미지
 ├── scripts/         # 빌드 / 검증 / 스모크 테스트 스크립트
-└── docker-compose.yml  # 인프라(MySQL / Redis / EMQX / Kafka / MinIO)
+└── docker-compose.yml  # 基础设施编排（MySQL / Redis / EMQX / Kafka / MinIO / TDengine）
 ```
+
+## 원클릭 설치
+
+```bash
+git clone https://github.com/erikwang2013/iot-platform.git
+cd iot-platform
+./scripts/install.sh
+```
+
+스크립트가 자동으로: 인프라 기동(MySQL / Redis / EMQX / Kafka / MinIO / TDengine) → 6개 비즈니스 서비스 빌드 → .env 설정 생성 → 서비스 목록과 시작 명령 출력. 반복 실행해도 안전합니다.
+
+## 설치 안내
+
+### 사전 요구 사항
+
+- Docker 24+ 및 docker compose(또는 docker-compose)
+- Rust 1.80+(stable, 서비스 컴파일용. cargo가 설치되어 있으면 스크립트가 자동 빌드)
+- 포트 점유 확인: 8080-8085, 3306, 6379, 1883, 9092, 9000-9001, 6041이 비어 있어야 함
+
+### 설치 단계
+
+1. 인프라 설치 및 시작: `./scripts/install.sh`가 `docker compose up -d`를 실행합니다
+2. 서비스 빌드: cargo가 감지되면 자동으로 `cargo build --release` 실행, 바이너리는 `scripts/bin/`에 출력(`e-cat/target/release/` 결과물 직접 사용 가능)
+3. 서비스 시작: 스크립트 끝에 출력된 명령으로 6개 서비스를 하나씩 시작
+4. DB 마이그레이션: 서비스 시작 시 자동 실행, 수동 작업 불필요. 첫 실행 시 iot-access가 기본 테넌트와 관리자 계정을 생성
+
+## 사용 방법
+
+### 로그인
+
+- 관리자 콘솔: 기본 계정 `admin / admin123`(테넌트 `tenant-1`)으로 로그인
+
+### 서비스 포트
+
+| 서비스 | 포트 |
+|------|------|
+| iot-gateway(게이트웨이 / 공개 API) | 8080 |
+| iot-device(디바이스 서비스) | 8081 |
+| iot-access(접속 / 인증) | 8082 |
+| iot-data(데이터 서비스) | 8083 |
+| iot-rule(규칙 엔진) | 8084 |
+| iot-cdn(CDN 관리) | 8085 |
+| MySQL / Redis / EMQX / Kafka / MinIO / TDengine | 3306 / 6379 / 1883 / 9092 / 9000 / 6041 |
+
+### 모듈 사용법
+
+- **디바이스 관리**: 관리자 콘솔에서 디바이스 추가 → 벤더 OAuth 또는 직접 MQTT 선택, 상세에서 온라인 상태와 라이프사이클 확인
+- **사물 모델**: 디바이스 카테고리에 속성 / 이벤트 / 서비스 정의, 클라이언트 제어판이 자동 렌더링
+- **규칙 및 알림**: 임계값 규칙과 시나리오 자동화 설정, 트리거 시 WebSocket으로 실시간 푸시
+- **이력 데이터**: iot-data가 시계열 데이터 저장, 이력 곡선 조회 및 CSV / Excel 내보내기
+- **보고서 및 통계**: 디바이스 / 데이터 / CDN / 알림 / 테넌트 다차원 보고서
+- **CDN 관리**: 멀티 벤더 CDN 설정, 리프레시 / 프리웜 및 서명 URL 지원
+- **멀티 벤더 접속**: Tuya / Xiaomi / Huawei / AWS / Azure 클라우드 간 OAuth 어댑터
 
 ## 구현 단계
 

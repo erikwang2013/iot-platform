@@ -56,12 +56,65 @@
 ├── apps/            # フロントエンドアプリ
 │   ├── admin/       # 管理コンソール (Flutter + HarmonyOS)
 │   └── client/      # クライアントアプリ (Flutter + HarmonyOS)
-├── e-cat/           # Rust ワークスペース（フレームワーク＋ビジネスサービス一体）
-│   └── ecat*/       # フレームワーク・クレート＋ビジネスサービス（ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …）
+├── e-cat/           # Rust 工作区（框架 + 业务微服务一体）
+│   └── ecat*/       # 框架公共库 + 业务微服务（ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …）
 ├── ../            # ドキュメント、図、寄付画像
 ├── scripts/         # ビルド / 検証 / スモークテストスクリプト
-└── docker-compose.yml  # インフラ構成 (MySQL / Redis / EMQX / Kafka / MinIO)
+└── docker-compose.yml  # 基础设施编排（MySQL / Redis / EMQX / Kafka / MinIO / TDengine）
 ```
+
+## ワンクリックインストール
+
+```bash
+git clone https://github.com/erikwang2013/iot-platform.git
+cd iot-platform
+./scripts/install.sh
+```
+
+スクリプトが自動で実行します：インフラ起動（MySQL / Redis / EMQX / Kafka / MinIO / TDengine）→ 6 つの業務サービスをビルド → .env 設定を生成 → サービス一覧と起動コマンドを表示。再実行しても安全です。
+
+## インストールガイド
+
+### 前提条件
+
+- Docker 24+ と docker compose（または docker-compose）
+- Rust 1.80+（stable。業務サービスのコンパイルに使用。cargo があればスクリプトが自動ビルド）
+- ポート空き確認：8080-8085、3306、6379、1883、9092、9000-9001、6041 が空いている必要があります
+
+### インストール手順
+
+1. インフラのインストールと起動：`./scripts/install.sh` が `docker compose up -d` を実行します
+2. 業務サービスのビルド：cargo を検出すると自動で `cargo build --release` を実行し、バイナリを `scripts/bin/` に出力（`e-cat/target/release/` の成果物を直接使うことも可）
+3. サービスの起動：スクリプト末尾に表示されるコマンドで 6 つの業務サービスを順に起動
+4. DB マイグレーション：サービス起動時に自動実行、手動操作は不要。初回起動時に iot-access が既定テナントと管理者アカウントを作成
+
+## 使い方
+
+### ログイン
+
+- 管理画面：既定アカウント `admin / admin123`（テナント `tenant-1`）でログイン
+
+### サービスポート
+
+| サービス | ポート |
+|------|------|
+| iot-gateway（ゲートウェイ / 公開 API） | 8080 |
+| iot-device（デバイスサービス） | 8081 |
+| iot-access（接続 / 認証） | 8082 |
+| iot-data（データサービス） | 8083 |
+| iot-rule（ルールエンジン） | 8084 |
+| iot-cdn（CDN 管理） | 8085 |
+| MySQL / Redis / EMQX / Kafka / MinIO / TDengine | 3306 / 6379 / 1883 / 9092 / 9000 / 6041 |
+
+### モジュールの使い方
+
+- **デバイス管理**：管理画面でデバイスを追加 → ベンダー OAuth 接続または直接 MQTT を選択。詳細でオンライン状態とライフサイクルを確認
+- **物モデル**：デバイスカテゴリにプロパティ / イベント / サービスを定義、クライアントのコントロールパネルが自動レンダリング
+- **ルールとアラート**：しきい値ルールとシーン自動化を設定、トリガー後は WebSocket でリアルタイム通知
+- **履歴データ**：iot-data が時系列データを保存。履歴カーブの閲覧と CSV / Excel エクスポート
+- **レポートと統計**：デバイス / データ / CDN / アラート / テナントの多次元レポート
+- **CDN 管理**：複数ベンダーの CDN を設定、リフレッシュ / プリウォームと署名付き URL に対応
+- **マルチベンダー接続**：Tuya / Xiaomi / Huawei / AWS / Azure のクラウド間 OAuth アダプター
 
 ## 実装フェーズ
 

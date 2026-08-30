@@ -56,12 +56,65 @@ Una plataforma SaaS de IoT todo en uno que unifica el acceso a los principales f
 ├── apps/            # Aplicaciones frontend
 │   ├── admin/       # Consola de administración (Flutter + HarmonyOS)
 │   └── client/      # Aplicación cliente (Flutter + HarmonyOS)
-├── e-cat/           # Espacio de trabajo Rust (framework + servicios de negocio integrados)
-│   └── ecat*/       # Crates del framework y servicios de negocio (ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …)
+├── e-cat/           # Rust 工作区（框架 + 业务微服务一体）
+│   └── ecat*/       # 框架公共库 + 业务微服务（ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …）
 ├── ../            # Documentación, diagramas, imágenes de donaciones
 ├── scripts/         # Scripts de build / validación / smoke tests
-└── docker-compose.yml  # Infraestructura (MySQL / Redis / EMQX / Kafka / MinIO)
+└── docker-compose.yml  # 基础设施编排（MySQL / Redis / EMQX / Kafka / MinIO / TDengine）
 ```
+
+## Instalación en un clic
+
+```bash
+git clone https://github.com/erikwang2013/iot-platform.git
+cd iot-platform
+./scripts/install.sh
+```
+
+El script hace automáticamente: levantar la infraestructura (MySQL / Redis / EMQX / Kafka / MinIO / TDengine) → compilar los 6 servicios de negocio → generar la configuración .env → imprimir la lista de servicios y los comandos de arranque. Es seguro ejecutarlo varias veces.
+
+## Guía de instalación
+
+### Requisitos previos
+
+- Docker 24+ y docker compose (o docker-compose)
+- Rust 1.80+ (stable, para compilar los servicios; el script compila automáticamente si cargo está instalado)
+- Comprobación de puertos: 8080-8085, 3306, 6379, 1883, 9092, 9000-9001, 6041 deben estar libres
+
+### Pasos de instalación
+
+1. Instalar y arrancar la infraestructura: `./scripts/install.sh` ejecuta `docker compose up -d`
+2. Compilar los servicios: el script ejecuta automáticamente `cargo build --release` si detecta cargo; los binarios se copian a `scripts/bin/` (o usa los de `e-cat/target/release/`)
+3. Arrancar los servicios: lanza los 6 servicios con los comandos impresos al final del script
+4. Migración de base de datos: se ejecuta automáticamente al arrancar; en el primer inicio iot-access crea el inquilino por defecto y la cuenta de administrador
+
+## Uso
+
+### Inicio de sesión
+
+- Consola de administración: entra con la cuenta `admin / admin123` (inquilino `tenant-1`)
+
+### Puertos de los servicios
+
+| Servicio | Puerto |
+|------|------|
+| iot-gateway (pasarela / API pública) | 8080 |
+| iot-device (servicio de dispositivos) | 8081 |
+| iot-access (conexión / autenticación) | 8082 |
+| iot-data (servicio de datos) | 8083 |
+| iot-rule (motor de reglas) | 8084 |
+| iot-cdn (gestión de CDN) | 8085 |
+| MySQL / Redis / EMQX / Kafka / MinIO / TDengine | 3306 / 6379 / 1883 / 9092 / 9000 / 6041 |
+
+### Uso de los módulos
+
+- **Gestión de dispositivos**: añade un dispositivo en la consola → elige OAuth del fabricante o MQTT directo; estado en línea y ciclo de vida en los detalles
+- **Modelo de cosas**: define propiedad / evento / servicio para las categorías; el panel del cliente se renderiza automáticamente
+- **Reglas y alertas**: configura reglas de umbral y automatización de escenarios; notificación WebSocket en tiempo real
+- **Datos históricos**: iot-data almacena series temporales; curvas históricas y exportación CSV / Excel
+- **Informes y estadísticas**: informes multidimensionales de dispositivos / datos / CDN / alertas / inquilinos
+- **Gestión de CDN**: configura CDN multi-fabricante, refresco / prewarm y URL firmadas
+- **Acceso multi-fabricante**: adaptadores OAuth nube a nube Tuya / Xiaomi / Huawei / AWS / Azure
 
 ## Fases de implementación
 

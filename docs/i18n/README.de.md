@@ -56,12 +56,65 @@ Eine All-in-one-SaaS-IoT-Plattform für die einheitliche Anbindung führender Ge
 ├── apps/            # Frontend-Apps
 │   ├── admin/       # Admin-Konsole (Flutter + HarmonyOS)
 │   └── client/      # Client-App (Flutter + HarmonyOS)
-├── e-cat/           # Rust-Workspace (Framework + Business-Dienste in einem)
-│   └── ecat*/       # Framework-Crates & Business-Dienste (ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …)
+├── e-cat/           # Rust 工作区（框架 + 业务微服务一体）
+│   └── ecat*/       # 框架公共库 + 业务微服务（ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …）
 ├── ../            # Doku, Diagramme, Spendenbilder
 ├── scripts/         # Build- / Validierungs- / Smoke-Test-Skripte
-└── docker-compose.yml  # Infrastruktur (MySQL / Redis / EMQX / Kafka / MinIO)
+└── docker-compose.yml  # 基础设施编排（MySQL / Redis / EMQX / Kafka / MinIO / TDengine）
 ```
+
+## Ein-Klick-Installation
+
+```bash
+git clone https://github.com/erikwang2013/iot-platform.git
+cd iot-platform
+./scripts/install.sh
+```
+
+Das Skript erledigt automatisch: Infrastruktur starten (MySQL / Redis / EMQX / Kafka / MinIO / TDengine) → 6 Geschäftsdienste bauen → .env-Konfiguration erzeugen → Dienstliste und Startbefehle ausgeben. Wiederholtes Ausführen ist sicher.
+
+## Installationsanleitung
+
+### Voraussetzungen
+
+- Docker 24+ und docker compose (oder docker-compose)
+- Rust 1.80+ (stable, zum Kompilieren der Dienste; das Skript baut automatisch, wenn cargo installiert ist)
+- Portprüfung: 8080-8085, 3306, 6379, 1883, 9092, 9000-9001, 6041 müssen frei sein
+
+### Installationsschritte
+
+1. Infrastruktur installieren und starten: `./scripts/install.sh` führt `docker compose up -d` aus
+2. Dienste bauen: bei erkanntem cargo führt das Skript automatisch `cargo build --release` aus; Binärdateien landen in `scripts/bin/` (oder nutzen Sie die Artefakte unter `e-cat/target/release/`)
+3. Dienste starten: starten Sie die 6 Dienste mit den am Ende des Skripts ausgegebenen Befehlen
+4. Datenbank-Migration: läuft automatisch beim Dienststart; beim ersten Start legt iot-access den Standard-Mandanten und das Admin-Konto an
+
+## Verwendung
+
+### Anmeldung
+
+- Admin-Konsole: melden Sie sich mit `admin / admin123` (Mandant `tenant-1`) an
+
+### Dienstports
+
+| Dienst | Port |
+|------|------|
+| iot-gateway (Gateway / öffentliche API) | 8080 |
+| iot-device (Gerätedienst) | 8081 |
+| iot-access (Zugang / Auth) | 8082 |
+| iot-data (Datendienst) | 8083 |
+| iot-rule (Regel-Engine) | 8084 |
+| iot-cdn (CDN-Verwaltung) | 8085 |
+| MySQL / Redis / EMQX / Kafka / MinIO / TDengine | 3306 / 6379 / 1883 / 9092 / 9000 / 6041 |
+
+### Modulnutzung
+
+- **Geräteverwaltung**: Gerät in der Konsole hinzufügen → Vendor-OAuth oder direkten MQTT wählen; Online-Status und Lebenszyklus in den Details prüfen
+- **Dingmodell**: Attribute / Ereignisse / Dienste für Gerätekategorien definieren; das Client-Bedienfeld rendert automatisch
+- **Regeln & Alarme**: Schwellwertregeln und Szenario-Automatisierung konfigurieren; Echtzeit-Push über WebSocket bei Auslösung
+- **Verlaufsdaten**: iot-data speichert Zeitreihen; Verlaufskurven ansehen und als CSV / Excel exportieren
+- **Berichte & Statistik**: mehrdimensionale Berichte über Geräte / Daten / CDN / Alarme / Mandanten
+- **CDN-Verwaltung**: Multi-Vendor-CDN konfigurieren, Refresh / Prewarm und signierte URLs
+- **Multi-Vendor-Zugang**: Cloud-zu-Cloud-OAuth-Adapter für Tuya / Xiaomi / Huawei / AWS / Azure
 
 ## Umsetzungsphasen
 

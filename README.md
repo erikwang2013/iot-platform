@@ -60,8 +60,61 @@
 │   └── ecat*/       # 框架公共库 + 业务微服务（ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …）
 ├── docs/            # 文档、架构图、打赏图片
 ├── scripts/         # 构建 / 校验 / 冒烟测试脚本
-└── docker-compose.yml  # 基础设施编排（MySQL / Redis / EMQX / Kafka / MinIO）
+└── docker-compose.yml  # 基础设施编排（MySQL / Redis / EMQX / Kafka / MinIO / TDengine）
 ```
+
+## 一键安装
+
+```bash
+git clone https://github.com/erikwang2013/iot-platform.git
+cd iot-platform
+./scripts/install.sh
+```
+
+脚本将自动完成：拉起基础设施（MySQL / Redis / EMQX / Kafka / MinIO / TDengine）→ 构建 6 个业务服务 → 生成 .env 配置 → 打印服务清单与启动命令。重复运行安全。
+
+## 安装说明
+
+### 前置依赖
+
+- Docker 24+ 与 docker compose（或 docker-compose）
+- Rust 1.80+（stable，用于编译业务服务；已安装 cargo 时脚本自动构建）
+- 端口占用检查：8080-8085、3306、6379、1883、9092、9000-9001、6041 需空闲
+
+### 安装步骤
+
+1. 安装并启动基础设施：`./scripts/install.sh` 会执行 `docker compose up -d`
+2. 构建业务服务：脚本检测到 cargo 后自动 `cargo build --release`，二进制输出至 `scripts/bin/`（或直接使用 `e-cat/target/release/` 下的产物）
+3. 启动服务：按脚本末尾打印的命令逐个启动 6 个业务服务
+4. 数据库迁移：服务启动时自动执行，无需手动操作；首次启动 iot-access 会自动创建默认租户与管理员账号
+
+## 使用说明
+
+### 登录
+
+- 管理端：使用默认账号 `admin / admin123`（租户 `tenant-1`）登录
+
+### 服务端口
+
+| 服务 | 端口 |
+|------|------|
+| iot-gateway（网关 / 开放 API） | 8080 |
+| iot-device（设备服务） | 8081 |
+| iot-access（接入 / 认证） | 8082 |
+| iot-data（数据服务） | 8083 |
+| iot-rule（规则引擎） | 8084 |
+| iot-cdn（CDN 管理） | 8085 |
+| MySQL / Redis / EMQX / Kafka / MinIO / TDengine | 3306 / 6379 / 1883 / 9092 / 9000 / 6041 |
+
+### 模块使用
+
+- **设备管理**：管理端添加设备 → 选择厂商 OAuth 接入或直连 MQTT，设备详情查看在线状态与生命周期
+- **物模型**：为设备品类定义属性 / 事件 / 服务，客户端控制面板自动渲染
+- **规则与告警**：配置阈值规则与场景自动化，触发后 WebSocket 实时推送
+- **历史数据**：iot-data 存储时序数据，查看历史曲线并导出 CSV / Excel
+- **报表统计**：设备 / 数据 / CDN / 告警 / 租户多维报表
+- **CDN 管理**：配置多厂商 CDN，支持刷新 / 预热与签名 URL
+- **多厂商接入**：涂鸦 / 小米 / 华为 / AWS / Azure 云对云 OAuth 适配
 
 ## 实施阶段
 

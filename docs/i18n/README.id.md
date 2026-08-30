@@ -56,12 +56,65 @@ Platform SaaS IoT satu atap yang menyatukan akses ke vendor perangkat utama dala
 ├── apps/            # Aplikasi frontend
 │   ├── admin/       # Konsol admin (Flutter + HarmonyOS)
 │   └── client/      # Aplikasi klien (Flutter + HarmonyOS)
-├── e-cat/           # Ruang kerja Rust (framework + layanan bisnis terpadu)
-│   └── ecat*/       # Crate framework & layanan bisnis (ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …)
+├── e-cat/           # Rust 工作区（框架 + 业务微服务一体）
+│   └── ecat*/       # 框架公共库 + 业务微服务（ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …）
 ├── ../            # Dokumen, diagram, gambar donasi
 ├── scripts/         # Skrip build / validasi / smoke test
-└── docker-compose.yml  # Orkestrasi infrastruktur (MySQL / Redis / EMQX / Kafka / MinIO)
+└── docker-compose.yml  # 基础设施编排（MySQL / Redis / EMQX / Kafka / MinIO / TDengine）
 ```
+
+## Instalasi Sekali Klik
+
+```bash
+git clone https://github.com/erikwang2013/iot-platform.git
+cd iot-platform
+./scripts/install.sh
+```
+
+Skrip otomatis: menjalankan infrastruktur (MySQL / Redis / EMQX / Kafka / MinIO / TDengine) → membangun 6 layanan bisnis → membuat konfigurasi .env → mencetak daftar layanan dan perintah menjalankannya. Aman dijalankan berulang kali.
+
+## Panduan Instalasi
+
+### Prasyarat
+
+- Docker 24+ dan docker compose (atau docker-compose)
+- Rust 1.80+ (stable, untuk mengompilasi layanan; skrip membangun otomatis jika cargo terpasang)
+- Periksa ketersediaan port: 8080-8085, 3306, 6379, 1883, 9092, 9000-9001, 6041 harus kosong
+
+### Langkah Instalasi
+
+1. Pasang dan jalankan infrastruktur: `./scripts/install.sh` menjalankan `docker compose up -d`
+2. Bangun layanan: jika cargo terdeteksi, skrip otomatis menjalankan `cargo build --release`; biner disalin ke `scripts/bin/` (atau gunakan hasil di `e-cat/target/release/`)
+3. Jalankan layanan: mulai 6 layanan satu per satu dengan perintah yang dicetak di akhir skrip
+4. Migrasi basis data: berjalan otomatis saat layanan dimulai; pada start pertama, iot-access membuat tenant default dan akun admin
+
+## Penggunaan
+
+### Login
+
+- Konsol admin: masuk dengan akun default `admin / admin123` (tenant `tenant-1`)
+
+### Port Layanan
+
+| Layanan | Port |
+|------|------|
+| iot-gateway (gateway / API publik) | 8080 |
+| iot-device (layanan perangkat) | 8081 |
+| iot-access (koneksi / autentikasi) | 8082 |
+| iot-data (layanan data) | 8083 |
+| iot-rule (mesin aturan) | 8084 |
+| iot-cdn (manajemen CDN) | 8085 |
+| MySQL / Redis / EMQX / Kafka / MinIO / TDengine | 3306 / 6379 / 1883 / 9092 / 9000 / 6041 |
+
+### Penggunaan Modul
+
+- **Manajemen perangkat**: tambah perangkat di konsol → pilih OAuth vendor atau MQTT langsung; status online dan siklus hidup di detail
+- **Model benda**: definisikan properti / event / layanan untuk kategori perangkat; panel kontrol klien dirender otomatis
+- **Aturan & peringatan**: atur aturan ambang dan otomatisasi skenario; push WebSocket real-time saat terpicu
+- **Data historis**: iot-data menyimpan data deret waktu; lihat kurva historis dan ekspor CSV / Excel
+- **Laporan & statistik**: laporan multidimensi perangkat / data / CDN / peringatan / tenant
+- **Manajemen CDN**: konfigurasi CDN multi-vendor, refresh / prewarm dan URL bertanda tangan
+- **Akses multi-vendor**: adaptor OAuth cloud-to-cloud Tuya / Xiaomi / Huawei / AWS / Azure
 
 ## Fase Implementasi
 
