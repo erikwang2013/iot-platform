@@ -1696,6 +1696,7 @@ dependencies = [
  "ecat",
  "ecat-auth",
  "ecat-health",
+ "ecat-middleware",
  "ecat-security",
  "ecat-transport-http",
  "http",
@@ -1706,6 +1707,7 @@ dependencies = [
  "tokio",
  "tower 0.5.3",
  "tower-util",
+ "tracing",
 ]
 
 [[package]]
