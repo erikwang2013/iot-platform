@@ -1,0 +1,37 @@
+[package]
+name = "ecat-cdn"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "iot-cdn"
+path = "src/main.rs"
+
+[dependencies]
+ecat = { path = "../ecat" }
+ecat-transport-http.workspace = true
+ecat-data = { path = "../ecat-data" }
+ecat-data-sqlx = { path = "../ecat-data-sqlx" }
+ecat-middleware = { path = "../ecat-middleware" }
+ecat-health = { path = "../ecat-health" }
+ecat-security = { path = "../ecat-security" }
+async-trait.workspace = true
+axum.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["full"] }
+tracing.workspace = true
+reqwest = { version = "0.12", features = ["json"] }
+uuid = { version = "1", features = ["v4"] }
+hmac = "0.12"
+sha2.workspace = true
+sha1 = "0.10"
+md-5 = "0.10"
+hex = "0.4"
+base64 = "0.22"
+
+[dev-dependencies]
+tower-util = "0.3"
+tower.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

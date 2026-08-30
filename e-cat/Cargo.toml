@@ -63,6 +63,7 @@ members = [
     "ecat-access",
     "ecat-rule",
     "ecat-data-service",
+    "ecat-cdn",
 ]
 resolver = "2"
 
