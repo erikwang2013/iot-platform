@@ -13,12 +13,14 @@ ecat-auth = { path = "../ecat-auth" }
 ecat-transport-http.workspace = true
 ecat-health = { path = "../ecat-health" }
 ecat-security = { path = "../ecat-security" }
+ecat-middleware = { path = "../ecat-middleware", features = ["redis"] }
 axum.workspace = true
 http.workspace = true
 tower.workspace = true
 reqwest = { version = "0.12", features = ["json"] }
 serde_json.workspace = true
 tokio = { workspace = true, features = ["full"] }
+tracing.workspace = true
 
 [dev-dependencies]
 jsonwebtoken = "9"

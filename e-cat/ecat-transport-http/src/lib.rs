@@ -75,11 +75,15 @@ impl TransportServer for HttpServer {
                 listener,
                 tokio_rustls::TlsAcceptor::from(Arc::new(server_config)),
             );
+            // 自定义 TlsListener 不提供远端地址，ConnectInfo 不可用（限流键退化为 global）
             axum::serve(tls_listener, router)
                 .with_graceful_shutdown(shutdown_signal)
                 .await?;
         } else {
-            axum::serve(listener, router)
+            axum::serve(
+                listener,
+                router.into_make_service_with_connect_info::<std::net::SocketAddr>(),
+            )
                 .with_graceful_shutdown(shutdown_signal)
                 .await?;
         }

@@ -1,11 +1,14 @@
-use axum::{Router, routing::{get, post, put}};
+use axum::{Router, response::IntoResponse, routing::{get, post, put}};
 use ecat_auth::JwtAuthCompat;
 use ecat_health::HealthRegistry;
 use ecat_gateway::{
     api_version::ApiVersionLayer,
     proxy::{ProxyState, access_proxy, access_proxy_open, data_proxy, rule_proxy},
 };
+use ecat_middleware::{MemoryStore, RateLimitLayer, RateLimitStore, RedisRateLimitStore};
 use ecat_security::SecurityBodyCompatLayer;
+use std::sync::Arc;
+use std::time::Duration;
 
 async fn submit() -> &'static str {
     "ok"
@@ -23,6 +26,8 @@ async fn me() -> &'static str {
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let secret = std::env::var("JWT_SECRET")
         .unwrap_or_else(|_| "dev-secret-key-0123456789abcdefghijklmn".into());
+    let redis_url = std::env::var("REDIS_URL")
+        .unwrap_or_else(|_| "redis://localhost:6379".into());
 
     let proxy_state = ProxyState {
         client: reqwest::Client::new(),
@@ -78,6 +83,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             SecurityBodyCompatLayer::new()
                 .strict()
                 .body_limit(1024 * 1024),
+        )
+        // 限流：默认 100 次/分钟（RATE_LIMIT_MAX / RATE_LIMIT_WINDOW_SECS 可配），
+        // Redis 不可用降级内存存储（fail-open，与 store 语义一致）；
+        // HandleErrorLayer 包裹限流层，把超限错误映射为 429
+        .layer(
+            // ServiceBuilder：先加的层在外层，故 HandleError 包住限流层
+            tower::ServiceBuilder::new()
+                .layer(axum::error_handling::HandleErrorLayer::new(rate_limit_error))
+                .layer(rate_limit(&redis_url).await)
+                .into_inner(),
         );
 
     let srv = ecat_transport_http::HttpServer::new("0.0.0.0:8080").router(router);
@@ -88,4 +103,65 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .build()?;
     app.run().await?;
     Ok(())
+}
+
+/// Redis 限流存储，不可用时降级内存（fail-open，与 store 语义一致）。
+async fn rate_limit(redis_url: &str) -> RateLimitLayer<axum::body::Body> {
+    let max = env_u32("RATE_LIMIT_MAX", 100);
+    let window_secs = env_u32("RATE_LIMIT_WINDOW_SECS", 60);
+    let store: Arc<dyn RateLimitStore> = match RedisRateLimitStore::connect(redis_url).await {
+        Ok(s) => {
+            tracing::info!("rate limit store: redis");
+            Arc::new(s)
+        }
+        Err(e) => {
+            tracing::warn!(error = %e, "redis rate-limit store unavailable; fallback to in-memory");
+            Arc::new(MemoryStore::new())
+        }
+    };
+    RateLimitLayer::new(max, Duration::from_secs(window_secs as u64))
+        .with_store(store)
+        // 优先按租户（x-tenant-id），否则按来源 IP（ConnectInfo 由 HttpServer 填充）
+        .with_key_fn(|req: &axum::http::Request<axum::body::Body>| {
+            if let Some(t) = req
+                .headers()
+                .get("x-tenant-id")
+                .and_then(|v| v.to_str().ok())
+            {
+                return format!("tenant:{t}");
+            }
+            match req
+                .extensions()
+                .get::<axum::extract::ConnectInfo<std::net::SocketAddr>>()
+            {
+                Some(axum::extract::ConnectInfo(addr)) => format!("ip:{}", addr.ip()),
+                None => "global".into(),
+            }
+        })
+}
+
+fn env_u32(name: &str, default: u32) -> u32 {
+    std::env::var(name)
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(default)
+}
+
+/// 限流超限 → 429；其余服务错误 → 500（详情只进日志）。
+async fn rate_limit_error(
+    e: Box<dyn std::error::Error + Send + Sync>,
+) -> axum::response::Response {
+    if e.is::<ecat_middleware::RateLimitError>() {
+        return (
+            axum::http::StatusCode::TOO_MANY_REQUESTS,
+            "rate limit exceeded",
+        )
+            .into_response();
+    }
+    tracing::warn!(error = %e, "rate limit service error");
+    (
+        axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+        "internal error",
+    )
+        .into_response()
 }

@@ -15,7 +15,7 @@ pub use tower_http::cors::{AllowOrigin, Any, CorsLayer};
 
 pub use gate::{secret_eq, tenant_from_header};
 pub use logging::LoggingLayer;
-pub use ratelimit::{MemoryStore, RateLimitLayer, RateLimitStore};
+pub use ratelimit::{MemoryStore, RateLimitError, RateLimitLayer, RateLimitStore};
 #[cfg(feature = "redis")]
 pub use ratelimit_redis::RedisRateLimitStore;
 pub use recovery::RecoveryLayer;

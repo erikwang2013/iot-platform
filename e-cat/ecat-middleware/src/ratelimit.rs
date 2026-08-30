@@ -165,12 +165,23 @@ impl RateLimiter {
 /// function inspects. `new` produces `RateLimitLayer<()>`; call
 /// [`with_key_fn`](Self::with_key_fn) with the body type of your service
 /// (e.g. `axum::body::Body`) to extract keys from the full request.
-#[derive(Clone)]
 pub struct RateLimitLayer<B = ()> {
     limiter: Arc<RateLimiter>,
     max_requests: u32,
     window: Duration,
     key_fn: KeyFn<B>,
+}
+
+// 手写 Clone：B 仅出现在 Arc<dyn Fn> 内部（不要求 B: Clone，axum Body 不 Clone）
+impl<B> Clone for RateLimitLayer<B> {
+    fn clone(&self) -> Self {
+        Self {
+            limiter: Arc::clone(&self.limiter),
+            max_requests: self.max_requests,
+            window: self.window,
+            key_fn: Arc::clone(&self.key_fn),
+        }
+    }
 }
 
 impl RateLimitLayer<()> {
@@ -237,11 +248,23 @@ where
     }
 }
 
-#[derive(Clone)]
 pub struct RateLimitService<S, B = ()> {
     inner: S,
     limiter: Arc<RateLimiter>,
     key_fn: KeyFn<B>,
+}
+
+impl<S, B> Clone for RateLimitService<S, B>
+where
+    S: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+            limiter: Arc::clone(&self.limiter),
+            key_fn: Arc::clone(&self.key_fn),
+        }
+    }
 }
 
 impl<S, B> Service<http::Request<B>> for RateLimitService<S, B>
