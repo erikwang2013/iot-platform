@@ -1,7 +1,7 @@
-import 'dart:convert';
-
 /// 后端 API 数据模型（与 e-cat 各服务 JSON 契约对应，字段取用尽量宽松）。
 library;
+
+import 'dart:convert';
 
 String _s(Map<String, dynamic> j, String key, [String fallback = '']) =>
     j[key] is String && (j[key] as String).isNotEmpty ? j[key] as String : fallback;
@@ -209,7 +209,7 @@ class ThingModel {
 
   factory ThingModel.fromJson(Map<String, dynamic> j) {
     List<T> pick<T>(dynamic v, T Function(Map<String, dynamic>) f) =>
-        v is List ? v.whereType<Map<String, dynamic>>().map(f).toList() : const <T>[];
+        v is List ? v.whereType<Map<String, dynamic>>().map(f).toList() : <T>[];
     return ThingModel(
       properties: pick<ThingProperty>(j['properties'] ?? j['props'], ThingProperty.fromJson),
       events: pick<ThingEvent>(j['events'], ThingEvent.fromJson),

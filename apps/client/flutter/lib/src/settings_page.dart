@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../l10n/app_localizations.dart';
+import 'auth_controller.dart';
 import 'i18n/locale_controller.dart';
 import 'i18n_demo_page.dart';
 
@@ -125,7 +126,7 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.logout),
             title: Text(l10n.settingsLogout),
-            onTap: placeholder,
+            onTap: () => context.read<AuthController>().logout(),
           ),
         ],
       ),

@@ -21,6 +21,8 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
+    # 页面 await API 后经 helper 弹 SnackBar 是既定模式，关闭该 lint 避免 30+ 条噪音
+    use_build_context_synchronously: false
     # avoid_print: false  # Uncomment to disable the `avoid_print` rule
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
 

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import 'pages/alerts_page.dart';
+import 'pages/dashboard_page.dart';
+import 'pages/device_list_page.dart';
 import 'settings_page.dart';
 
 class HomeShell extends StatefulWidget {
@@ -20,9 +23,9 @@ class _HomeShellState extends State<HomeShell> {
       body: IndexedStack(
         index: _index,
         children: const [
-          _PlaceholderPage(icon: Icons.dashboard_outlined),
-          _PlaceholderPage(icon: Icons.devices_outlined),
-          _PlaceholderPage(icon: Icons.notifications_outlined),
+          DashboardPage(),
+          DeviceListPage(),
+          AlertsPage(),
           SettingsPage(),
         ],
       ),
@@ -51,20 +54,6 @@ class _HomeShellState extends State<HomeShell> {
             label: l10n.navSettings,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _PlaceholderPage extends StatelessWidget {
-  final IconData icon;
-  const _PlaceholderPage({required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Icon(icon, size: 64, color: Theme.of(context).colorScheme.outline),
       ),
     );
   }
