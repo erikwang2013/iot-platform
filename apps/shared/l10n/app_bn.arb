@@ -134,5 +134,19 @@
   "commandSent": "কমান্ড পাঠানো হয়েছে",
   "modelName": "নাম",
   "deviceLifecycleConfirm": "ডিভাইসে এই কাজটি করবেন?",
-  "modelAdd": "যোগ করুন"
+  "modelAdd": "যোগ করুন",
+  "statTotalDevices": "মোট ডিভাইস",
+  "statOnlineDevices": "অনলাইন",
+  "statOfflineDevices": "অফলাইন",
+  "statActiveAlerts": "অপঠিত সতর্কতা",
+  "statVendors": "সংযুক্ত ভেন্ডর",
+  "statVendorDist": "ভেন্ডর বিতরণ",
+  "reportToday": "আজ",
+  "reportLast7Days": "গত ৭ দিন",
+  "reportLast30Days": "গত ৩০ দিন",
+  "reportCustom": "কাস্টম",
+  "reportExportCsv": "CSV রপ্তানি",
+  "reportTrendTitle": "রিপোর্ট প্রবণতা",
+  "reportStartDate": "শুরুর তারিখ",
+  "reportEndDate": "শেষ তারিখ"
 }

@@ -134,5 +134,19 @@
   "commandSent": "コマンド送信済み",
   "modelName": "名称",
   "deviceLifecycleConfirm": "このデバイスにこの操作を実行しますか？",
-  "modelAdd": "追加"
+  "modelAdd": "追加",
+  "statTotalDevices": "デバイス総数",
+  "statOnlineDevices": "オンライン",
+  "statOfflineDevices": "オフライン",
+  "statActiveAlerts": "未処理アラート",
+  "statVendors": "接続ベンダー",
+  "statVendorDist": "ベンダー分布",
+  "reportToday": "今日",
+  "reportLast7Days": "直近7日",
+  "reportLast30Days": "直近30日",
+  "reportCustom": "カスタム",
+  "reportExportCsv": "CSVエクスポート",
+  "reportTrendTitle": "報告トレンド",
+  "reportStartDate": "開始日",
+  "reportEndDate": "終了日"
 }

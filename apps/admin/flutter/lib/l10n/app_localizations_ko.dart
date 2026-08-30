@@ -412,4 +412,46 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get modelAdd => '추가';
+
+  @override
+  String get statTotalDevices => '장치 총계';
+
+  @override
+  String get statOnlineDevices => '온라인';
+
+  @override
+  String get statOfflineDevices => '오프라인';
+
+  @override
+  String get statActiveAlerts => '미처리 알림';
+
+  @override
+  String get statVendors => '접속 업체';
+
+  @override
+  String get statVendorDist => '업체 분포';
+
+  @override
+  String get reportToday => '오늘';
+
+  @override
+  String get reportLast7Days => '최근 7일';
+
+  @override
+  String get reportLast30Days => '최근 30일';
+
+  @override
+  String get reportCustom => '사용자 지정';
+
+  @override
+  String get reportExportCsv => 'CSV 내보내기';
+
+  @override
+  String get reportTrendTitle => '보고 추세';
+
+  @override
+  String get reportStartDate => '시작 날짜';
+
+  @override
+  String get reportEndDate => '종료 날짜';
 }

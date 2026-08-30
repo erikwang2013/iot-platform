@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import 'pages/cdn_page.dart';
+import 'pages/dashboard_page.dart';
 import 'pages/devices_page.dart';
 import 'pages/history_page.dart';
 import 'pages/models_page.dart';
+import 'pages/reports_page.dart';
 import 'pages/rules_page.dart';
 import 'pages/tenants_page.dart';
 import 'settings_page.dart';
@@ -24,10 +26,12 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final pages = [
+      const DashboardPage(),
       const DevicesPage(),
       const ModelsPage(),
       const RulesPage(),
       const HistoryPage(),
+      const ReportsPage(),
       const CdnPage(),
       const TenantsPage(),
       const SettingsPage(),
@@ -48,6 +52,11 @@ class _HomeShellState extends State<HomeShell> {
           ),
           const Divider(height: 1),
           NavigationDrawerDestination(
+            icon: const Icon(Icons.dashboard_outlined),
+            selectedIcon: const Icon(Icons.dashboard),
+            label: Text(l10n.navDashboard),
+          ),
+          NavigationDrawerDestination(
             icon: const Icon(Icons.devices_outlined),
             selectedIcon: const Icon(Icons.devices),
             label: Text(l10n.navDevices),
@@ -65,6 +74,10 @@ class _HomeShellState extends State<HomeShell> {
           NavigationDrawerDestination(
             icon: const Icon(Icons.show_chart),
             label: Text(l10n.navHistory),
+          ),
+          NavigationDrawerDestination(
+            icon: const Icon(Icons.bar_chart),
+            label: Text(l10n.navReports),
           ),
           NavigationDrawerDestination(
             icon: const Icon(Icons.cloud_outlined),

@@ -134,5 +134,19 @@
   "commandSent": "Commande envoyée",
   "modelName": "Nom",
   "deviceLifecycleConfirm": "Effectuer cette action sur l'appareil ?",
-  "modelAdd": "Ajouter"
+  "modelAdd": "Ajouter",
+  "statTotalDevices": "Appareils totaux",
+  "statOnlineDevices": "En ligne",
+  "statOfflineDevices": "Hors ligne",
+  "statActiveAlerts": "Alertes actives",
+  "statVendors": "Fournisseurs",
+  "statVendorDist": "Répartition des fournisseurs",
+  "reportToday": "Aujourd'hui",
+  "reportLast7Days": "7 derniers jours",
+  "reportLast30Days": "30 derniers jours",
+  "reportCustom": "Personnalisé",
+  "reportExportCsv": "Exporter CSV",
+  "reportTrendTitle": "Tendance des rapports",
+  "reportStartDate": "Date de début",
+  "reportEndDate": "Date de fin"
 }

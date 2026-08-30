@@ -414,4 +414,46 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get modelAdd => 'যোগ করুন';
+
+  @override
+  String get statTotalDevices => 'মোট ডিভাইস';
+
+  @override
+  String get statOnlineDevices => 'অনলাইন';
+
+  @override
+  String get statOfflineDevices => 'অফলাইন';
+
+  @override
+  String get statActiveAlerts => 'অপঠিত সতর্কতা';
+
+  @override
+  String get statVendors => 'সংযুক্ত ভেন্ডর';
+
+  @override
+  String get statVendorDist => 'ভেন্ডর বিতরণ';
+
+  @override
+  String get reportToday => 'আজ';
+
+  @override
+  String get reportLast7Days => 'গত ৭ দিন';
+
+  @override
+  String get reportLast30Days => 'গত ৩০ দিন';
+
+  @override
+  String get reportCustom => 'কাস্টম';
+
+  @override
+  String get reportExportCsv => 'CSV রপ্তানি';
+
+  @override
+  String get reportTrendTitle => 'রিপোর্ট প্রবণতা';
+
+  @override
+  String get reportStartDate => 'শুরুর তারিখ';
+
+  @override
+  String get reportEndDate => 'শেষ তারিখ';
 }

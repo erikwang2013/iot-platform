@@ -415,4 +415,46 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get modelAdd => 'Добавить';
+
+  @override
+  String get statTotalDevices => 'Всего устройств';
+
+  @override
+  String get statOnlineDevices => 'Онлайн';
+
+  @override
+  String get statOfflineDevices => 'Офлайн';
+
+  @override
+  String get statActiveAlerts => 'Необработанные оповещения';
+
+  @override
+  String get statVendors => 'Подключенные вендоры';
+
+  @override
+  String get statVendorDist => 'Распределение вендоров';
+
+  @override
+  String get reportToday => 'Сегодня';
+
+  @override
+  String get reportLast7Days => 'Последние 7 дней';
+
+  @override
+  String get reportLast30Days => 'Последние 30 дней';
+
+  @override
+  String get reportCustom => 'Пользовательский';
+
+  @override
+  String get reportExportCsv => 'Экспорт CSV';
+
+  @override
+  String get reportTrendTitle => 'Тренд отчетности';
+
+  @override
+  String get reportStartDate => 'Дата начала';
+
+  @override
+  String get reportEndDate => 'Дата окончания';
 }

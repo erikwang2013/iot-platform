@@ -414,4 +414,46 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get modelAdd => 'إضافة';
+
+  @override
+  String get statTotalDevices => 'إجمالي الأجهزة';
+
+  @override
+  String get statOnlineDevices => 'متصل';
+
+  @override
+  String get statOfflineDevices => 'غير متصل';
+
+  @override
+  String get statActiveAlerts => 'تنبيهات نشطة';
+
+  @override
+  String get statVendors => 'الموردون المتصلون';
+
+  @override
+  String get statVendorDist => 'توزيع الموردين';
+
+  @override
+  String get reportToday => 'اليوم';
+
+  @override
+  String get reportLast7Days => 'آخر 7 أيام';
+
+  @override
+  String get reportLast30Days => 'آخر 30 يومًا';
+
+  @override
+  String get reportCustom => 'مخصص';
+
+  @override
+  String get reportExportCsv => 'تصدير CSV';
+
+  @override
+  String get reportTrendTitle => 'اتجاه التقارير';
+
+  @override
+  String get reportStartDate => 'تاريخ البدء';
+
+  @override
+  String get reportEndDate => 'تاريخ الانتهاء';
 }

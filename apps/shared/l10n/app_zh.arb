@@ -134,5 +134,19 @@
   "commandSent": "指令已下发",
   "modelName": "名称",
   "deviceLifecycleConfirm": "确定对该设备执行此操作？",
-  "modelAdd": "添加"
+  "modelAdd": "添加",
+  "statTotalDevices": "设备总数",
+  "statOnlineDevices": "在线设备",
+  "statOfflineDevices": "离线设备",
+  "statActiveAlerts": "未处理告警",
+  "statVendors": "接入厂商",
+  "statVendorDist": "厂商分布",
+  "reportToday": "今日",
+  "reportLast7Days": "近 7 天",
+  "reportLast30Days": "近 30 天",
+  "reportCustom": "自定义",
+  "reportExportCsv": "导出 CSV",
+  "reportTrendTitle": "上报趋势",
+  "reportStartDate": "开始日期",
+  "reportEndDate": "结束日期"
 }

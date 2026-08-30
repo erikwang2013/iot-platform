@@ -412,4 +412,46 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get modelAdd => '追加';
+
+  @override
+  String get statTotalDevices => 'デバイス総数';
+
+  @override
+  String get statOnlineDevices => 'オンライン';
+
+  @override
+  String get statOfflineDevices => 'オフライン';
+
+  @override
+  String get statActiveAlerts => '未処理アラート';
+
+  @override
+  String get statVendors => '接続ベンダー';
+
+  @override
+  String get statVendorDist => 'ベンダー分布';
+
+  @override
+  String get reportToday => '今日';
+
+  @override
+  String get reportLast7Days => '直近7日';
+
+  @override
+  String get reportLast30Days => '直近30日';
+
+  @override
+  String get reportCustom => 'カスタム';
+
+  @override
+  String get reportExportCsv => 'CSVエクスポート';
+
+  @override
+  String get reportTrendTitle => '報告トレンド';
+
+  @override
+  String get reportStartDate => '開始日';
+
+  @override
+  String get reportEndDate => '終了日';
 }

@@ -412,4 +412,46 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get modelAdd => '添加';
+
+  @override
+  String get statTotalDevices => '设备总数';
+
+  @override
+  String get statOnlineDevices => '在线设备';
+
+  @override
+  String get statOfflineDevices => '离线设备';
+
+  @override
+  String get statActiveAlerts => '未处理告警';
+
+  @override
+  String get statVendors => '接入厂商';
+
+  @override
+  String get statVendorDist => '厂商分布';
+
+  @override
+  String get reportToday => '今日';
+
+  @override
+  String get reportLast7Days => '近 7 天';
+
+  @override
+  String get reportLast30Days => '近 30 天';
+
+  @override
+  String get reportCustom => '自定义';
+
+  @override
+  String get reportExportCsv => '导出 CSV';
+
+  @override
+  String get reportTrendTitle => '上报趋势';
+
+  @override
+  String get reportStartDate => '开始日期';
+
+  @override
+  String get reportEndDate => '结束日期';
 }

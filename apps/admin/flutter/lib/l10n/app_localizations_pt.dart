@@ -414,4 +414,46 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get modelAdd => 'Adicionar';
+
+  @override
+  String get statTotalDevices => 'Dispositivos totais';
+
+  @override
+  String get statOnlineDevices => 'Online';
+
+  @override
+  String get statOfflineDevices => 'Offline';
+
+  @override
+  String get statActiveAlerts => 'Alertas ativas';
+
+  @override
+  String get statVendors => 'Fornecedores';
+
+  @override
+  String get statVendorDist => 'Distribuição de fornecedores';
+
+  @override
+  String get reportToday => 'Hoje';
+
+  @override
+  String get reportLast7Days => 'Últimos 7 dias';
+
+  @override
+  String get reportLast30Days => 'Últimos 30 dias';
+
+  @override
+  String get reportCustom => 'Personalizado';
+
+  @override
+  String get reportExportCsv => 'Exportar CSV';
+
+  @override
+  String get reportTrendTitle => 'Tendência de relatórios';
+
+  @override
+  String get reportStartDate => 'Data inicial';
+
+  @override
+  String get reportEndDate => 'Data final';
 }

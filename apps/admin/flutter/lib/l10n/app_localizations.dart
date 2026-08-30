@@ -929,6 +929,90 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'添加'**
   String get modelAdd;
+
+  /// No description provided for @statTotalDevices.
+  ///
+  /// In zh, this message translates to:
+  /// **'设备总数'**
+  String get statTotalDevices;
+
+  /// No description provided for @statOnlineDevices.
+  ///
+  /// In zh, this message translates to:
+  /// **'在线设备'**
+  String get statOnlineDevices;
+
+  /// No description provided for @statOfflineDevices.
+  ///
+  /// In zh, this message translates to:
+  /// **'离线设备'**
+  String get statOfflineDevices;
+
+  /// No description provided for @statActiveAlerts.
+  ///
+  /// In zh, this message translates to:
+  /// **'未处理告警'**
+  String get statActiveAlerts;
+
+  /// No description provided for @statVendors.
+  ///
+  /// In zh, this message translates to:
+  /// **'接入厂商'**
+  String get statVendors;
+
+  /// No description provided for @statVendorDist.
+  ///
+  /// In zh, this message translates to:
+  /// **'厂商分布'**
+  String get statVendorDist;
+
+  /// No description provided for @reportToday.
+  ///
+  /// In zh, this message translates to:
+  /// **'今日'**
+  String get reportToday;
+
+  /// No description provided for @reportLast7Days.
+  ///
+  /// In zh, this message translates to:
+  /// **'近 7 天'**
+  String get reportLast7Days;
+
+  /// No description provided for @reportLast30Days.
+  ///
+  /// In zh, this message translates to:
+  /// **'近 30 天'**
+  String get reportLast30Days;
+
+  /// No description provided for @reportCustom.
+  ///
+  /// In zh, this message translates to:
+  /// **'自定义'**
+  String get reportCustom;
+
+  /// No description provided for @reportExportCsv.
+  ///
+  /// In zh, this message translates to:
+  /// **'导出 CSV'**
+  String get reportExportCsv;
+
+  /// No description provided for @reportTrendTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'上报趋势'**
+  String get reportTrendTitle;
+
+  /// No description provided for @reportStartDate.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始日期'**
+  String get reportStartDate;
+
+  /// No description provided for @reportEndDate.
+  ///
+  /// In zh, this message translates to:
+  /// **'结束日期'**
+  String get reportEndDate;
 }
 
 class _AppLocalizationsDelegate

@@ -134,5 +134,19 @@
   "commandSent": "कमांड भेजा गया",
   "modelName": "नाम",
   "deviceLifecycleConfirm": "डिवाइस पर यह कार्रवाई करें?",
-  "modelAdd": "जोड़ें"
+  "modelAdd": "जोड़ें",
+  "statTotalDevices": "कुल डिवाइस",
+  "statOnlineDevices": "ऑनलाइन",
+  "statOfflineDevices": "ऑफ़लाइन",
+  "statActiveAlerts": "अनसुलझे अलर्ट",
+  "statVendors": "कनेक्टेड विक्रेता",
+  "statVendorDist": "विक्रेता वितरण",
+  "reportToday": "आज",
+  "reportLast7Days": "पिछले 7 दिन",
+  "reportLast30Days": "पिछले 30 दिन",
+  "reportCustom": "कस्टम",
+  "reportExportCsv": "CSV निर्यात",
+  "reportTrendTitle": "रिपोर्ट प्रवृत्ति",
+  "reportStartDate": "आरंभ तिथि",
+  "reportEndDate": "समाप्ति तिथि"
 }

@@ -134,5 +134,19 @@
   "commandSent": "Perintah terkirim",
   "modelName": "Nama",
   "deviceLifecycleConfirm": "Lakukan tindakan ini pada perangkat?",
-  "modelAdd": "Tambah"
+  "modelAdd": "Tambah",
+  "statTotalDevices": "Total perangkat",
+  "statOnlineDevices": "Daring",
+  "statOfflineDevices": "Luring",
+  "statActiveAlerts": "Peringatan aktif",
+  "statVendors": "Vendor terhubung",
+  "statVendorDist": "Distribusi vendor",
+  "reportToday": "Hari ini",
+  "reportLast7Days": "7 hari terakhir",
+  "reportLast30Days": "30 hari terakhir",
+  "reportCustom": "Kustom",
+  "reportExportCsv": "Ekspor CSV",
+  "reportTrendTitle": "Tren laporan",
+  "reportStartDate": "Tanggal mulai",
+  "reportEndDate": "Tanggal selesai"
 }

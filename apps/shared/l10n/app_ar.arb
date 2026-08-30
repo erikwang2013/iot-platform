@@ -134,5 +134,19 @@
   "commandSent": "تم إرسال الأمر",
   "modelName": "الاسم",
   "deviceLifecycleConfirm": "تنفيذ هذا الإجراء على الجهاز؟",
-  "modelAdd": "إضافة"
+  "modelAdd": "إضافة",
+  "statTotalDevices": "إجمالي الأجهزة",
+  "statOnlineDevices": "متصل",
+  "statOfflineDevices": "غير متصل",
+  "statActiveAlerts": "تنبيهات نشطة",
+  "statVendors": "الموردون المتصلون",
+  "statVendorDist": "توزيع الموردين",
+  "reportToday": "اليوم",
+  "reportLast7Days": "آخر 7 أيام",
+  "reportLast30Days": "آخر 30 يومًا",
+  "reportCustom": "مخصص",
+  "reportExportCsv": "تصدير CSV",
+  "reportTrendTitle": "اتجاه التقارير",
+  "reportStartDate": "تاريخ البدء",
+  "reportEndDate": "تاريخ الانتهاء"
 }

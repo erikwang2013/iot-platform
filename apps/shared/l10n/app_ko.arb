@@ -134,5 +134,19 @@
   "commandSent": "명령 전송됨",
   "modelName": "이름",
   "deviceLifecycleConfirm": "이 기기에 이 작업을 수행하시겠습니까?",
-  "modelAdd": "추가"
+  "modelAdd": "추가",
+  "statTotalDevices": "장치 총계",
+  "statOnlineDevices": "온라인",
+  "statOfflineDevices": "오프라인",
+  "statActiveAlerts": "미처리 알림",
+  "statVendors": "접속 업체",
+  "statVendorDist": "업체 분포",
+  "reportToday": "오늘",
+  "reportLast7Days": "최근 7일",
+  "reportLast30Days": "최근 30일",
+  "reportCustom": "사용자 지정",
+  "reportExportCsv": "CSV 내보내기",
+  "reportTrendTitle": "보고 추세",
+  "reportStartDate": "시작 날짜",
+  "reportEndDate": "종료 날짜"
 }

@@ -134,5 +134,19 @@
   "commandSent": "Befehl gesendet",
   "modelName": "Name",
   "deviceLifecycleConfirm": "Diese Aktion am Gerät ausführen?",
-  "modelAdd": "Hinzufügen"
+  "modelAdd": "Hinzufügen",
+  "statTotalDevices": "Geräte gesamt",
+  "statOnlineDevices": "Online",
+  "statOfflineDevices": "Offline",
+  "statActiveAlerts": "Unbearbeitete Alarme",
+  "statVendors": "Anbieter",
+  "statVendorDist": "Anbieterverteilung",
+  "reportToday": "Heute",
+  "reportLast7Days": "Letzte 7 Tage",
+  "reportLast30Days": "Letzte 30 Tage",
+  "reportCustom": "Benutzerdefiniert",
+  "reportExportCsv": "CSV exportieren",
+  "reportTrendTitle": "Berichtstrend",
+  "reportStartDate": "Startdatum",
+  "reportEndDate": "Enddatum"
 }

@@ -414,4 +414,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get modelAdd => 'Add';
+
+  @override
+  String get statTotalDevices => 'Total Devices';
+
+  @override
+  String get statOnlineDevices => 'Online';
+
+  @override
+  String get statOfflineDevices => 'Offline';
+
+  @override
+  String get statActiveAlerts => 'Active Alerts';
+
+  @override
+  String get statVendors => 'Vendors';
+
+  @override
+  String get statVendorDist => 'Vendor Distribution';
+
+  @override
+  String get reportToday => 'Today';
+
+  @override
+  String get reportLast7Days => 'Last 7 Days';
+
+  @override
+  String get reportLast30Days => 'Last 30 Days';
+
+  @override
+  String get reportCustom => 'Custom';
+
+  @override
+  String get reportExportCsv => 'Export CSV';
+
+  @override
+  String get reportTrendTitle => 'Report Trend';
+
+  @override
+  String get reportStartDate => 'Start Date';
+
+  @override
+  String get reportEndDate => 'End Date';
 }

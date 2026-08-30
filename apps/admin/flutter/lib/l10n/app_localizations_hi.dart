@@ -414,4 +414,46 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get modelAdd => 'जोड़ें';
+
+  @override
+  String get statTotalDevices => 'कुल डिवाइस';
+
+  @override
+  String get statOnlineDevices => 'ऑनलाइन';
+
+  @override
+  String get statOfflineDevices => 'ऑफ़लाइन';
+
+  @override
+  String get statActiveAlerts => 'अनसुलझे अलर्ट';
+
+  @override
+  String get statVendors => 'कनेक्टेड विक्रेता';
+
+  @override
+  String get statVendorDist => 'विक्रेता वितरण';
+
+  @override
+  String get reportToday => 'आज';
+
+  @override
+  String get reportLast7Days => 'पिछले 7 दिन';
+
+  @override
+  String get reportLast30Days => 'पिछले 30 दिन';
+
+  @override
+  String get reportCustom => 'कस्टम';
+
+  @override
+  String get reportExportCsv => 'CSV निर्यात';
+
+  @override
+  String get reportTrendTitle => 'रिपोर्ट प्रवृत्ति';
+
+  @override
+  String get reportStartDate => 'आरंभ तिथि';
+
+  @override
+  String get reportEndDate => 'समाप्ति तिथि';
 }

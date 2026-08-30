@@ -414,4 +414,46 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get modelAdd => 'Tambah';
+
+  @override
+  String get statTotalDevices => 'Total perangkat';
+
+  @override
+  String get statOnlineDevices => 'Daring';
+
+  @override
+  String get statOfflineDevices => 'Luring';
+
+  @override
+  String get statActiveAlerts => 'Peringatan aktif';
+
+  @override
+  String get statVendors => 'Vendor terhubung';
+
+  @override
+  String get statVendorDist => 'Distribusi vendor';
+
+  @override
+  String get reportToday => 'Hari ini';
+
+  @override
+  String get reportLast7Days => '7 hari terakhir';
+
+  @override
+  String get reportLast30Days => '30 hari terakhir';
+
+  @override
+  String get reportCustom => 'Kustom';
+
+  @override
+  String get reportExportCsv => 'Ekspor CSV';
+
+  @override
+  String get reportTrendTitle => 'Tren laporan';
+
+  @override
+  String get reportStartDate => 'Tanggal mulai';
+
+  @override
+  String get reportEndDate => 'Tanggal selesai';
 }

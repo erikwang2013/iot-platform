@@ -134,5 +134,19 @@
   "commandSent": "Команда отправлена",
   "modelName": "Название",
   "deviceLifecycleConfirm": "Выполнить это действие над устройством?",
-  "modelAdd": "Добавить"
+  "modelAdd": "Добавить",
+  "statTotalDevices": "Всего устройств",
+  "statOnlineDevices": "Онлайн",
+  "statOfflineDevices": "Офлайн",
+  "statActiveAlerts": "Необработанные оповещения",
+  "statVendors": "Подключенные вендоры",
+  "statVendorDist": "Распределение вендоров",
+  "reportToday": "Сегодня",
+  "reportLast7Days": "Последние 7 дней",
+  "reportLast30Days": "Последние 30 дней",
+  "reportCustom": "Пользовательский",
+  "reportExportCsv": "Экспорт CSV",
+  "reportTrendTitle": "Тренд отчетности",
+  "reportStartDate": "Дата начала",
+  "reportEndDate": "Дата окончания"
 }
