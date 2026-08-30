@@ -27,6 +27,16 @@ struct Index {
         + i18n.getDisplayLanguage(this.currentLocale, this.currentLocale, true))
         .fontSize(16)
         .fontColor($r('app.color.app_primary'))
+      Button($r('app.string.login_btn'))
+        .width(200)
+        .onClick(() => {
+          router.pushUrl({ url: 'pages/Login' });
+        })
+      Button($r('app.string.device_my_devices'))
+        .width(200)
+        .onClick(() => {
+          router.pushUrl({ url: 'pages/Devices' });
+        })
       Button($r('app.string.nav_settings'))
         .width(200)
         .onClick(() => {
