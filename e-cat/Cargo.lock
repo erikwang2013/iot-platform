@@ -1284,6 +1284,8 @@ dependencies = [
  "sha2 0.10.9",
  "thiserror 2.0.19",
  "tokio",
+ "tower 0.5.3",
+ "tower-util",
  "tracing",
  "uuid",
 ]

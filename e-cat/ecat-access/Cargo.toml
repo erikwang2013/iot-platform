@@ -3,6 +3,10 @@ name = "ecat-access"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "iot-access"
+path = "src/main.rs"
+
 [dependencies]
 ecat = { path = "../ecat" }
 ecat-transport-http.workspace = true
@@ -31,3 +35,7 @@ hmac = "0.12"
 hex = "0.4"
 uuid = { version = "1", features = ["v4"] }
 futures-util = "0.3"
+
+[dev-dependencies]
+tower-util = "0.3"
+tower.workspace = true
