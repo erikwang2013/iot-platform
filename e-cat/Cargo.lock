@@ -1683,11 +1683,19 @@ name = "ecat-gateway"
 version = "0.1.0"
 dependencies = [
  "axum 0.8.9",
+ "ecat",
  "ecat-auth",
+ "ecat-health",
+ "ecat-security",
+ "ecat-transport-http",
  "http",
+ "jsonwebtoken",
  "reqwest",
+ "serde",
  "serde_json",
+ "tokio",
  "tower 0.5.3",
+ "tower-util",
 ]
 
 [[package]]
@@ -2983,110 +2991,6 @@ dependencies = [
  "hermit-abi 0.3.9",
  "libc",
  "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "iot-access"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "axum 0.8.9",
- "base64",
- "ecat",
- "ecat-access",
- "ecat-data",
- "ecat-data-redis",
- "ecat-data-sqlx",
- "ecat-health",
- "ecat-middleware",
- "ecat-mq",
- "ecat-mq-kafka",
- "ecat-mq-mqtt",
- "ecat-security",
- "ecat-transport-http",
- "futures-util",
- "hex",
- "hmac 0.12.1",
- "serde_json",
- "sha2 0.10.9",
- "tokio",
- "tower 0.5.3",
- "tower-util",
-]
-
-[[package]]
-name = "iot-data"
-version = "0.1.0"
-dependencies = [
- "axum 0.8.9",
- "ecat",
- "ecat-data",
- "ecat-data-service",
- "ecat-data-tdengine",
- "ecat-health",
- "ecat-middleware",
- "ecat-mq",
- "ecat-mq-kafka",
- "ecat-transport-http",
- "serde",
- "serde_json",
- "tokio",
- "tower 0.5.3",
- "tracing",
-]
-
-[[package]]
-name = "iot-device"
-version = "0.1.0"
-dependencies = [
- "axum 0.8.9",
- "ecat",
- "ecat-data-sqlx",
- "ecat-device",
- "ecat-health",
- "ecat-transport-http",
- "tokio",
-]
-
-[[package]]
-name = "iot-gateway"
-version = "0.1.0"
-dependencies = [
- "axum 0.8.9",
- "ecat",
- "ecat-auth",
- "ecat-gateway",
- "ecat-health",
- "ecat-security",
- "ecat-transport-http",
- "jsonwebtoken",
- "reqwest",
- "serde",
- "tokio",
- "tower 0.5.3",
- "tower-util",
-]
-
-[[package]]
-name = "iot-rule"
-version = "0.1.0"
-dependencies = [
- "axum 0.8.9",
- "ecat",
- "ecat-auth",
- "ecat-data",
- "ecat-data-sqlx",
- "ecat-health",
- "ecat-middleware",
- "ecat-mq-kafka",
- "ecat-rule",
- "ecat-transport-http",
- "jsonwebtoken",
- "reqwest",
- "serde_json",
- "tokio",
- "tower 0.5.3",
- "tower-util",
 ]
 
 [[package]]

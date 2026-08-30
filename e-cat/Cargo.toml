@@ -63,11 +63,6 @@ members = [
     "ecat-access",
     "ecat-rule",
     "ecat-data-service",
-    "iot-gateway",
-    "iot-device",
-    "iot-access",
-    "iot-data",
-    "iot-rule",
 ]
 resolver = "2"
 
