@@ -1,4 +1,4 @@
-use crate::models::NewRule;
+use crate::models::{NewNotifyChannel, NewRule};
 use crate::store::RuleStore;
 use axum::{
     Json,
@@ -27,6 +27,11 @@ pub fn router(api: ApiState) -> axum::Router {
         .route("/alerts", axum::routing::get(list_alerts))
         .route("/alerts/{id}/ack", axum::routing::post(ack_alert))
         .route("/stats", axum::routing::get(alert_stats))
+        .route(
+            "/channels/{channel}",
+            axum::routing::put(upsert_channel).delete(delete_channel),
+        )
+        .route("/channels", axum::routing::get(list_channels))
         .with_state(api)
 }
 
@@ -96,6 +101,48 @@ pub async fn delete_rule(
         .await
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
     if ok { Ok(StatusCode::NO_CONTENT) } else { Err((StatusCode::NOT_FOUND, "rule not found".into())) }
+}
+
+/// GET /api/rule/channels：通知渠道列表。
+pub async fn list_channels(
+    State(api): State<ApiState>,
+    tenant: axum::Extension<String>,
+) -> Result<Json<Vec<crate::models::NotifyChannel>>, (StatusCode, String)> {
+    let channels = api
+        .store
+        .list_channels(&tenant)
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    Ok(Json(channels))
+}
+
+/// PUT /api/rule/channels/{channel}：创建或更新（单租户单渠道唯一）。
+pub async fn upsert_channel(
+    State(api): State<ApiState>,
+    tenant: axum::Extension<String>,
+    Path(channel): Path<String>,
+    Json(body): Json<NewNotifyChannel>,
+) -> Result<Json<crate::models::NotifyChannel>, (StatusCode, String)> {
+    let ch = api
+        .store
+        .upsert_channel(&tenant, &channel, &body)
+        .await
+        .map_err(|e| (StatusCode::BAD_REQUEST, e))?;
+    Ok(Json(ch))
+}
+
+/// DELETE /api/rule/channels/{channel}
+pub async fn delete_channel(
+    State(api): State<ApiState>,
+    tenant: axum::Extension<String>,
+    Path(channel): Path<String>,
+) -> Result<StatusCode, (StatusCode, String)> {
+    let ok = api
+        .store
+        .delete_channel(&tenant, &channel)
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    if ok { Ok(StatusCode::NO_CONTENT) } else { Err((StatusCode::NOT_FOUND, "channel not found".into())) }
 }
 
 /// GET /api/rule/stats：告警总数 + 未处理数。

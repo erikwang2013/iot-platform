@@ -152,6 +152,140 @@ class RulesPage extends StatelessWidget {
     }
   }
 
+  Future<List<NotifyChannel>> _loadChannels(BuildContext context) async {
+    final api = context.read<ApiClient>();
+    return parseList<NotifyChannel>(
+        await api.get('/api/rule/channels'), NotifyChannel.fromJson);
+  }
+
+  Future<void> _editChannel(BuildContext context,
+      {NotifyChannel? existing}) async {
+    final api = context.read<ApiClient>();
+    final channel = existing?.channel ?? 'wecom';
+    final enabled = existing?.enabled ?? true;
+    final smtpHost = TextEditingController(
+        text: existing?.config['smtp_host'] as String? ?? '');
+    final smtpPort = TextEditingController(
+        text: existing?.config['smtp_port']?.toString() ?? '587');
+    final smtpUser = TextEditingController(
+        text: existing?.config['smtp_user'] as String? ?? '');
+    final smtpPass = TextEditingController(
+        text: existing?.config['smtp_pass'] as String? ?? '');
+    final mailFrom = TextEditingController(
+        text: existing?.config['mail_from'] as String? ?? '');
+    final mailTo =
+        TextEditingController(text: existing?.config['mail_to'] as String? ?? '');
+    final webhookUrl = TextEditingController(
+        text: existing?.config['webhook_url'] as String? ?? '');
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(existing == null ? '添加通知渠道' : '编辑通知渠道'),
+        content: StatefulBuilder(
+          builder: (ctx, setState) => SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: channel,
+                  decoration: const InputDecoration(labelText: '渠道类型'),
+                  items: const [
+                    DropdownMenuItem(value: 'email', child: Text('邮件 (SMTP)')),
+                    DropdownMenuItem(
+                        value: 'dingtalk', child: Text('钉钉机器人')),
+                    DropdownMenuItem(
+                        value: 'wecom', child: Text('企业微信机器人')),
+                  ],
+                  onChanged: (v) => setState(() {}),
+                ),
+                if (channel == 'email') ...[
+                  TextField(
+                      controller: smtpHost,
+                      decoration: const InputDecoration(labelText: 'SMTP 主机')),
+                  TextField(
+                      controller: smtpPort,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'SMTP 端口')),
+                  TextField(
+                      controller: smtpUser,
+                      decoration: const InputDecoration(labelText: 'SMTP 用户名')),
+                  TextField(
+                      controller: smtpPass,
+                      obscureText: true,
+                      decoration: const InputDecoration(labelText: 'SMTP 密码')),
+                  TextField(
+                      controller: mailFrom,
+                      decoration: const InputDecoration(labelText: '发件人')),
+                  TextField(
+                      controller: mailTo,
+                      decoration: const InputDecoration(labelText: '收件人')),
+                ] else
+                  TextField(
+                      controller: webhookUrl,
+                      decoration: const InputDecoration(labelText: 'Webhook URL')),
+                SwitchListTile(
+                  title: Text(l10n(ctx).commonEnabled),
+                  value: enabled,
+                  onChanged: (v) => setState(() {}),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n(ctx).commonCancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n(ctx).commonSave)),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final Map<String, dynamic> config;
+    if (channel == 'email') {
+      config = {
+        'smtp_host': smtpHost.text.trim(),
+        'smtp_port': int.tryParse(smtpPort.text) ?? 587,
+        'smtp_user': smtpUser.text.trim(),
+        'smtp_pass': smtpPass.text,
+        'mail_from': mailFrom.text.trim(),
+        'mail_to': mailTo.text.trim(),
+      };
+    } else {
+      config = {'webhook_url': webhookUrl.text.trim()};
+    }
+    try {
+      await api.put('/api/rule/channels/$channel',
+          body: NewNotifyChannel(config: config, enabled: enabled).toJson());
+      _toast(context, l10n(context).commonSuccess);
+    } catch (e) {
+      _toast(context, '$e');
+    }
+  }
+
+  Future<void> _deleteChannel(BuildContext context, NotifyChannel ch) async {
+    final api = context.read<ApiClient>();
+    try {
+      await api.delete('/api/rule/channels/${ch.channel}');
+      _toast(context, l10n(context).commonSuccess);
+    } catch (e) {
+      _toast(context, '$e');
+    }
+  }
+
+  Future<void> _toggleChannel(
+      BuildContext context, NotifyChannel ch, bool enabled) async {
+    final api = context.read<ApiClient>();
+    try {
+      await api.put('/api/rule/channels/${ch.channel}',
+          body: NewNotifyChannel(config: ch.config, enabled: enabled).toJson());
+    } catch (e) {
+      _toast(context, '$e');
+    }
+  }
+
   Future<void> _ackAlert(BuildContext context, AlertRecord a) async {
     final api = context.read<ApiClient>();
     try {
@@ -172,13 +306,14 @@ class RulesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.navRules),
           bottom: TabBar(tabs: [
             Tab(text: l10n.navRules),
             Tab(text: l10n.navAlerts),
+            const Tab(text: '通知渠道'),
           ]),
         ),
         body: TabBarView(
@@ -246,12 +381,52 @@ class RulesPage extends StatelessWidget {
                 },
               ),
             ),
+            ApiList<NotifyChannel>(
+              load: () => _loadChannels(context),
+              emptyText: '暂无通知渠道',
+              builder: (context, channels) => ListView.builder(
+                itemCount: channels.length,
+                itemBuilder: (context, i) {
+                  final c = channels[i];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    child: ListTile(
+                      leading: Icon(
+                        c.channel == 'email'
+                            ? Icons.email_outlined
+                            : Icons.chat_outlined,
+                        color: c.enabled ? Colors.green : Colors.grey,
+                      ),
+                      title: Text(c.channel),
+                      subtitle: Text(c.summary),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Switch(
+                            value: c.enabled,
+                            onChanged: (v) => _toggleChannel(context, c, v),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit_outlined),
+                            onPressed: () => _editChannel(context, existing: c),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline),
+                            onPressed: () => _deleteChannel(context, c),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => _editRule(context),
+          onPressed: () => _editChannel(context),
           icon: const Icon(Icons.add),
-          label: Text(l10n.ruleCreate),
+          label: Text('添加渠道'),
         ),
       ),
     );

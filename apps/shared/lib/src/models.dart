@@ -146,6 +146,51 @@ class AlertRecord {
       );
 }
 
+/// 通知渠道（ecat-rule NotifyChannel）。channel: email|dingtalk|wecom。
+class NotifyChannel {
+  NotifyChannel({
+    required this.channel,
+    this.config = const {},
+    this.enabled = true,
+  });
+
+  final String channel;
+  final Map<String, dynamic> config;
+  final bool enabled;
+
+  factory NotifyChannel.fromJson(Map<String, dynamic> j) => NotifyChannel(
+        channel: _s(j, 'channel'),
+        config: j['config'] is Map<String, dynamic>
+            ? j['config'] as Map<String, dynamic>
+            : const {},
+        enabled: j['enabled'] is bool ? j['enabled'] as bool : true,
+      );
+
+  String get summary {
+    if (channel == 'email') {
+      final to = config['mail_to'];
+      return to is String && to.isNotEmpty
+          ? 'smtp ${config['smtp_host']} → $to'
+          : 'smtp 未配置完整';
+    }
+    final url = config['webhook_url'];
+    return url is String ? url : '未配置 URL';
+  }
+}
+
+/// 创建/更新通知渠道的请求体（ecat-rule NewNotifyChannel）。
+class NewNotifyChannel {
+  NewNotifyChannel({required this.config, this.enabled});
+
+  final Map<String, dynamic> config;
+  final bool? enabled;
+
+  Map<String, dynamic> toJson() => {
+        'config': config,
+        if (enabled != null) 'enabled': enabled,
+      };
+}
+
 /// WebSocket 实时告警消息（ecat-rule AlertMessage）。
 class AlertMessage {
   AlertMessage({

@@ -71,6 +71,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/rule/alerts", get(rule_proxy))
         .route("/rule/alerts/{id}/ack", post(rule_proxy))
         .route("/rule/stats", get(rule_proxy))
+        .route("/rule/channels", get(rule_proxy))
+        .route("/rule/channels/{channel}", put(rule_proxy).delete(rule_proxy))
         .layer(
             JwtAuthCompat::new(&secret, &["sub", "role"])?
                 .role_policy(ROLES_ALL, ROLES_WRITE),
@@ -134,6 +136,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/ota/firmwares", get(device_proxy).post(device_proxy))
         .route("/ota/firmwares/{id}", delete(device_proxy))
         .route("/ota/tasks", get(device_proxy).post(device_proxy))
+        .route("/ota/tasks/{id}/report", post(device_proxy))
         .layer(
             JwtAuthCompat::new(&secret, &["sub", "role"])?
                 .role_policy(ROLES_ALL, ROLES_ADMIN),

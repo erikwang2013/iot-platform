@@ -1,5 +1,6 @@
 use ecat_rule::models::NewRule;
-use ecat_rule::store::{OPERATORS, validate_rule};
+use ecat_rule::store::{CHANNELS, OPERATORS, validate_channel, validate_rule};
+use serde_json::json;
 
 fn new_rule() -> NewRule {
     NewRule {
@@ -48,4 +49,53 @@ fn rejects_non_finite_threshold() {
     let mut r = new_rule();
     r.threshold = f64::NAN;
     assert!(validate_rule(&r).is_err());
+}
+
+fn email_cfg() -> serde_json::Value {
+    json!({
+        "smtp_host": "smtp.example.com",
+        "smtp_port": 587,
+        "smtp_user": "u",
+        "smtp_pass": "p",
+        "mail_from": "a@example.com",
+        "mail_to": "b@example.com",
+    })
+}
+
+#[test]
+fn channel_whitelist_enforced() {
+    for ch in CHANNELS {
+        assert!(validate_channel(ch, &email_cfg()).is_ok(), "{ch} email 配置应合法");
+    }
+    assert!(validate_channel("sms", &email_cfg()).is_err());
+    assert!(validate_channel("email OR 1=1", &email_cfg()).is_err(), "注入载荷不得通过");
+}
+
+#[test]
+fn email_channel_requires_smtp_fields() {
+    let mut c = email_cfg();
+    c.as_object_mut().unwrap().remove("smtp_host");
+    assert!(validate_channel("email", &c).is_err());
+    let mut c = email_cfg();
+    c.as_object_mut().unwrap().insert("smtp_port".into(), json!(70000));
+    assert!(validate_channel("email", &c).is_err());
+    let mut c = email_cfg();
+    c.as_object_mut().unwrap().insert("mail_to".into(), json!("not-an-email"));
+    assert!(validate_channel("email", &c).is_err());
+}
+
+#[test]
+fn webhook_channel_requires_http_url() {
+    let ok = json!({ "webhook_url": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=k" });
+    assert!(validate_channel("dingtalk", &ok).is_ok());
+    assert!(validate_channel("wecom", &ok).is_ok());
+    let bad = json!({ "webhook_url": "javascript:alert(1)" });
+    assert!(validate_channel("wecom", &bad).is_err());
+    let no_url = json!({});
+    assert!(validate_channel("wecom", &no_url).is_err());
+}
+
+#[test]
+fn channel_config_must_be_object() {
+    assert!(validate_channel("wecom", &json!(42)).is_err());
 }

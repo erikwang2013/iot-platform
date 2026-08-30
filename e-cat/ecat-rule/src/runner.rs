@@ -52,6 +52,18 @@ pub async fn run(kafka: Arc<KafkaMq>, store: Arc<RuleStore>, hub: PushHub, http:
             if let Some(url) = webhook {
                 notify_webhook(&http, &url, &msg).await;
             }
+            // 多渠道通知：加载租户渠道配置，异步发送，失败只记日志
+            match store.list_channels(&msg.tenant_id).await {
+                Ok(channels) if !channels.is_empty() => {
+                    let http = http.clone();
+                    let msg = msg.clone();
+                    tokio::spawn(async move {
+                        crate::notify::dispatch(channels, msg, http).await;
+                    });
+                }
+                Ok(_) => {}
+                Err(e) => tracing::warn!(error = %e, "list notify channels failed"),
+            }
         }
     }
 }

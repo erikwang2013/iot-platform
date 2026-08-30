@@ -1,5 +1,5 @@
 use crate::engine::to_alert_record;
-use crate::models::{AlertMessage, AlertRecord, NewRule, Rule};
+use crate::models::{AlertMessage, AlertRecord, NewRule, NotifyChannel, NewNotifyChannel, Rule};
 use ecat_data::{RdbmsClient, Row};
 use ecat_data_sqlx::SqlxClient;
 use serde_json::{Value, json};
@@ -11,6 +11,61 @@ pub struct RuleStore {
 }
 
 pub const OPERATORS: [&str; 6] = ["gt", "gte", "lt", "lte", "eq", "neq"];
+
+pub const CHANNELS: [&str; 3] = ["email", "dingtalk", "wecom"];
+
+fn config_str(c: &serde_json::Value, key: &str) -> Option<String> {
+    c.get(key)
+        .and_then(|v| v.as_str())
+        .map(str::to_string)
+        .filter(|s| !s.trim().is_empty())
+}
+
+fn validate_email_config(c: &serde_json::Value) -> Result<(), String> {
+    let host = config_str(c, "smtp_host").ok_or("smtp_host required")?;
+    if host.len() > 255 || host.contains(' ') {
+        return Err("smtp_host invalid".into());
+    }
+    if let Some(p) = c.get("smtp_port").and_then(|v| v.as_i64()) {
+        if !(1..=65535).contains(&p) {
+            return Err("smtp_port must be 1..65535".into());
+        }
+    }
+    for key in ["mail_from", "mail_to"] {
+        let addr = config_str(c, key).ok_or(format!("{key} required"))?;
+        if addr.len() > 255 || !addr.contains('@') {
+            return Err(format!("{key} must be a valid email address"));
+        }
+    }
+    Ok(())
+}
+
+fn validate_webhook_config(c: &serde_json::Value) -> Result<(), String> {
+    let url = config_str(c, "webhook_url").ok_or("webhook_url required")?;
+    if url.len() > 512 || !(url.starts_with("https://") || url.starts_with("http://")) {
+        return Err("webhook_url must start with http(s):// and be <= 512 chars".into());
+    }
+    Ok(())
+}
+
+/// 通知渠道校验：渠道名白名单 + 按渠道校验 config 结构。
+pub fn validate_channel(channel: &str, c: &serde_json::Value) -> Result<(), String> {
+    if !c.is_object() {
+        return Err("config must be a JSON object".into());
+    }
+    match channel {
+        "email" => validate_email_config(c),
+        "dingtalk" | "wecom" => validate_webhook_config(c),
+        _ => Err(format!("channel must be one of {CHANNELS:?}")),
+    }
+}
+
+/// 迁移执行（复用 ecat-data-sqlx::execute_script 逐条执行）。
+/// 编译期 include_str! 内联，无运行时文件依赖。
+const MIGRATION_SQL: [&str; 2] = [
+    include_str!("../migrations/0001_rule_tables.sql"),
+    include_str!("../migrations/0002_notify_channels.sql"),
+];
 
 pub fn validate_rule(r: &NewRule) -> Result<(), String> {
     if r.name.trim().is_empty() || r.name.len() > 128 {
@@ -36,14 +91,12 @@ pub fn validate_rule(r: &NewRule) -> Result<(), String> {
     Ok(())
 }
 
-/// 迁移执行（复用 ecat-data-sqlx::execute_script 逐条执行）。
-/// 编译期 include_str! 内联，无运行时文件依赖。
-const MIGRATION_SQL: &str = include_str!("../migrations/0001_rule_tables.sql");
-
 pub async fn migrate(db: &SqlxClient) -> Result<(), String> {
-    db.execute_script(MIGRATION_SQL)
-        .await
-        .map_err(|e| format!("migrate: {e}"))?;
+    for sql in MIGRATION_SQL {
+        db.execute_script(sql)
+            .await
+            .map_err(|e| format!("migrate: {e}"))?;
+    }
     Ok(())
 }
 
@@ -53,7 +106,9 @@ mod tests {
 
     #[test]
     fn migration_sql_non_empty() {
-        assert!(!MIGRATION_SQL.trim().is_empty());
+        for sql in MIGRATION_SQL {
+            assert!(!sql.trim().is_empty());
+        }
     }
 
     #[test]
@@ -237,6 +292,67 @@ impl RuleStore {
             .map_err(|e| format!("ack alert: {e}"))?;
         Ok(n > 0)
     }
+
+    pub async fn list_channels(&self, tenant_id: &str) -> Result<Vec<NotifyChannel>, String> {
+        let rows = self
+            .db
+            .query_with(
+                "SELECT id, tenant_id, channel, config, enabled, CAST(created_at AS CHAR), \
+                 CAST(updated_at AS CHAR) FROM notify_channels WHERE tenant_id = ? \
+                 ORDER BY created_at",
+                &[json!(tenant_id)],
+            )
+            .await
+            .map_err(|e| format!("list channels: {e}"))?;
+        Ok(rows.iter().map(channel_from_row).collect())
+    }
+
+    /// 单租户单渠道唯一（UNIQUE KEY），重复 PUT 即更新。
+    pub async fn upsert_channel(
+        &self,
+        tenant_id: &str,
+        channel: &str,
+        req: &NewNotifyChannel,
+    ) -> Result<NotifyChannel, String> {
+        validate_channel(channel, &req.config)?;
+        let id = uuid::Uuid::new_v4().to_string();
+        self.db
+            .execute_with(
+                "INSERT INTO notify_channels (id, tenant_id, channel, config, enabled) \
+                 VALUES (?, ?, ?, ?, ?) \
+                 ON DUPLICATE KEY UPDATE config = VALUES(config), enabled = VALUES(enabled)",
+                &[
+                    json!(id),
+                    json!(tenant_id),
+                    json!(channel),
+                    json!(req.config.to_string()),
+                    json!(req.enabled.unwrap_or(true) as i64),
+                ],
+            )
+            .await
+            .map_err(|e| format!("upsert channel: {e}"))?;
+        Ok(NotifyChannel {
+            id,
+            tenant_id: tenant_id.to_string(),
+            channel: channel.to_string(),
+            config: req.config.clone(),
+            enabled: req.enabled.unwrap_or(true),
+            created_at: String::new(),
+            updated_at: String::new(),
+        })
+    }
+
+    pub async fn delete_channel(&self, tenant_id: &str, channel: &str) -> Result<bool, String> {
+        let n = self
+            .db
+            .execute_with(
+                "DELETE FROM notify_channels WHERE tenant_id = ? AND channel = ?",
+                &[json!(tenant_id), json!(channel)],
+            )
+            .await
+            .map_err(|e| format!("delete channel: {e}"))?;
+        Ok(n > 0)
+    }
 }
 
 /// status 计数 → (总数, 未处理数)。acknowledged 只计入总数。
@@ -262,6 +378,22 @@ fn rule_from_row(r: &Row) -> Rule {
         operator: r.get("operator").and_then(Value::as_str).unwrap_or_default().to_string(),
         threshold: r.get("threshold").and_then(Value::as_f64).unwrap_or(0.0),
         webhook_url: r.get("webhook_url").and_then(Value::as_str).map(str::to_string),
+        enabled: r.get("enabled").and_then(Value::as_i64).unwrap_or(0) != 0,
+        created_at: r.get("created_at").and_then(Value::as_str).unwrap_or_default().to_string(),
+        updated_at: r.get("updated_at").and_then(Value::as_str).unwrap_or_default().to_string(),
+    }
+}
+
+fn channel_from_row(r: &Row) -> NotifyChannel {
+    NotifyChannel {
+        id: r.get("id").and_then(Value::as_str).unwrap_or_default().to_string(),
+        tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or_default().to_string(),
+        channel: r.get("channel").and_then(Value::as_str).unwrap_or_default().to_string(),
+        config: r
+            .get("config")
+            .and_then(Value::as_str)
+            .and_then(|s| serde_json::from_str(s).ok())
+            .unwrap_or(Value::Null),
         enabled: r.get("enabled").and_then(Value::as_i64).unwrap_or(0) != 0,
         created_at: r.get("created_at").and_then(Value::as_str).unwrap_or_default().to_string(),
         updated_at: r.get("updated_at").and_then(Value::as_str).unwrap_or_default().to_string(),

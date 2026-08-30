@@ -46,6 +46,27 @@ pub struct AlertMessage {
     pub ts: i64,
 }
 
+/// 通知渠道（notify_channels 表行）。channel：email|dingtalk|wecom。
+/// config 为渠道私有 JSON：email 用 smtp_host/port/user/pass/mail_from/mail_to，
+/// dingtalk/wecom 用 webhook_url。
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct NotifyChannel {
+    pub id: String,
+    pub tenant_id: String,
+    pub channel: String,
+    pub config: serde_json::Value,
+    pub enabled: bool,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+/// 创建/更新通知渠道的请求体（id/tenant_id/时间戳由服务端生成）。
+#[derive(Deserialize, Clone, Debug)]
+pub struct NewNotifyChannel {
+    pub config: serde_json::Value,
+    pub enabled: Option<bool>,
+}
+
 /// 告警记录（alert_records 表行）。status：active|acknowledged。
 #[derive(Serialize, Clone, Debug, PartialEq)]
 pub struct AlertRecord {
