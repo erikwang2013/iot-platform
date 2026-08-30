@@ -52,6 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/rule/rules/{id}", put(rule_proxy).delete(rule_proxy))
         .route("/rule/alerts", get(rule_proxy))
         .route("/rule/alerts/{id}/ack", post(rule_proxy))
+        .route("/rule/stats", get(rule_proxy))
         .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
         .with_state(proxy_state.clone());
     // /api/cdn/* 受保护路径：供应商 CRUD / 启停 / 刷新预热 / 签名 URL
@@ -68,6 +69,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/cdn/providers/{id}/purge", post(cdn_proxy))
         .route("/cdn/providers/{id}/prefetch", post(cdn_proxy))
         .route("/cdn/tasks", get(cdn_proxy))
+        .route("/cdn/stats", get(cdn_proxy))
         .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
         .with_state(proxy_state.clone());
 
@@ -85,6 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .with_state(proxy_state.clone());
     let device_admin = Router::new()
         .route("/devices", get(device_proxy))
+        .route("/devices/stats", get(device_proxy))
         .route("/devices/{id}", put(device_proxy).delete(device_proxy))
         .route("/devices/{id}/unbind", post(device_proxy))
         .route("/ota/firmwares", get(device_proxy).post(device_proxy))
