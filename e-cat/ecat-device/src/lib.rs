@@ -60,9 +60,11 @@ pub async fn list_devices(
 }
 
 fn db_err(e: ecat_data::RdbmsError) -> (axum::http::StatusCode, String) {
+    // 细节只进日志，客户端只收通用文案
+    tracing::warn!(error = %e, "devices query failed");
     (
         axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-        format!("db error: {e}"),
+        "devices query failed".to_string(),
     )
 }
 
