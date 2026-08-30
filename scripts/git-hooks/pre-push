@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# git pre-push 钩子：推送 main 前按最新版本增量发布（标签 + GitHub Release）
+# 注：本机 git 2.51.0 实测不执行 post-push（post-commit/pre-push 正常），故用 pre-push 触发；
+# release.sh 有"无新提交则跳过"守卫，即使 post-push 也生效也不会重复发布。
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+    if [[ "$remote_ref" == "refs/heads/main" ]]; then
+        "$repo_root/scripts/release.sh" minor
+        break
+    fi
+done
