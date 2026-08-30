@@ -1,4 +1,5 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
+mod gate;
 mod logging;
 mod ratelimit;
 #[cfg(feature = "redis")]
@@ -12,6 +13,7 @@ mod validate;
 #[cfg(feature = "cors")]
 pub use tower_http::cors::{AllowOrigin, Any, CorsLayer};
 
+pub use gate::{secret_eq, tenant_from_header};
 pub use logging::LoggingLayer;
 pub use ratelimit::{MemoryStore, RateLimitLayer, RateLimitStore};
 #[cfg(feature = "redis")]

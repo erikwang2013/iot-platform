@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-ecat = { path = "../../ecat" }
+ecat = { path = "../ecat" }
 ecat-auth.workspace = true
 ecat-transport-http.workspace = true
-ecat-health = { path = "../../ecat-health" }
+ecat-health = { path = "../ecat-health" }
 # 外部依赖：security-rust 需克隆 https://github.com/erikwang2013/security-rust
 # 到 /home/wwwroot/erikwang2013/security-rust（P6 部署文档给出 CI 拉取方案）
 security-rust = { path = "/home/wwwroot/erikwang2013/security-rust" }

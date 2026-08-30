@@ -53,15 +53,16 @@ members = [
     "ecat-data-s3",
     "ecat-tls",
     "ecat-scheduler",
+    "ecat-iot",
     "examples/helloworld",
     "examples/databases",
     "examples/middleware",
     "examples/websocket",
-    "services/iot-gateway",
-    "services/iot-device",
-    "services/iot-access",
-    "services/iot-data",
-    "services/iot-rule",
+    "iot-gateway",
+    "iot-device",
+    "iot-access",
+    "iot-data",
+    "iot-rule",
 ]
 resolver = "2"
 

@@ -23,61 +23,11 @@ async fn health() -> &'static str {
     "OK"
 }
 
-/// 恒定时间比较，避免通过响应时序探测 secret（长度提前返回只泄露长度）。
-fn secret_eq(a: &str, b: &str) -> bool {
-    let (a, b) = (a.as_bytes(), b.as_bytes());
-    if a.len() != b.len() {
-        return false;
-    }
-    let mut diff = 0u8;
-    for (x, y) in a.iter().zip(b.iter()) {
-        diff |= x ^ y;
-    }
-    diff == 0
-}
-
 async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     for file in ["migrations/0001_init.sql", "migrations/0002_vendor_auth.sql"] {
-        let sql = std::fs::read_to_string(file)?;
-        // sqlx Any 驱动不启用 multi-statements，逐条执行
-        for stmt in sql.split(';').filter(|s| !s.trim().is_empty()) {
-            db.execute(stmt).await?;
-        }
+        db.execute_script(&std::fs::read_to_string(file)?).await?;
     }
     Ok(())
-}
-
-/// 受保护路由前置门：请求必须携带与 IOT_GATEWAY_SECRET 一致的 x-gateway-secret
-/// （该 secret 只由网关反代持有，客户端拿不到），x-tenant-id 格式合法才放行，
-/// 防止客户端绕过网关直接自报任意租户。租户写入 request extensions 供 handler 用。
-async fn tenant_from_header(mut req: Request, next: Next) -> Response {
-    let expected = std::env::var("IOT_GATEWAY_SECRET").unwrap_or_default();
-    let secret_ok = req
-        .headers()
-        .get("x-gateway-secret")
-        .and_then(|v| v.to_str().ok())
-        .is_some_and(|v| secret_eq(v, expected.as_str()));
-    if !secret_ok {
-        return (StatusCode::UNAUTHORIZED, "missing or bad x-gateway-secret").into_response();
-    }
-    let tenant = match req
-        .headers()
-        .get("x-tenant-id")
-        .and_then(|v| v.to_str().ok())
-        .map(str::to_string)
-    {
-        Some(t)
-            if !t.is_empty()
-                && t.len() <= 64
-                && t.bytes()
-                    .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_') =>
-        {
-            t
-        }
-        _ => return (StatusCode::UNAUTHORIZED, "missing or invalid x-tenant-id").into_response(),
-    };
-    req.extensions_mut().insert(tenant);
-    next.run(req).await
 }
 
 #[tokio::main]
@@ -142,7 +92,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let protected = Router::new()
         .merge(oauth::router(oauth_state))
         .merge(api::router(api_state))
-        .layer(middleware::from_fn(tenant_from_header));
+        .layer(middleware::from_fn(ecat_middleware::tenant_from_header));
 
     let router = Router::new()
         .route("/health", get(health))

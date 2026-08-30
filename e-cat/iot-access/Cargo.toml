@@ -4,14 +4,16 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-ecat = { path = "../../ecat" }
+ecat = { path = "../ecat" }
 ecat-transport-http.workspace = true
-ecat-data-sqlx = { path = "../../ecat-data-sqlx" }
-ecat-data = { path = "../../ecat-data" }
-ecat-data-redis = { path = "../../ecat-data-redis" }
-ecat-mq = { path = "../../ecat-mq" }
-ecat-mq-kafka = { path = "../../ecat-mq-kafka" }
-ecat-mq-mqtt = { path = "../../ecat-mq-mqtt" }
+ecat-data-sqlx = { path = "../ecat-data-sqlx" }
+ecat-data = { path = "../ecat-data" }
+ecat-middleware = { path = "../ecat-middleware" }
+ecat-iot = { path = "../ecat-iot" }
+ecat-data-redis = { path = "../ecat-data-redis" }
+ecat-mq = { path = "../ecat-mq" }
+ecat-mq-kafka = { path = "../ecat-mq-kafka" }
+ecat-mq-mqtt = { path = "../ecat-mq-mqtt" }
 axum.workspace = true
 async-trait.workspace = true
 serde.workspace = true

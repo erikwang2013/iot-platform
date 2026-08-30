@@ -78,6 +78,16 @@ impl SqlxClient {
     pub fn from_pool(pool: AnyPool) -> Self {
         Self { pool }
     }
+
+    /// 逐条执行多语句脚本（sqlx Any 驱动不启用 multi-statements，按 `;` 拆分）。
+    /// 迁移文件即此用法；不校验脚本内容，仅原样拆分。
+    pub async fn execute_script(&self, sql: &str) -> Result<u64, RdbmsError> {
+        let mut affected = 0;
+        for stmt in sql.split(';').filter(|s| !s.trim().is_empty()) {
+            affected += self.execute(stmt).await?;
+        }
+        Ok(affected)
+    }
 }
 
 /// 单格类型转换链：bool → i64 → i32 → f64（NaN/Inf 转字符串）→ String →

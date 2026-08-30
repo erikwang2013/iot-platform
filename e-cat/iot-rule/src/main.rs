@@ -15,51 +15,6 @@ async fn health() -> &'static str {
     "OK"
 }
 
-/// 恒定时间比较，避免通过响应时序探测 secret（与 iot-access 一致）。
-fn secret_eq(a: &str, b: &str) -> bool {
-    let (a, b) = (a.as_bytes(), b.as_bytes());
-    if a.len() != b.len() {
-        return false;
-    }
-    let mut diff = 0u8;
-    for (x, y) in a.iter().zip(b.iter()) {
-        diff |= x ^ y;
-    }
-    diff == 0
-}
-
-/// 受保护路由前置门（与 iot-access/iot-data 一致）：必须携带与 IOT_GATEWAY_SECRET
-/// 一致的 x-gateway-secret（只由网关反代持有）+ 合法 x-tenant-id，
-/// 防止客户端绕过网关直接自报任意租户。租户写入 extensions 供 handler 用。
-async fn tenant_from_header(mut req: Request, next: Next) -> Response {
-    let expected = std::env::var("IOT_GATEWAY_SECRET").unwrap_or_default();
-    let secret_ok = req
-        .headers()
-        .get("x-gateway-secret")
-        .and_then(|v| v.to_str().ok())
-        .is_some_and(|v| secret_eq(v, expected.as_str()));
-    if !secret_ok {
-        return (StatusCode::UNAUTHORIZED, "missing or bad x-gateway-secret").into_response();
-    }
-    let tenant = match req
-        .headers()
-        .get("x-tenant-id")
-        .and_then(|v| v.to_str().ok())
-        .map(str::to_string)
-    {
-        Some(t)
-            if !t.is_empty()
-                && t.len() <= 64
-                && t.bytes()
-                    .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_') =>
-        {
-            t
-        }
-        _ => return (StatusCode::UNAUTHORIZED, "missing or invalid x-tenant-id").into_response(),
-    };
-    req.extensions_mut().insert(tenant);
-    next.run(req).await
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -92,7 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // 受保护路由：需网关 secret + x-tenant-id（网关反代注入）
     let protected = Router::new()
         .merge(api::router(api_state))
-        .layer(middleware::from_fn(tenant_from_header));
+        .layer(middleware::from_fn(ecat_middleware::tenant_from_header));
 
     // WS 直连端点：JWT query token 校验（P5 前端直连 8084，不走网关）
     let ws_route = Router::new()

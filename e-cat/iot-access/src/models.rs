@@ -21,16 +21,5 @@ pub struct DeviceRecord {
     pub properties: Vec<PropertyValue>,
 }
 
-/// 统一事件消息：Webhook、MQTT 直连、Kafka `iot.events`、Redis 影子共用。
-/// kind 取值：`"property"` | `"online"` | `"offline"`。
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct EventMessage {
-    pub device_id: String,
-    pub tenant_id: String,
-    pub kind: String,
-    /// property 时为属性 code；online/offline 时为 "online"/"offline"
-    pub code: String,
-    pub value: serde_json::Value,
-    /// epoch 毫秒
-    pub ts: i64,
-}
+/// 统一事件消息：契约定义在 ecat-iot（跨服务共享）。
+pub use ecat_iot::EventMessage;

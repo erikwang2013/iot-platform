@@ -1638,6 +1638,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ecat-iot"
+version = "3.0.3"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ecat-lock"
 version = "3.0.3"
 dependencies = [
@@ -2880,6 +2888,8 @@ dependencies = [
  "ecat-data",
  "ecat-data-redis",
  "ecat-data-sqlx",
+ "ecat-iot",
+ "ecat-middleware",
  "ecat-mq",
  "ecat-mq-kafka",
  "ecat-mq-mqtt",
@@ -2908,6 +2918,8 @@ dependencies = [
  "ecat",
  "ecat-data",
  "ecat-data-tdengine",
+ "ecat-iot",
+ "ecat-middleware",
  "ecat-mq",
  "ecat-mq-kafka",
  "ecat-transport-http",
@@ -2965,6 +2977,8 @@ dependencies = [
  "ecat-auth",
  "ecat-data",
  "ecat-data-sqlx",
+ "ecat-iot",
+ "ecat-middleware",
  "ecat-mq",
  "ecat-mq-kafka",
  "ecat-transport-http",

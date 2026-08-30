@@ -1,0 +1,10 @@
+[package]
+name = "ecat-iot"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "IoT 业务共享模型（事件总线契约）for e-cat"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true

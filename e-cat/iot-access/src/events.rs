@@ -5,8 +5,7 @@ use ecat_mq::{MessageQueue, MqError};
 use ecat_mq_kafka::KafkaMq;
 use serde_json::{Value, json};
 
-/// 事件总线 topic：P2 的 iot-data 消费者订阅此 topic。
-pub const TOPIC_EVENTS: &str = "iot.events";
+pub use ecat_iot::TOPIC_EVENTS;
 
 /// 影子键前缀：`shadow:{device_id}`。
 pub fn shadow_key(device_id: &str) -> String {

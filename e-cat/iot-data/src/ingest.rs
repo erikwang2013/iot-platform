@@ -7,8 +7,7 @@ use ecat_mq_kafka::KafkaMq;
 use futures_util::{StreamExt, stream::poll_fn};
 use std::sync::Arc;
 
-/// 事件总线 topic：必须与 iot-access/src/events.rs 的 TOPIC_EVENTS 一致。
-pub const TOPIC_EVENTS: &str = "iot.events";
+pub use ecat_iot::TOPIC_EVENTS;
 
 /// 每批最多攒多少条事件后写一次（一次 REST 请求多行 INSERT）。
 const BATCH_SIZE: usize = 100;

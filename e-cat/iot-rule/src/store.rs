@@ -36,14 +36,14 @@ pub fn validate_rule(r: &NewRule) -> Result<(), String> {
     Ok(())
 }
 
-/// 迁移执行（照 iot-access main.rs 模式：逐条 execute，sqlx Any 不支持 multi-statements）。
+/// 迁移执行（复用 ecat-data-sqlx::execute_script 逐条执行）。
 /// CWD 为包根目录（main.rs 与集成测试均如此），相对路径可解析。
 pub async fn migrate(db: &SqlxClient) -> Result<(), String> {
     let sql = std::fs::read_to_string("migrations/0001_rule_tables.sql")
         .map_err(|e| format!("read migration: {e}"))?;
-    for stmt in sql.split(';').filter(|s| !s.trim().is_empty()) {
-        db.execute(stmt).await.map_err(|e| format!("migrate: {e}"))?;
-    }
+    db.execute_script(&sql)
+        .await
+        .map_err(|e| format!("migrate: {e}"))?;
     Ok(())
 }
 

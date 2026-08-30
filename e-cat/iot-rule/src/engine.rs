@@ -1,8 +1,7 @@
 use crate::models::{AlertMessage, AlertRecord, EventMessage, Rule};
 use ecat_mq_kafka::KafkaConfig;
 
-/// 事件总线 topic：必须与 iot-access/src/events.rs 的 TOPIC_EVENTS 一致。
-pub const TOPIC_EVENTS: &str = "iot.events";
+pub use ecat_iot::TOPIC_EVENTS;
 
 /// iot-rule 消费组：与 iot-data（未配置 group_id → 每次订阅随机独立组）不同，
 /// 互不抢消息；同组多实例共享消费负载（水平扩展点）。

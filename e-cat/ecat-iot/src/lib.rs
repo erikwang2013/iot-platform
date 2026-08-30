@@ -1,8 +1,10 @@
+// Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 use serde::{Deserialize, Serialize};
 
-/// 统一事件消息（Kafka `iot.events` 消费侧反序列化）。
-/// 字段与 P1 iot-access/src/models.rs 的 EventMessage 完全一致，
-/// 新增/改名字段必须两边同步。
+/// 事件总线 topic：iot-access 发布，iot-data / iot-rule 订阅。
+pub const TOPIC_EVENTS: &str = "iot.events";
+
+/// 统一事件消息：Webhook、MQTT 直连、Kafka `iot.events`、Redis 影子共用。
 /// kind 取值：`"property"` | `"online"` | `"offline"`。
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct EventMessage {
@@ -14,11 +16,4 @@ pub struct EventMessage {
     pub value: serde_json::Value,
     /// epoch 毫秒
     pub ts: i64,
-}
-
-/// 历史曲线单点：ts 为 epoch 毫秒，value 为原始值（数值或字符串）。
-#[derive(Serialize, Clone, Debug, PartialEq)]
-pub struct HistoryPoint {
-    pub ts: i64,
-    pub value: serde_json::Value,
 }
