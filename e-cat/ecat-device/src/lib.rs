@@ -23,8 +23,34 @@ pub async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + 
     for sql in MIGRATION_SQL {
         db.execute_script(sql).await?;
     }
+    // MySQL 8 无 ADD COLUMN IF NOT EXISTS，老库补列需先查 information_schema；
+    // 新装库由 0003 CREATE TABLE 直接建全列，此处查询返回 1 跳过
+    for (column, ddl) in OTA_TASK_EXTRA_COLUMNS {
+        let exists = db
+            .query_with(
+                "SELECT COUNT(*) AS n FROM information_schema.COLUMNS \
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ota_upgrade_tasks' \
+                 AND COLUMN_NAME = ?",
+                &[json!(column)],
+            )
+            .await?;
+        let n = exists
+            .first()
+            .and_then(|r| r.get("n"))
+            .and_then(Value::as_i64)
+            .unwrap_or(0);
+        if n == 0 {
+            db.execute_with(&format!("ALTER TABLE ota_upgrade_tasks ADD COLUMN {ddl}"), &[])
+                .await?;
+        }
+    }
     Ok(())
 }
+
+const OTA_TASK_EXTRA_COLUMNS: [(&str, &str); 2] = [
+    ("progress", "progress INT NOT NULL DEFAULT 0"),
+    ("message", "message VARCHAR(512) NOT NULL DEFAULT ''"),
+];
 
 #[derive(Serialize)]
 struct DeviceRow {
@@ -309,7 +335,11 @@ struct TaskRow {
     id: String,
     device_id: String,
     firmware_id: String,
+    firmware_version: String,
     status: String,
+    progress: i64,
+    message: String,
+    updated_at: String,
 }
 
 pub async fn list_ota_tasks(
@@ -319,8 +349,10 @@ pub async fn list_ota_tasks(
     let rows = db
         .0
         .query_with(
-            "SELECT id, device_id, firmware_id, status FROM ota_upgrade_tasks \
-             WHERE tenant_id = ? ORDER BY created_at DESC",
+            "SELECT t.id, t.device_id, t.firmware_id, f.version AS firmware_version, \
+             t.status, t.progress, t.message, CAST(t.updated_at AS CHAR) \
+             FROM ota_upgrade_tasks t LEFT JOIN ota_firmwares f ON f.id = t.firmware_id \
+             WHERE t.tenant_id = ? ORDER BY t.created_at DESC",
             &[json!(tenant.as_str())],
         )
         .await
@@ -331,7 +363,11 @@ pub async fn list_ota_tasks(
             id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
             device_id: r.get("device_id").and_then(Value::as_str).unwrap_or("").to_string(),
             firmware_id: r.get("firmware_id").and_then(Value::as_str).unwrap_or("").to_string(),
+            firmware_version: r.get("firmware_version").and_then(Value::as_str).unwrap_or("").to_string(),
             status: r.get("status").and_then(Value::as_str).unwrap_or("").to_string(),
+            progress: r.get("progress").and_then(Value::as_i64).unwrap_or(0),
+            message: r.get("message").and_then(Value::as_str).unwrap_or("").to_string(),
+            updated_at: r.get("updated_at").and_then(Value::as_str).unwrap_or("").to_string(),
         })
         .collect();
     Ok(Json(json!({ "tasks": items })))
@@ -378,6 +414,93 @@ pub async fn create_ota_task(
     Ok(Json(json!({ "id": id, "status": "pending" })))
 }
 
+/// OTA 任务状态机：pending → downloading → installing → success|failed。
+/// 允许同状态重复上报（进度更新）；跨终态（success/failed）不可再流转。
+pub fn transition_allowed(current: &str, next: &str) -> bool {
+    if current == next {
+        return matches!(current, "pending" | "downloading" | "installing" | "success" | "failed");
+    }
+    matches!(
+        (current, next),
+        ("pending", "downloading")
+            | ("downloading", "installing")
+            | ("installing", "success")
+            | ("installing", "failed")
+    )
+}
+
+pub const OTA_STATUSES: [&str; 5] = ["downloading", "installing", "success", "failed", "pending"];
+
+#[derive(Deserialize)]
+pub struct OtaReportReq {
+    /// downloading|installing|success|failed
+    pub status: String,
+    pub progress: Option<u8>,
+    pub message: Option<String>,
+}
+
+/// POST /api/ota/tasks/{id}/report：设备上报升级状态/进度（模拟设备可 mock）。
+/// 校验：状态在状态机内、progress ≤ 100、message ≤ 512；任务必须属于本租户。
+pub async fn report_ota_progress(
+    State(db): State<Db>,
+    tenant: axum::Extension<String>,
+    Path(id): Path<String>,
+    Json(req): Json<OtaReportReq>,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    let status = req.status.trim().to_string();
+    if !["downloading", "installing", "success", "failed"].contains(&status.as_str()) {
+        return Err((StatusCode::BAD_REQUEST, "status must be downloading/installing/success/failed".into()));
+    }
+    let progress = req.progress.unwrap_or(0).min(100);
+    let message = req.message.unwrap_or_default();
+    if message.len() > 512 {
+        return Err((StatusCode::BAD_REQUEST, "message must be <= 512 chars".into()));
+    }
+    let rows = db
+        .0
+        .query_with(
+            "SELECT status FROM ota_upgrade_tasks WHERE id = ? AND tenant_id = ?",
+            &[json!(id), json!(tenant.as_str())],
+        )
+        .await
+        .map_err(db_err)?;
+    let current = rows
+        .first()
+        .and_then(|r| r.get("status"))
+        .and_then(Value::as_str)
+        .unwrap_or("")
+        .to_string();
+    if current.is_empty() {
+        return Err((StatusCode::NOT_FOUND, "ota task not found".into()));
+    }
+    if !transition_allowed(&current, &status) {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            format!("invalid transition {current} -> {status}"),
+        ));
+    }
+    let final_progress = if status == "success" { 100 } else { progress };
+    let n = db
+        .0
+        .execute_with(
+            "UPDATE ota_upgrade_tasks SET status = ?, progress = ?, message = ? \
+             WHERE id = ? AND tenant_id = ?",
+            &[
+                json!(status),
+                json!(final_progress as i64),
+                json!(message),
+                json!(id),
+                json!(tenant.as_str()),
+            ],
+        )
+        .await
+        .map_err(db_err)?;
+    if n == 0 {
+        return Err((StatusCode::NOT_FOUND, "ota task not found".into()));
+    }
+    Ok(Json(json!({ "ok": true, "status": status, "progress": final_progress })))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -398,5 +521,28 @@ mod tests {
         ];
         assert_eq!(stats_from_counts(&c), (10, 3, 2));
         assert_eq!(stats_from_counts(&[]), (0, 0, 0));
+    }
+
+    #[test]
+    fn ota_transition_matrix() {
+        // 正常流转
+        assert!(transition_allowed("pending", "downloading"));
+        assert!(transition_allowed("downloading", "installing"));
+        assert!(transition_allowed("installing", "success"));
+        assert!(transition_allowed("installing", "failed"));
+        // 同状态重复上报（进度更新）
+        assert!(transition_allowed("downloading", "downloading"));
+        assert!(transition_allowed("installing", "installing"));
+        // 跳步与逆向
+        assert!(!transition_allowed("pending", "installing"));
+        assert!(!transition_allowed("pending", "success"));
+        assert!(!transition_allowed("downloading", "success"));
+        // 终态冻结
+        assert!(!transition_allowed("success", "failed"));
+        assert!(!transition_allowed("failed", "success"));
+        assert!(!transition_allowed("success", "installing"));
+        // 未知状态
+        assert!(!transition_allowed("pending", "bogus"));
+        assert!(!transition_allowed("bogus", "downloading"));
     }
 }

@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS ota_upgrade_tasks (
     device_id VARCHAR(36) NOT NULL,
     firmware_id VARCHAR(36) NOT NULL,
     status VARCHAR(32) NOT NULL DEFAULT 'pending',
+    progress INT NOT NULL DEFAULT 0,
+    message VARCHAR(512) NOT NULL DEFAULT '',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_ota_tenant (tenant_id)

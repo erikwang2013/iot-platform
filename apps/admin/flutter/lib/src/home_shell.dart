@@ -7,6 +7,7 @@ import 'pages/devices_page.dart';
 import 'pages/history_page.dart';
 import 'pages/models_page.dart';
 import 'pages/reports_page.dart';
+import 'pages/ota_page.dart';
 import 'pages/rules_page.dart';
 import 'pages/screen_page.dart';
 import 'pages/tenants_page.dart';
@@ -32,6 +33,7 @@ class _HomeShellState extends State<HomeShell> {
       const DevicesPage(),
       const ModelsPage(),
       const RulesPage(),
+      const OtaPage(),
       const HistoryPage(),
       const ReportsPage(),
       const CdnPage(),
@@ -77,6 +79,11 @@ class _HomeShellState extends State<HomeShell> {
             icon: const Icon(Icons.rule_outlined),
             selectedIcon: const Icon(Icons.rule),
             label: Text(l10n.navRules),
+          ),
+          NavigationDrawerDestination(
+            icon: const Icon(Icons.system_update_alt_outlined),
+            selectedIcon: const Icon(Icons.system_update_alt),
+            label: const Text('OTA 升级'),
           ),
           NavigationDrawerDestination(
             icon: const Icon(Icons.show_chart),

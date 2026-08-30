@@ -372,6 +372,66 @@ class CdnVendor {
       );
 }
 
+/// OTA 固件（/api/ota/firmwares 行）。
+class OtaFirmware {
+  OtaFirmware({
+    required this.id,
+    this.name = '',
+    this.version = '',
+    this.url = '',
+    this.description = '',
+  });
+
+  final String id;
+  final String name;
+  final String version;
+  final String url;
+  final String description;
+
+  factory OtaFirmware.fromJson(Map<String, dynamic> j) => OtaFirmware(
+        id: _s(j, 'id'),
+        name: _s(j, 'name'),
+        version: _s(j, 'version'),
+        url: _s(j, 'url'),
+        description: _s(j, 'description'),
+      );
+}
+
+/// OTA 升级任务（/api/ota/tasks 行）。
+/// status: pending|downloading|installing|success|failed
+class OtaTask {
+  OtaTask({
+    required this.id,
+    required this.deviceId,
+    required this.firmwareId,
+    this.firmwareVersion = '',
+    this.status = 'pending',
+    this.progress = 0,
+    this.message = '',
+    this.updatedAt = '',
+  });
+
+  final String id;
+  final String deviceId;
+  final String firmwareId;
+  final String firmwareVersion;
+  final String status;
+  final int progress;
+  final String message;
+  final String updatedAt;
+
+  factory OtaTask.fromJson(Map<String, dynamic> j) => OtaTask(
+        id: _s(j, 'id'),
+        deviceId: _s(j, 'device_id'),
+        firmwareId: _s(j, 'firmware_id'),
+        firmwareVersion: _s(j, 'firmware_version'),
+        status: _s(j, 'status', 'pending'),
+        progress: j['progress'] is int ? j['progress'] as int : _n(j, 'progress').toInt(),
+        message: _s(j, 'message'),
+        updatedAt: _s(j, 'updated_at'),
+      );
+}
+
 /// 租户（/api/tenants 行）。
 class Tenant {
   Tenant({required this.id, this.name = '', this.quota = 0, this.enabled = true});

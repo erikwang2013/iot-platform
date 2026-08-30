@@ -64,11 +64,12 @@ fn email_cfg() -> serde_json::Value {
 
 #[test]
 fn channel_whitelist_enforced() {
-    for ch in CHANNELS {
-        assert!(validate_channel(ch, &email_cfg()).is_ok(), "{ch} email 配置应合法");
-    }
-    assert!(validate_channel("sms", &email_cfg()).is_err());
-    assert!(validate_channel("email OR 1=1", &email_cfg()).is_err(), "注入载荷不得通过");
+    let webhook = json!({ "webhook_url": "https://oapi.dingtalk.com/robot/send?access_token=x" });
+    assert!(validate_channel("email", &email_cfg()).is_ok());
+    assert!(validate_channel("dingtalk", &webhook).is_ok());
+    assert!(validate_channel("wecom", &webhook).is_ok());
+    assert!(validate_channel("sms", &webhook).is_err());
+    assert!(validate_channel("email OR 1=1", &webhook).is_err(), "注入载荷不得通过");
 }
 
 #[test]

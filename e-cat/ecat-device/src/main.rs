@@ -2,7 +2,8 @@ use axum::{Router, middleware, routing::{delete, get, post, put}};
 use ecat_data_sqlx::SqlxClient;
 use ecat_device::{
     Db, create_firmware, create_ota_task, delete_device, delete_firmware, device_stats,
-    list_devices, list_firmwares, list_ota_tasks, migrate, unbind_device, update_device,
+    list_devices, list_firmwares, list_ota_tasks, migrate, report_ota_progress, unbind_device,
+    update_device,
 };
 use std::sync::Arc;
 
@@ -29,6 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/firmwares", get(list_firmwares).post(create_firmware))
         .route("/firmwares/{id}", delete(delete_firmware))
         .route("/tasks", get(list_ota_tasks).post(create_ota_task))
+        .route("/tasks/{id}/report", post(report_ota_progress))
         .with_state(Db(db));
     let protected = Router::new()
         .nest("/api/devices", devices)
