@@ -93,6 +93,37 @@ redis_c=$(docker ps --format '{{.Names}}' | grep -m1 'redis' || true)
 shadow=$(docker exec "$redis_c" redis-cli GET shadow:p1 || true)
 echo "$shadow" | grep -q '"temp":23.5' && pass=$((pass+1)) && echo "PASS: redis shadow:p1 has temp=23.5" || { fail=$((fail+1)); echo "FAIL: shadow (got: $shadow)"; }
 
+# 13. data 服务健康（直连 8083）
+DATA=${DATA:-http://localhost:8083}
+body=$(curl -s "$DATA/health")
+check "data /health 200" "OK" "$body"
+
+# 14. TDengine 种子数据：直插 2 行（REST basic auth root:taosdata）
+curl -s -u root:taosdata -H "content-type: application/json" \
+  -d "{\"sql\":\"INSERT INTO iot.devdata USING iot.devdata TAGS ('smoke-tenant', 'smoke-dev', 'temp') VALUES (1690000000000, 23.5, NULL)\"}" \
+  "http://localhost:6041/rest/sql" >/dev/null
+curl -s -u root:taosdata -H "content-type: application/json" \
+  -d "{\"sql\":\"INSERT INTO iot.devdata USING iot.devdata TAGS ('smoke-tenant', 'smoke-dev', 'temp') VALUES (1690000000100, 24.5, NULL)\"}" \
+  "http://localhost:6041/rest/sql" >/dev/null
+
+# 15. 经网关查历史曲线（JWT + 版本 header → 200 且含点）
+code=$(curl -s -o /tmp/data_history.json -w "%{http_code}" \
+  -H "x-api-version: v1" -H "authorization: Bearer $token" \
+  "$GATEWAY/api/data/history?device_id=smoke-dev&code=temp&start=1690000000000&end=1690000002000")
+check "gateway -> data history 200" 200 "$code"
+grep -q '"points"' /tmp/data_history.json && grep -q '23.5' /tmp/data_history.json \
+  && pass=$((pass+1)) && echo "PASS: history returns points with value 23.5" \
+  || { fail=$((fail+1)); echo "FAIL: history points (got: $(cat /tmp/data_history.json))"; }
+
+# 16. 经网关导出 CSV（→ 200 且含表头）
+code=$(curl -s -o /tmp/data_export.csv -w "%{http_code}" \
+  -H "x-api-version: v1" -H "authorization: Bearer $token" \
+  "$GATEWAY/api/data/export?device_id=smoke-dev&code=temp&start=1690000000000&end=1690000002000")
+check "gateway -> data export csv 200" 200 "$code"
+grep -q "ts,value" /tmp/data_export.csv && grep -q "23.5" /tmp/data_export.csv \
+  && pass=$((pass+1)) && echo "PASS: export csv has header + 23.5" \
+  || { fail=$((fail+1)); echo "FAIL: export csv (got: $(head -c 200 /tmp/data_export.csv))"; }
+
 echo "----"
 echo "smoke: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]
