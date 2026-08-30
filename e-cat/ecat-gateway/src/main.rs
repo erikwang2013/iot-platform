@@ -3,7 +3,7 @@ use ecat_auth::JwtAuthCompat;
 use ecat_health::HealthRegistry;
 use ecat_gateway::{
     api_version::ApiVersionLayer,
-    proxy::{ProxyState, access_proxy, access_proxy_open, data_proxy, rule_proxy},
+    proxy::{ProxyState, access_proxy, access_proxy_open, cdn_proxy, data_proxy, rule_proxy},
 };
 use ecat_middleware::{MemoryStore, RateLimitLayer, RateLimitStore, RedisRateLimitStore};
 use ecat_security::SecurityBodyCompatLayer;
@@ -58,6 +58,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/rule/alerts", get(rule_proxy))
         .route("/rule/alerts/{id}/ack", post(rule_proxy))
         .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
+        .with_state(proxy_state.clone());
+    // /api/cdn/* 受保护路径：供应商 CRUD / 启停 / 刷新预热 / 签名 URL
+    let cdn_admin = Router::new()
+        .route("/cdn/providers", get(cdn_proxy).post(cdn_proxy))
+        .route(
+            "/cdn/providers/{id}",
+            get(cdn_proxy).put(cdn_proxy).delete(cdn_proxy),
+        )
+        .route("/cdn/providers/{id}/enable", post(cdn_proxy))
+        .route("/cdn/providers/{id}/disable", post(cdn_proxy))
+        .route("/cdn/providers/{id}/test", post(cdn_proxy))
+        .route("/cdn/providers/{id}/signed-url", post(cdn_proxy))
+        .route("/cdn/providers/{id}/purge", post(cdn_proxy))
+        .route("/cdn/providers/{id}/prefetch", post(cdn_proxy))
+        .route("/cdn/tasks", get(cdn_proxy))
+        .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
         .with_state(proxy_state);
 
     let admin_api = Router::new()
@@ -75,6 +91,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .nest("/api/access", access_admin)
         .nest("/api", data_admin)
         .nest("/api", rule_admin)
+        .nest("/api", cdn_admin)
         .nest("/api", admin_api)
         .nest("/admin", client_api)
         .layer(ApiVersionLayer)

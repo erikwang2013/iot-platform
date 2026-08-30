@@ -13,6 +13,8 @@ const ACCESS_BASE: &str = "http://localhost:8082";
 const DATA_BASE: &str = "http://localhost:8083";
 /// iot-rule 内部地址（RULE_BASE 环境变量可覆盖）。
 const RULE_BASE: &str = "http://localhost:8084";
+/// iot-cdn 内部地址（CDN_BASE 环境变量可覆盖）。
+const CDN_BASE: &str = "http://localhost:8085";
 
 #[derive(Clone)]
 pub struct ProxyState {
@@ -57,6 +59,17 @@ pub async fn rule_proxy(State(ps): State<ProxyState>, req: Request) -> Response 
     // 与 data_proxy 同构：nest 在 /api 下、路由为 /rule/...，handler 看到的
     // 路径是 /rule/rules 等剩余段，prefix "/api" 补回后即 /api/rule/rules
     forward(&ps, req, &tenant, "/api", "RULE_BASE", RULE_BASE).await
+}
+
+/// /api/cdn/* 受保护转发：JWT sub → x-tenant-id + x-gateway-secret，
+/// 供应商 CRUD/启停/刷新预热/签名 URL 由 iot-cdn 处理。
+pub async fn cdn_proxy(State(ps): State<ProxyState>, req: Request) -> Response {
+    let tenant = req
+        .extensions()
+        .get::<AuthClaims>()
+        .map(|c| c.sub.clone())
+        .unwrap_or_default();
+    forward(&ps, req, &tenant, "/api", "CDN_BASE", CDN_BASE).await
 }
 
 /// 原样转发到上游服务：方法/路径/query/body 透传，注入 x-gateway-secret
