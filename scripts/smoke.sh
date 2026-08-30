@@ -6,6 +6,8 @@ GATEWAY=${GATEWAY:-http://localhost:8080}
 DEVICE=${DEVICE:-http://localhost:8081}
 JWT_SECRET=${JWT_SECRET:-dev-secret-key-0123456789abcdefghijklmn}
 TUYA_WEBHOOK_SECRET=${TUYA_WEBHOOK_SECRET:-mock-client-secret}
+# 内部服务间门禁 secret（与部署时各服务 IOT_GATEWAY_SECRET 一致）
+GATEWAY_SECRET=${GATEWAY_SECRET:-dev-gateway-secret}
 
 pass=0; fail=0
 check() { # check <desc> <expected> <actual>
@@ -52,7 +54,11 @@ check "sql injection -> 403" 403 "$code"
 code=$(curl -s -o /dev/null -w "%{http_code}" "$DEVICE/ready")
 check "device /ready 200" 200 "$code"
 code=$(curl -s -o /dev/null -w "%{http_code}" "$DEVICE/api/devices")
-check "device list 200" 200 "$code"
+check "device list no gateway headers -> 401" 401 "$code"
+code=$(curl -s -o /dev/null -w "%{http_code}" \
+  -H "x-gateway-secret: $GATEWAY_SECRET" -H "x-tenant-id: smoke-tenant" \
+  "$DEVICE/api/devices")
+check "device list with gateway headers -> 200" 200 "$code"
 
 # 8. access 服务健康（直连）
 ACCESS=${ACCESS:-http://localhost:8082}

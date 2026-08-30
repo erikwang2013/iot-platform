@@ -1,4 +1,4 @@
-use axum::{Router, routing::get};
+use axum::{Router, middleware, routing::get};
 use ecat_data_sqlx::SqlxClient;
 use ecat_device::{Db, list_devices, migrate};
 use std::sync::Arc;
@@ -15,9 +15,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .with_check(ecat_health::db_check(db.clone()))
         .into_router();
 
-    let router = Router::new()
-        .merge(health_router)
-        .merge(Router::new().route("/api/devices", get(list_devices)).with_state(Db(db)));
+    // 受保护路由：需网关 secret + x-tenant-id（与 ecat-access/rule/data 一致）
+    let devices = Router::new()
+        .route("/api/devices", get(list_devices))
+        .with_state(Db(db))
+        .layer(middleware::from_fn(ecat_middleware::tenant_from_header));
+
+    let router = Router::new().merge(health_router).merge(devices);
 
     let srv = ecat_transport_http::HttpServer::new("0.0.0.0:8081").router(router);
     let mut app = ecat::App::builder()

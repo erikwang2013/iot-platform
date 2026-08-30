@@ -1643,10 +1643,12 @@ dependencies = [
  "ecat-data",
  "ecat-data-sqlx",
  "ecat-health",
+ "ecat-middleware",
  "ecat-transport-http",
  "serde",
  "serde_json",
  "tokio",
+ "tower 0.5.3",
  "tracing",
 ]
 

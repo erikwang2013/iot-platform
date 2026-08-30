@@ -1,7 +1,7 @@
-use axum::extract::{Query, State};
+use axum::extract::State;
 use ecat_data::RdbmsClient;
 use ecat_data_sqlx::SqlxClient;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use serde_json::{Value, json};
 use std::sync::Arc;
 
@@ -21,11 +21,6 @@ pub async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + 
     Ok(())
 }
 
-#[derive(Deserialize)]
-pub struct TenantFilter {
-    pub tenant_id: Option<String>,
-}
-
 #[derive(Serialize)]
 struct DeviceRow {
     id: String,
@@ -34,19 +29,20 @@ struct DeviceRow {
     status: String,
 }
 
+/// 租户强制隔离：tenant 由 tenant_from_header 中间件从 x-tenant-id 校验后写入 extensions
+/// （main.rs 挂载），handler 不再接受客户端自报租户。
 pub async fn list_devices(
     State(db): State<Db>,
-    Query(filter): Query<TenantFilter>,
+    tenant: axum::Extension<String>,
 ) -> Result<axum::Json<Value>, (axum::http::StatusCode, String)> {
-    // ponytail: P0 支持任意/按租户过滤；参数化查询防注入，租户强制隔离 P1 随鉴权一起做
-    let (sql, params): (&str, Vec<Value>) = match &filter.tenant_id {
-        Some(t) => (
+    let rows = db
+        .0
+        .query_with(
             "SELECT id, name, vendor, status FROM devices WHERE tenant_id = ?",
-            vec![json!(t)],
-        ),
-        None => ("SELECT id, name, vendor, status FROM devices", vec![]),
-    };
-    let rows = db.0.query_with(sql, &params).await.map_err(db_err)?;
+            &[json!(tenant.as_str())],
+        )
+        .await
+        .map_err(db_err)?;
     let devices: Vec<DeviceRow> = rows
         .iter()
         .map(|r| DeviceRow {
