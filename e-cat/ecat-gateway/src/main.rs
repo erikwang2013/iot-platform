@@ -35,6 +35,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         client: reqwest::Client::new(),
     };
 
+    // 全局限流与登录限流共享同一存储（Redis 优先，多实例计数一致；
+    // 不可用时降级内存 fail-open，可用性优先，降级有日志告警）
+    let rate_store = rate_limit_store(&redis_url).await;
+
     // /api/access/* 公开路径：OAuth 回调、涂鸦 Webhook（无 JWT，浏览器/厂商服务器直连）
     let access_public = Router::new()
         .route("/oauth/callback", get(access_proxy_open))
@@ -136,13 +140,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         )
         .with_state(proxy_state.clone());
     // 登录端点：管理端 /api/auth/login 与客户端 /admin/auth/login 同一 handler，
-    // 独立更严的按 IP 限流（10 次/分钟）防爆破；全局 100 次/分钟限流仍叠加生效
+    // 独立更严的按 IP 限流（10 次/分钟）防爆破；全局 100 次/分钟限流仍叠加生效。
+    // 与全局限流共享 Redis 存储：多实例下登录失败计数一致（防爆破不因扩容失效）
     let login_router = Router::new()
         .route("/auth/login", post(auth_proxy))
         .layer(
             tower::ServiceBuilder::new()
                 .layer(axum::error_handling::HandleErrorLayer::new(rate_limit_error))
-                .layer(login_rate_limit()),
+                .layer(login_rate_limit(rate_store.clone())),
         )
         .with_state(proxy_state);
 
@@ -175,7 +180,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             // ServiceBuilder：先加的层在外层，故 HandleError 包住限流层
             tower::ServiceBuilder::new()
                 .layer(axum::error_handling::HandleErrorLayer::new(rate_limit_error))
-                .layer(rate_limit(&redis_url).await)
+                .layer(rate_limit(rate_store))
                 .into_inner(),
         );
 
@@ -190,10 +195,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 }
 
 /// Redis 限流存储，不可用时降级内存（fail-open，与 store 语义一致）。
-async fn rate_limit(redis_url: &str) -> RateLimitLayer<axum::body::Body> {
-    let max = env_u32("RATE_LIMIT_MAX", 100);
-    let window_secs = env_u32("RATE_LIMIT_WINDOW_SECS", 60);
-    let store: Arc<dyn RateLimitStore> = match RedisRateLimitStore::connect(redis_url).await {
+/// 全局与登录限流共享同一 Arc<dyn RateLimitStore>，多实例计数一致。
+async fn rate_limit_store(redis_url: &str) -> Arc<dyn RateLimitStore> {
+    match RedisRateLimitStore::connect(redis_url).await {
         Ok(s) => {
             tracing::info!("rate limit store: redis");
             Arc::new(s)
@@ -202,7 +206,12 @@ async fn rate_limit(redis_url: &str) -> RateLimitLayer<axum::body::Body> {
             tracing::warn!(error = %e, "redis rate-limit store unavailable; fallback to in-memory");
             Arc::new(MemoryStore::new())
         }
-    };
+    }
+}
+
+fn rate_limit(store: Arc<dyn RateLimitStore>) -> RateLimitLayer<axum::body::Body> {
+    let max = env_u32("RATE_LIMIT_MAX", 100);
+    let window_secs = env_u32("RATE_LIMIT_WINDOW_SECS", 60);
     RateLimitLayer::new(max, Duration::from_secs(window_secs as u64))
         .with_store(store)
         // 优先按租户（x-tenant-id），否则按来源 IP（ConnectInfo 由 HttpServer 填充）
@@ -224,13 +233,14 @@ async fn rate_limit(redis_url: &str) -> RateLimitLayer<axum::body::Body> {
         })
 }
 
-/// 登录防爆破：按来源 IP 10 次/分钟（LOGIN_RATE_LIMIT_MAX 可配），
-/// 独立内存存储，Redis 故障不影响登录可用性。
-fn login_rate_limit() -> RateLimitLayer<axum::body::Body> {
+/// 登录防爆破：按来源 IP 10 次/分钟（LOGIN_RATE_LIMIT_MAX 可配）。
+/// 与全局限流共享 Redis 存储（多实例登录失败计数一致，防爆破不因扩容失效）；
+/// Redis 不可用时降级内存 fail-open——登录可用性优先，爆破防护降级由日志告警。
+fn login_rate_limit(store: Arc<dyn RateLimitStore>) -> RateLimitLayer<axum::body::Body> {
     let max = env_u32("LOGIN_RATE_LIMIT_MAX", 10);
     let window_secs = env_u32("LOGIN_RATE_LIMIT_WINDOW_SECS", 60);
     RateLimitLayer::new(max, Duration::from_secs(window_secs as u64))
-        .with_store(Arc::new(MemoryStore::new()))
+        .with_store(store)
         .with_key_fn(|req: &axum::http::Request<axum::body::Body>| {
             match req
                 .extensions()
