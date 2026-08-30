@@ -26,7 +26,7 @@ pub fn batch_sql(events: &[EventMessage]) -> String {
 /// 停机期间消息跳过）；同 ts 同 tags 覆盖保证幂等。
 /// 多副本消费需显式 KafkaConfig.group_id（见 ecat-mq-kafka），P2 单实例。
 pub async fn run(td: Arc<TdengineClient>, kafka: Arc<KafkaMq>) {
-    let stream = match kafka.subscribe(TOPIC_EVENTS).await {
+    let mut stream = match kafka.subscribe(TOPIC_EVENTS).await {
         Ok(s) => s,
         Err(e) => {
             tracing::error!(error = %e, "kafka subscribe failed, ingest exits");
