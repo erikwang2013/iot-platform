@@ -10,6 +10,7 @@ ecat-data-sqlx = { path = "../ecat-data-sqlx" }
 ecat-data = { path = "../ecat-data" }
 ecat-middleware = { path = "../ecat-middleware" }
 ecat-iot = { path = "../ecat-iot" }
+ecat-health = { path = "../ecat-health" }
 ecat-data-redis = { path = "../ecat-data-redis" }
 ecat-mq = { path = "../ecat-mq" }
 ecat-mq-kafka = { path = "../ecat-mq-kafka" }

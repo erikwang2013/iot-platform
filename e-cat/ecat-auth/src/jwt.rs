@@ -197,6 +197,20 @@ where
     }
 }
 
+/// 无 HTTP 层依赖的纯校验：WS query token、内部服务间调用共用。
+/// 与 JwtAuthLayer 同一 secret；开发/演示 token 可不带 exp/nbf，只验签名与 sub。
+pub fn verify_token(token: &str, secret: &str) -> Result<AuthClaims, String> {
+    let mut validation = jsonwebtoken::Validation::default();
+    validation.required_spec_claims = std::collections::HashSet::new();
+    jsonwebtoken::decode::<AuthClaims>(
+        token,
+        &jsonwebtoken::DecodingKey::from_secret(secret.as_bytes()),
+        &validation,
+    )
+    .map(|d| d.claims)
+    .map_err(|e| format!("bad token: {e}"))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

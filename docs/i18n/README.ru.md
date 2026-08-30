@@ -56,8 +56,9 @@
 ├── apps/            # Фронтенд-приложения
 │   ├── admin/       # Консоль администратора (Flutter + HarmonyOS)
 │   └── client/      # Клиентское приложение (Flutter + HarmonyOS)
-├── e-cat/           # Рабочая область Rust (микросервисы + общие крейты)
-│   └── services/    # iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn
+├── e-cat/           # Rust 工作区（Rust-рабочее пространство (фреймворк + бизнес-микросервисы)）
+│   ├── ecat*/       # библиотеки фреймворка (ecat · ecat-auth · ecat-data-* …)
+│   └── iot-*/       # бизнес-микросервисы (iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn)
 ├── ../            # Документация, диаграммы, изображения для донатов
 ├── scripts/         # Скрипты сборки / проверки / смоук-тестов
 └── docker-compose.yml  # Инфраструктура (MySQL / Redis / EMQX / Kafka / MinIO)

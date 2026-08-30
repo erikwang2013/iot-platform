@@ -14,23 +14,9 @@ struct Db(Arc<SqlxClient>);
 
 async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     for file in ["migrations/0001_init.sql", "migrations/0002_vendor_auth.sql"] {
-        let sql = std::fs::read_to_string(file)?;
-        // execute 逐条执行: sqlx Any 驱动不启用 multi-statements,整文件一次 execute 会 1064
-        for stmt in sql.split(';').filter(|s| !s.trim().is_empty()) {
-            db.execute(stmt).await?;
-        }
+        db.execute_script(&std::fs::read_to_string(file)?).await?;
     }
     Ok(())
-}
-
-async fn health(State(db): State<Db>) -> Result<axum::Json<Value>, (axum::http::StatusCode, String)> {
-    match db.0.query("SELECT 1").await {
-        Ok(_) => Ok(axum::Json(json!({"status": "ok", "db": true}))),
-        Err(e) => Err((
-            axum::http::StatusCode::SERVICE_UNAVAILABLE,
-            format!("db unreachable: {e}"),
-        )),
-    }
 }
 
 #[derive(Deserialize)]
@@ -81,11 +67,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .unwrap_or_else(|_| "mysql://iot:iot@localhost:3306/iot".into());
     let db = SqlxClient::connect(&db_url).await?;
     migrate(&db).await?;
+    let db = Arc::new(db);
+
+    let health_router = ecat_health::HealthRegistry::new()
+        .with_check(ecat_health::FnCheck::new("db", {
+            let db = db.clone();
+            move || {
+                let db = db.clone();
+                async move {
+                    db.execute("SELECT 1").await.map(|_| ()).map_err(|e| {
+                        // 细节只进日志，不回给客户端（/ready 无鉴权直接可达）
+                        tracing::warn!(error = %e, "health check db failed");
+                        "db check failed".to_string()
+                    })
+                }
+            }
+        }))
+        .into_router();
 
     let router = Router::new()
-        .route("/health", get(health))
-        .route("/api/devices", get(list_devices))
-        .with_state(Db(Arc::new(db)));
+        .merge(health_router)
+        .merge(
+            Router::new()
+                .route("/api/devices", get(list_devices))
+                .with_state(Db(db)),
+        );
 
     let srv = ecat_transport_http::HttpServer::new("0.0.0.0:8081").router(router);
     let mut app = ecat::App::builder()

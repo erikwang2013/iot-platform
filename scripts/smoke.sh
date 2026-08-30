@@ -48,17 +48,16 @@ code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -X POST \
   -d "{\"q\":\"'; DROP TABLE users; --\"}" "$GATEWAY/api/submit")
 check "sql injection -> 403" 403 "$code"
 
-# 7. device 健康 + 数据
-body=$(curl -s "$DEVICE/health")
-# serde_json 默认 BTreeMap：key 按字母序（db < status）
-check "device /health db ok" '{"db":true,"status":"ok"}' "$body"
+# 7. device 健康 + 数据（/ready 由 ecat-health 提供，含 db 检查）
+code=$(curl -s -o /dev/null -w "%{http_code}" "$DEVICE/ready")
+check "device /ready 200" 200 "$code"
 code=$(curl -s -o /dev/null -w "%{http_code}" "$DEVICE/api/devices")
 check "device list 200" 200 "$code"
 
 # 8. access 服务健康（直连）
 ACCESS=${ACCESS:-http://localhost:8082}
-body=$(curl -s "$ACCESS/health")
-check "access /health 200" "OK" "$body"
+code=$(curl -s -o /dev/null -w "%{http_code}" "$ACCESS/health")
+check "access /health 200" 200 "$code"
 
 # 9. 网关转发 /api/access/oauth/authorize-url（带 JWT + 版本 header → 200）
 code=$(curl -s -o /tmp/access_authorize.json -w "%{http_code}" -H "x-api-version: v1" \
@@ -95,8 +94,8 @@ echo "$shadow" | grep -q '"temp":23.5' && pass=$((pass+1)) && echo "PASS: redis 
 
 # 13. data 服务健康（直连 8083）
 DATA=${DATA:-http://localhost:8083}
-body=$(curl -s "$DATA/health")
-check "data /health 200" "OK" "$body"
+code=$(curl -s -o /dev/null -w "%{http_code}" "$DATA/health")
+check "data /health 200" 200 "$code"
 
 # 14. TDengine 种子数据：直插 2 行（REST basic auth root:taosdata）
 curl -s -u root:taosdata -H "content-type: application/json" \
@@ -126,8 +125,8 @@ grep -q "ts,value" /tmp/data_export.csv && grep -q "23.5" /tmp/data_export.csv \
 
 # 17. rule 服务健康（直连 8084）
 RULE=${RULE:-http://localhost:8084}
-body=$(curl -s "$RULE/health")
-check "rule /health 200" "OK" "$body"
+code=$(curl -s -o /dev/null -w "%{http_code}" "$RULE/health")
+check "rule /health 200" 200 "$code"
 
 # 18. 经网关建阈值规则（JWT → 201 且含 rule id/tenant_id）
 code=$(curl -s -o /tmp/rule_create.json -w "%{http_code}" \

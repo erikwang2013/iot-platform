@@ -56,8 +56,9 @@
 ├── apps/            # تطبيقات الواجهة الأمامية
 │   ├── admin/       # وحدة التحكم الإدارية (Flutter + HarmonyOS)
 │   └── client/      # تطبيق العميل (Flutter + HarmonyOS)
-├── e-cat/           # مساحة عمل Rust (خدمات مصغرة + صناديق مشتركة)
-│   └── services/    # iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn
+├── e-cat/           # Rust 工作区（مساحة عمل Rust (إطار العمل + الخدمات المصغرة للأعمال)）
+│   ├── ecat*/       # مكتبات إطار العمل المشتركة (ecat · ecat-auth · ecat-data-* …)
+│   └── iot-*/       # الخدمات المصغرة للأعمال (iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn)
 ├── ../            # الوثائق والرسوم البيانية وصور التبرعات
 ├── scripts/         # نصوص البناء / التحقق / اختبارات الدخان
 └── docker-compose.yml  # البنية التحتية (MySQL / Redis / EMQX / Kafka / MinIO)

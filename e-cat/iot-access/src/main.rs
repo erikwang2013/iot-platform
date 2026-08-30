@@ -1,11 +1,4 @@
-use axum::{
-    Router,
-    extract::Request,
-    http::StatusCode,
-    middleware::{self, Next},
-    response::{IntoResponse, Response},
-    routing::get,
-};
+use axum::{Router, middleware};
 use ecat_data::RdbmsClient;
 use ecat_data_redis::RedisCache;
 use ecat_data_sqlx::SqlxClient;
@@ -18,10 +11,6 @@ use iot_access::{
     webhook::{self, WebhookState},
 };
 use std::sync::Arc;
-
-async fn health() -> &'static str {
-    "OK"
-}
 
 async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     for file in ["migrations/0001_init.sql", "migrations/0002_vendor_auth.sql"] {
@@ -51,10 +40,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let db = SqlxClient::connect(&db_url).await?;
     migrate(&db).await?;
+    let db = Arc::new(db);
     let redis = Arc::new(RedisCache::connect(&redis_url).await?);
     let kafka = Arc::new(KafkaMq::connect(&kafka_brokers).await?);
     let mqtt = Arc::new(MqttMq::connect(&mqtt_url).await?);
-    let store = Arc::new(Store::new(Arc::new(db), &enc_key));
+    let store = Arc::new(Store::new(db.clone(), &enc_key));
 
     let callback_base = std::env::var("ACCESS_CALLBACK_BASE")
         .unwrap_or_else(|_| "http://localhost:8080/api/access/oauth/callback".into());
@@ -94,8 +84,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .merge(api::router(api_state))
         .layer(middleware::from_fn(ecat_middleware::tenant_from_header));
 
+    let health_router = ecat_health::HealthRegistry::new()
+        .with_check(ecat_health::FnCheck::new("db", {
+            let db = db.clone();
+            move || {
+                let db = db.clone();
+                async move {
+                    db.execute("SELECT 1").await.map(|_| ()).map_err(|e| {
+                        // 细节只进日志，不回给客户端（/ready 无鉴权直接可达）
+                        tracing::warn!(error = %e, "health check db failed");
+                        "db check failed".to_string()
+                    })
+                }
+            }
+        }))
+        .into_router();
+
     let router = Router::new()
-        .route("/health", get(health))
+        .merge(health_router)
         .nest("/api/access", public)
         .nest("/api/access", protected);
 

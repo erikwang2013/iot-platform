@@ -8,7 +8,7 @@ mod oauth2;
 pub use apikey::{ApiKeyLayer, ApiKeyService};
 pub use claims::AuthClaims;
 pub use helpers::claims_from_request;
-pub use jwt::{JwtAuthError, JwtAuthLayer, JwtAuthService};
+pub use jwt::{verify_token, JwtAuthError, JwtAuthLayer, JwtAuthService};
 pub use oauth2::{OAuth2Layer, OAuth2Service};
 
 #[cfg(test)]
@@ -295,6 +295,34 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(resp.status(), http::StatusCode::UNAUTHORIZED);
+    }
+
+    #[test]
+    fn verify_token_roundtrip() {
+        use jsonwebtoken::{EncodingKey, Header};
+        let secret = "test-secret-at-least-16-bytes";
+        let claims = AuthClaims {
+            sub: "tenant-1".into(),
+            exp: None,
+            iat: None,
+            role: Some("admin".into()),
+            extra: std::collections::HashMap::new(),
+        };
+        let token = jsonwebtoken::encode(
+            &Header::default(),
+            &claims,
+            &EncodingKey::from_secret(secret.as_bytes()),
+        )
+        .unwrap();
+        let got = verify_token(&token, secret).unwrap();
+        assert_eq!(got.sub, "tenant-1");
+        assert_eq!(got.role(), Some("admin"));
+    }
+
+    #[test]
+    fn verify_token_rejects_bad_token() {
+        assert!(verify_token("not-a-jwt", "test-secret-at-least-16-bytes").is_err());
+        assert!(verify_token("", "test-secret-at-least-16-bytes").is_err());
     }
 
     #[tokio::test]

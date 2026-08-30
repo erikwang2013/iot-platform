@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 /// 统一事件消息：契约定义在 ecat-iot（跨服务共享）。
 pub use ecat_iot::EventMessage;

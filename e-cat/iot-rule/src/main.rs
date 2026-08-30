@@ -1,20 +1,9 @@
-use axum::{
-    Router,
-    extract::Request,
-    http::StatusCode,
-    middleware::{self, Next},
-    response::{IntoResponse, Response},
-    routing::get,
-};
+use axum::{Router, middleware, routing::get};
+use ecat_data::RdbmsClient;
 use ecat_data_sqlx::SqlxClient;
 use ecat_mq_kafka::KafkaMq;
 use iot_rule::{api::{self, ApiState}, push::PushHub, store::RuleStore, ws};
 use std::sync::Arc;
-
-async fn health() -> &'static str {
-    "OK"
-}
-
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -30,7 +19,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let db = SqlxClient::connect(&db_url).await?;
     iot_rule::store::migrate(&db).await?;
-    let store = Arc::new(RuleStore::new(Arc::new(db)));
+    let db = Arc::new(db);
+    let store = Arc::new(RuleStore::new(db.clone()));
 
     let kafka = Arc::new(KafkaMq::from_config(iot_rule::engine::kafka_config(&kafka_brokers)).await?);
     let hub = PushHub::new();
@@ -54,8 +44,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/ws", get(ws::ws_handler))
         .with_state(hub);
 
+    let health_router = ecat_health::HealthRegistry::new()
+        .with_check(ecat_health::FnCheck::new("db", {
+            let db = db.clone();
+            move || {
+                let db = db.clone();
+                async move {
+                    db.execute("SELECT 1").await.map(|_| ()).map_err(|e| {
+                        // 细节只进日志，不回给客户端（/ready 无鉴权直接可达）
+                        tracing::warn!(error = %e, "health check db failed");
+                        "db check failed".to_string()
+                    })
+                }
+            }
+        }))
+        .into_router();
+
     let router = Router::new()
-        .route("/health", get(health))
+        .merge(health_router)
         .merge(ws_route)
         .nest("/api/rule", protected);
 

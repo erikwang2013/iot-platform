@@ -8,6 +8,7 @@ ecat = { path = "../ecat" }
 ecat-transport-http.workspace = true
 ecat-data-sqlx = { path = "../ecat-data-sqlx" }
 ecat-data = { path = "../ecat-data" }
+ecat-health = { path = "../ecat-health" }
 axum.workspace = true
 serde.workspace = true
 serde_json.workspace = true

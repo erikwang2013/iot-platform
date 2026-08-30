@@ -8,6 +8,7 @@ ecat = { path = "../ecat" }
 ecat-data = { path = "../ecat-data" }
 ecat-middleware = { path = "../ecat-middleware" }
 ecat-iot = { path = "../ecat-iot" }
+ecat-health = { path = "../ecat-health" }
 ecat-transport-http.workspace = true
 ecat-data-tdengine = { path = "../ecat-data-tdengine" }
 ecat-mq = { path = "../ecat-mq" }

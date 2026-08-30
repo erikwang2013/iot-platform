@@ -56,8 +56,9 @@ Eine All-in-one-SaaS-IoT-Plattform für die einheitliche Anbindung führender Ge
 ├── apps/            # Frontend-Apps
 │   ├── admin/       # Admin-Konsole (Flutter + HarmonyOS)
 │   └── client/      # Client-App (Flutter + HarmonyOS)
-├── e-cat/           # Rust-Workspace (Mikroservices + gemeinsame Crates)
-│   └── services/    # iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn
+├── e-cat/           # Rust 工作区（Rust-Workspace (Framework + Business-Mikrodienste)）
+│   ├── ecat*/       # Framework-Bibliotheken (ecat · ecat-auth · ecat-data-* …)
+│   └── iot-*/       # Business-Mikrodienste (iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn)
 ├── ../            # Doku, Diagramme, Spendenbilder
 ├── scripts/         # Build- / Validierungs- / Smoke-Test-Skripte
 └── docker-compose.yml  # Infrastruktur (MySQL / Redis / EMQX / Kafka / MinIO)

@@ -56,8 +56,9 @@
 ├── apps/            # ফ্রন্টএন্ড অ্যাপ
 │   ├── admin/       # অ্যাডমিন কনসোল (Flutter + HarmonyOS)
 │   └── client/      # ক্লায়েন্ট অ্যাপ (Flutter + HarmonyOS)
-├── e-cat/           # Rust ওয়ার্কস্পেস (মাইক্রোসার্ভিস + শেয়ার্ড ক্রেট)
-│   └── services/    # iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn
+├── e-cat/           # Rust 工作区（রাস্ট ওয়ার্কস্পেস (ফ্রেমওয়ার্ক + ব্যবসায়িক মাইক্রোসার্ভিস)）
+│   ├── ecat*/       # ফ্রেমওয়ার্ক শেয়ার্ড লাইব্রেরি (ecat · ecat-auth · ecat-data-* …)
+│   └── iot-*/       # ব্যবসায়িক মাইক্রোসার্ভিস (iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn)
 ├── ../            # ডকুমেন্টেশন, ডায়াগ্রাম, দান ছবি
 ├── scripts/         # বিল্ড / ভ্যালিডেশন / স্মোক-টেস্ট স্ক্রিপ্ট
 └── docker-compose.yml  # ইনফ্রাস্ট্রাকচার (MySQL / Redis / EMQX / Kafka / MinIO)

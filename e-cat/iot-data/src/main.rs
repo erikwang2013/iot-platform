@@ -1,20 +1,8 @@
-use axum::{
-    Router,
-    extract::Request,
-    http::StatusCode,
-    middleware::{self, Next},
-    response::{IntoResponse, Response},
-    routing::get,
-};
+use axum::{Router, middleware};
 use ecat_data::TsdbClient;
 use ecat_mq_kafka::KafkaMq;
 use iot_data::api::{self, ApiState};
 use std::sync::Arc;
-
-async fn health() -> &'static str {
-    "OK"
-}
-
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -49,8 +37,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .merge(api::router(api_state))
         .layer(middleware::from_fn(ecat_middleware::tenant_from_header));
 
+    let health_router = ecat_health::HealthRegistry::new()
+        .with_check(ecat_health::FnCheck::new("td", {
+            let td = td.clone();
+            move || {
+                let td = td.clone();
+                async move {
+                    td.query("SELECT server_status()")
+                        .await
+                        .map(|_| ())
+                        .map_err(|e| {
+                            // 细节只进日志，不回给客户端（/ready 无鉴权直接可达）
+                            tracing::warn!(error = %e, "health check tdengine failed");
+                            "tdengine check failed".to_string()
+                        })
+                }
+            }
+        }))
+        .into_router();
+
     let router = Router::new()
-        .route("/health", get(health))
+        .merge(health_router)
         .nest("/api/data", protected);
 
     let bind = std::env::var("HTTP_BIND").unwrap_or_else(|_| "0.0.0.0:8083".into());

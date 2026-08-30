@@ -56,8 +56,9 @@
 ├── apps/            # 前端应用
 │   ├── admin/       # 管理端（Flutter + HarmonyOS）
 │   └── client/      # 客户端（Flutter + HarmonyOS）
-├── e-cat/           # Rust 工作区（微服务 + 公共库）
-│   └── services/    # iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn
+├── e-cat/           # Rust 工作区（框架 + 业务微服务一体）
+│   ├── ecat*/       # 框架公共库（ecat · ecat-auth · ecat-data-* …）
+│   └── iot-*/       # 业务微服务（iot-gateway · iot-device · iot-access · iot-rule · iot-data · iot-cdn）
 ├── docs/            # 文档、架构图、打赏图片
 ├── scripts/         # 构建 / 校验 / 冒烟测试脚本
 └── docker-compose.yml  # 基础设施编排（MySQL / Redis / EMQX / Kafka / MinIO）
