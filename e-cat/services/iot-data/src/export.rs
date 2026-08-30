@@ -31,7 +31,8 @@ fn value_text(v: &Value) -> String {
 /// xlsx：两列（ts 数值毫秒、value 文本），返回 zip 字节。
 pub fn xlsx_of_points(points: &[HistoryPoint]) -> Result<Vec<u8>, String> {
     let mut wb = rust_xlsxwriter::Workbook::new();
-    let ws = wb.push_worksheet();
+    // 0.99 的 push_worksheet 消费 Worksheet，add_worksheet 返回 &mut 可直接写
+    let ws = wb.add_worksheet();
     ws.write_string(0, 0, "ts").map_err(|e| e.to_string())?;
     ws.write_string(0, 1, "value").map_err(|e| e.to_string())?;
     for (i, p) in points.iter().enumerate() {

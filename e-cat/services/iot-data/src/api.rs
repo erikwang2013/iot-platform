@@ -2,9 +2,9 @@ use crate::models::HistoryPoint;
 use crate::td::{escape_sql_string, parse_points};
 use axum::{
     Json,
-    extract::{Query, RawQuery, State},
+    extract::{Query, State},
     http::StatusCode,
-    response::{IntoResponse, Response},
+    response::IntoResponse,
 };
 use ecat_data::TsdbClient;
 use ecat_data_tdengine::TdengineClient;
