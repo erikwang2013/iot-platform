@@ -12,7 +12,7 @@
 
     <rect x="40" y="140" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="166" font-size="14" font-weight="bold" fill="#0f172a">기기 관리</text>
-    <text x="60" y="184" font-size="10.5" fill="#475569">검색 · 제조사 OAuth 연동 안내 · 상세 · 수명 주기</text>
+    <text x="60" y="184" font-size="10.5" fill="#475569">검색 · 벤더 OAuth 온보딩 · 상세 · 라이프사이클 · OTA 업그레이드</text>
 
     <rect x="40" y="210" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="236" font-size="14" font-weight="bold" fill="#0f172a">사물 모델</text>
@@ -20,7 +20,7 @@
 
     <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">제조사 통합</text>
-    <text x="60" y="324" font-size="10.5" fill="#475569">어댑터 상태 · OAuth 자격 증명(AES) · 웹훅</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">Tuya / Xiaomi / Huawei / AWS / Azure · 자격 증명 AES 암호화 · Webhook</text>
 
     <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">CDN 관리</text>
@@ -72,7 +72,7 @@
 
   <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
   <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">플랫폼 기능</text>
-  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">13개 언어 i18n · 4개 플랫폼(Flutter Web/모바일 ×2 + HarmonyOS ×2) · 이중 API /api/* + /admin/* · 멀티 테넌트 SaaS · 6개 마이크로서비스</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">13개 언어 i18n · 4개 플랫폼(Flutter Web/모바일 ×2 + HarmonyOS ×2) · 이중 API(/api/* + /admin/*) · 멀티테넌트 SaaS · 6개 마이크로서비스 · 원클릭 설치</text>
 
   <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
   <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>

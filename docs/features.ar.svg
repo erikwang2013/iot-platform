@@ -12,7 +12,7 @@
 
     <rect x="40" y="140" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="166" font-size="14" font-weight="bold" fill="#0f172a">إدارة الأجهزة</text>
-    <text x="60" y="184" font-size="10.5" fill="#475569">بحث · دليل ربط OAuth للشركة · التفاصيل · دورة الحياة</text>
+    <text x="60" y="184" font-size="10.5" fill="#475569">بحث · إعداد OAuth للمورّد · تفاصيل · دورة الحياة · ترقية OTA</text>
 
     <rect x="40" y="210" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="236" font-size="14" font-weight="bold" fill="#0f172a">نموذج الأشياء</text>
@@ -20,7 +20,7 @@
 
     <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">تكامل الشركات</text>
-    <text x="60" y="324" font-size="10.5" fill="#475569">حالة المحولات · بيانات اعتماد OAuth (AES) · webhooks</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">Tuya / Xiaomi / Huawei / AWS / Azure · بيانات اعتماد مشفرة AES · Webhook</text>
 
     <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">إدارة CDN</text>
@@ -72,7 +72,7 @@
 
   <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
   <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">قدرات المنصة</text>
-  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">i18n بـ 13 لغة · 4 منصات (Flutter Web/محمول ×2 + HarmonyOS ×2) · سطحا API /api/* + /admin/* · SaaS متعدد المستأجرين · 6 خدمات مصغرة</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">i18n بـ 13 لغة · 4 منصات (Flutter ويب/موبايل ×2 + HarmonyOS ×2) · واجهتا API (/api/* + /admin/*) · SaaS متعدد المستأجرين · 6 خدمات صغيرة · تثبيت بنقرة واحدة</text>
 
   <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
   <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>

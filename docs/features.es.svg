@@ -12,7 +12,7 @@
 
     <rect x="40" y="140" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="166" font-size="14" font-weight="bold" fill="#0f172a">Gestión de dispositivos</text>
-    <text x="60" y="184" font-size="10.5" fill="#475569">Búsqueda · guía de integración OAuth del fabricante · detalles · ciclo de vida</text>
+    <text x="60" y="184" font-size="10.5" fill="#475569">Búsqueda · onboarding OAuth del fabricante · detalles · ciclo de vida · actualización OTA</text>
 
     <rect x="40" y="210" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="236" font-size="14" font-weight="bold" fill="#0f172a">Modelo de cosas</text>
@@ -20,7 +20,7 @@
 
     <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">Integración de fabricantes</text>
-    <text x="60" y="324" font-size="10.5" fill="#475569">Estado de adaptadores · credenciales OAuth (AES) · webhooks</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">Tuya / Xiaomi / Huawei / AWS / Azure · credenciales cifradas AES · Webhook</text>
 
     <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">Gestión de CDN</text>
@@ -72,7 +72,7 @@
 
   <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
   <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">Capacidades de la plataforma</text>
-  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">i18n en 13 idiomas · 4 plataformas (Flutter Web/Móvil ×2 + HarmonyOS ×2) · doble superficie API /api/* + /admin/* · SaaS multi-tenant · 6 microservicios</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">i18n en 13 idiomas · 4 plataformas (Flutter Web/Móvil ×2 + HarmonyOS ×2) · doble API (/api/* + /admin/*) · SaaS multiinquilino · 6 microservicios · instalación en un clic</text>
 
   <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
   <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>

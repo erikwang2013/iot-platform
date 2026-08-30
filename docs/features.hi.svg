@@ -12,7 +12,7 @@
 
     <rect x="40" y="140" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="166" font-size="14" font-weight="bold" fill="#0f172a">डिवाइस प्रबंधन</text>
-    <text x="60" y="184" font-size="10.5" fill="#475569">खोज · वेंडर OAuth ऑनबोर्डिंग · विवरण · जीवनचक्र</text>
+    <text x="60" y="184" font-size="10.5" fill="#475569">खोज · वेंडर OAuth ऑनबोर्डिंग · विवरण · जीवनचक्र · OTA अपग्रेड</text>
 
     <rect x="40" y="210" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="236" font-size="14" font-weight="bold" fill="#0f172a">थिंग मॉडल</text>
@@ -20,7 +20,7 @@
 
     <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">वेंडर एकीकरण</text>
-    <text x="60" y="324" font-size="10.5" fill="#475569">एडेप्टर स्थिति · OAuth क्रेडेंशियल (AES) · वेबहुक</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">Tuya / Xiaomi / Huawei / AWS / Azure · AES-एन्क्रिप्टेड क्रेडेंशियल · Webhook</text>
 
     <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">CDN प्रबंधन</text>
@@ -72,7 +72,7 @@
 
   <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
   <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">प्लेटफ़ॉर्म क्षमताएँ</text>
-  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">13 भाषाओं में i18n · 4 प्लेटफ़ॉर्म (Flutter Web/मोबाइल ×2 + HarmonyOS ×2) · दोहरी API सतह /api/* + /admin/* · मल्टी-टेनेंट SaaS · 6 माइक्रोसर्विस</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">13 भाषा i18n · 4 प्लेटफ़ॉर्म (Flutter Web/मोबाइल ×2 + HarmonyOS ×2) · दोहरा API (/api/* + /admin/*) · मल्टी-टेनेंट SaaS · 6 माइक्रोसर्विस · एक-क्लिक इंस्टॉल</text>
 
   <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
   <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>

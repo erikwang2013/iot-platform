@@ -12,7 +12,7 @@
 
     <rect x="40" y="140" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="166" font-size="14" font-weight="bold" fill="#0f172a">ডিভাইস ব্যবস্থাপনা</text>
-    <text x="60" y="184" font-size="10.5" fill="#475569">খোঁজ · ভেন্ডর OAuth অনবোর্ডিং · বিবরণ · জীবনচক্র</text>
+    <text x="60" y="184" font-size="10.5" fill="#475569">খোঁজ · ভেন্ডর OAuth অনবোর্ডিং · বিস্তারিত · জীবনচক্র · OTA আপগ্রেড</text>
 
     <rect x="40" y="210" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="236" font-size="14" font-weight="bold" fill="#0f172a">থিং মডেল</text>
@@ -20,7 +20,7 @@
 
     <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">ভেন্ডর ইন্টিগ্রেশন</text>
-    <text x="60" y="324" font-size="10.5" fill="#475569">অ্যাডাপ্টার অবস্থা · OAuth ক্রেডেনশিয়াল (AES) · ওয়েবহুক</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">Tuya / Xiaomi / Huawei / AWS / Azure · AES-এনক্রিপ্টেড ক্রেডেনশিয়াল · Webhook</text>
 
     <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">CDN ব্যবস্থাপনা</text>
@@ -72,7 +72,7 @@
 
   <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
   <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">প্ল্যাটফর্ম ক্ষমতা</text>
-  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">১৩টি ভাষায় i18n · ৪টি প্ল্যাটফর্ম (Flutter Web/মোবাইল ×2 + HarmonyOS ×2) · দ্বৈত API পৃষ্ঠ /api/* + /admin/* · মাল্টি-টেন্যান্ট SaaS · ৬টি মাইক্রোসার্ভিস</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">১৩ ভাষা i18n · ৪ প্ল্যাটফর্ম (Flutter Web/মোবাইল ×2 + HarmonyOS ×2) · দ্বৈত API (/api/* + /admin/*) · মাল্টি-টেন্যান্ট SaaS · ৬ মাইক্রোসার্ভিস · এক-ক্লিক ইনস্টল</text>
 
   <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
   <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>

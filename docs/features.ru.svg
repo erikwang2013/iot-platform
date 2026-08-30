@@ -12,7 +12,7 @@
 
     <rect x="40" y="140" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="166" font-size="14" font-weight="bold" fill="#0f172a">Управление устройствами</text>
-    <text x="60" y="184" font-size="10.5" fill="#475569">Поиск · онбординг OAuth вендора · детали · жизненный цикл</text>
+    <text x="60" y="184" font-size="10.5" fill="#475569">Поиск · OAuth-онбординг вендора · детали · жизненный цикл · OTA-обновление</text>
 
     <rect x="40" y="210" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="236" font-size="14" font-weight="bold" fill="#0f172a">Модель вещей</text>
@@ -20,7 +20,7 @@
 
     <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">Интеграция вендоров</text>
-    <text x="60" y="324" font-size="10.5" fill="#475569">Статус адаптеров · OAuth-учётные данные (AES) · вебхуки</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">Tuya / Xiaomi / Huawei / AWS / Azure · AES-шифрование учётных данных · Webhook</text>
 
     <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">Управление CDN</text>
@@ -72,7 +72,7 @@
 
   <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
   <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">Возможности платформы</text>
-  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">i18n на 13 языках · 4 платформы (Flutter Web/Мобайл ×2 + HarmonyOS ×2) · двойной API /api/* + /admin/* · мультитенантный SaaS · 6 микросервисов</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">i18n на 13 языках · 4 платформы (Flutter Web/моб. ×2 + HarmonyOS ×2) · два API (/api/* + /admin/*) · мультитенантный SaaS · 6 микросервисов · быстрая установка</text>
 
   <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
   <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>
