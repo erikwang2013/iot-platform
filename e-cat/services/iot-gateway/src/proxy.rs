@@ -35,8 +35,13 @@ pub async fn access_proxy_open(State(ps): State<ProxyState>, req: Request) -> Re
 /// 注入 x-gateway-secret（iot-access 的 tenant_from_header 门禁校验，见其 main.rs）；
 /// 受保护路径额外注入 x-tenant-id。上游失败 → 502。
 async fn forward(ps: &ProxyState, req: Request, tenant: &str) -> Response {
-    // axum nest 会剥掉 /api/access 前缀，handler 里看到的路径以 /oauth/... 开头，转发时补回
-    let path = format!("/api/access{}", req.uri().path());
+    // axum nest 会剥掉 /api/access 前缀，handler 里看到的路径以 /oauth/... 开头，转发时补回；
+    // query 也要透传（OAuth callback 的 ?code=&state= 由上游从 Query 读取）
+    let mut path = format!("/api/access{}", req.uri().path());
+    if let Some(q) = req.uri().query() {
+        path.push('?');
+        path.push_str(q);
+    }
     let method = req.method().clone();
     let content_type = req.headers().get(header::CONTENT_TYPE).cloned();
     // 只透传白名单头（x-tuya-signature 供涂鸦 webhook 验签用）；
