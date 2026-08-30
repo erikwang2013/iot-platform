@@ -3,6 +3,10 @@ name = "ecat-data-service"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "iot-data"
+path = "src/main.rs"
+
 [dependencies]
 ecat = { path = "../ecat" }
 ecat-data = { path = "../ecat-data" }
@@ -20,3 +24,6 @@ tokio = { workspace = true, features = ["full"] }
 tracing.workspace = true
 futures-util = "0.3"
 rust_xlsxwriter = "0.99"
+
+[dev-dependencies]
+tower.workspace = true
