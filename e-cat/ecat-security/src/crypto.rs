@@ -38,16 +38,22 @@ pub fn decrypt(key: &[u8; 32], enc: &str) -> Result<Vec<u8>, String> {
         .map_err(|e| format!("aes decrypt (密钥错误或密文被篡改): {e}"))
 }
 
-/// HMAC-SHA256 十六进制签名验签（如涂鸦 webhook x-tuya-signature）。
-/// 十六进制解码失败即视为不匹配；比较为常数时间。
-pub fn verify_hmac_sha256_hex(secret: &str, raw: &[u8], sig_hex: &str) -> bool {
+/// HMAC-SHA256 十六进制摘要（密码哈希、webhook 验签共用；登录密码落库哈希
+/// 与验签走同一实现，避免两处算法漂移）。
+pub fn hmac_sha256_hex(secret: &str, raw: &[u8]) -> String {
     use hmac::{Hmac, Mac};
     use sha2::Sha256;
     type HmacSha256 = Hmac<Sha256>;
     // 全限定 new_from_slice：模块级 aes_gcm 的 KeyInit 与 hmac 的 Mac 同名方法
     let mut mac = <HmacSha256 as Mac>::new_from_slice(secret.as_bytes()).expect("hmac key");
     mac.update(raw);
-    let expect = mac.finalize().into_bytes();
+    hex::encode(mac.finalize().into_bytes())
+}
+
+/// HMAC-SHA256 十六进制签名验签（如涂鸦 webhook x-tuya-signature）。
+/// 十六进制解码失败即视为不匹配；比较为常数时间。
+pub fn verify_hmac_sha256_hex(secret: &str, raw: &[u8], sig_hex: &str) -> bool {
+    let expect = hex::decode(hmac_sha256_hex(secret, raw)).expect("hmac hex output");
     let got = match hex::decode(sig_hex) {
         Ok(g) => g,
         Err(_) => return false,
@@ -89,6 +95,16 @@ mod tests {
         let key = derive_key("test");
         assert!(decrypt(&key, "not-base64!!").is_err());
         assert!(decrypt(&key, "c2hvcnQ=").is_err(), "短密文应拒绝");
+    }
+
+    #[test]
+    fn hmac_sha256_known_vector() {
+        // RFC 4231 附录 B 向量：HMAC-SHA256(key="key", "The quick brown fox jumps over the lazy dog")
+        let msg = b"The quick brown fox jumps over the lazy dog";
+        let digest = hmac_sha256_hex("key", msg);
+        assert_eq!(digest, "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8");
+        assert!(verify_hmac_sha256_hex("key", msg, &digest));
+        assert!(!verify_hmac_sha256_hex("key", msg, "deadbeef"));
     }
 
     #[test]
