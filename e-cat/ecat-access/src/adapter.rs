@@ -76,6 +76,7 @@ pub fn adapter_for(vendor: &str) -> Result<Box<dyn VendorAdapter>, AdapterError>
         "miot" => Ok(Box::new(crate::adapters::miot::MiAdapter::new())),
         "huawei" => Ok(Box::new(crate::adapters::huawei::HuaweiAdapter::new())),
         "aws" => Ok(Box::new(crate::adapters::aws::AwsAdapter::new())),
+        "azure" => Ok(Box::new(crate::adapters::azure::AzureAdapter::new())),
         v => Err(AdapterError::UnknownVendor(v.to_string())),
     }
 }
