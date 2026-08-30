@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 ecat = { path = "../../ecat" }
+ecat-data = { path = "../../ecat-data" }
 ecat-transport-http.workspace = true
 ecat-data-tdengine = { path = "../../ecat-data-tdengine" }
 ecat-mq = { path = "../../ecat-mq" }
