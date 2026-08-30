@@ -82,8 +82,8 @@ fn validate(q: &HistoryQuery) -> Result<(), (StatusCode, String)> {
         return Err((StatusCode::BAD_REQUEST, "limit must be 1..10000".into()));
     }
     if let Some(agg) = &q.agg {
-        if !["avg", "max", "min", "last"].contains(&agg.as_str()) {
-            return Err((StatusCode::BAD_REQUEST, "agg must be avg|max|min|last".into()));
+        if !["avg", "max", "min", "last", "count"].contains(&agg.as_str()) {
+            return Err((StatusCode::BAD_REQUEST, "agg must be avg|max|min|last|count".into()));
         }
         if q.interval.is_none() {
             return Err((StatusCode::BAD_REQUEST, "interval required when agg set".into()));
@@ -204,5 +204,43 @@ pub fn build_history_sql(tenant_id: &str, q: &HistoryQuery) -> String {
              WHERE {where_clause} ORDER BY ts LIMIT {} OFFSET {}",
             q.limit, q.offset,
         ),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn count_agg_builds_count_sql() {
+        let q = HistoryQuery {
+            device_id: "d1".into(),
+            code: "c1".into(),
+            start: 0,
+            end: 86400_000,
+            agg: Some("count".into()),
+            interval: Some("1d".into()),
+            limit: 100,
+            offset: 0,
+        };
+        let sql = build_history_sql("t1", &q);
+        assert!(sql.contains("COUNT(value)"));
+        assert!(sql.contains("INTERVAL(1d)"));
+        assert!(sql.contains("tenant_id = 't1'"));
+    }
+
+    #[test]
+    fn count_agg_validation_passes() {
+        let q = HistoryQuery {
+            device_id: "d1".into(),
+            code: "c1".into(),
+            start: 0,
+            end: 1,
+            agg: Some("count".into()),
+            interval: Some("1h".into()),
+            limit: 100,
+            offset: 0,
+        };
+        assert!(validate(&q).is_ok());
     }
 }
