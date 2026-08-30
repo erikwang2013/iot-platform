@@ -37,14 +37,28 @@ pub fn validate_rule(r: &NewRule) -> Result<(), String> {
 }
 
 /// 迁移执行（复用 ecat-data-sqlx::execute_script 逐条执行）。
-/// CWD 为包根目录（main.rs 与集成测试均如此），相对路径可解析。
+/// CARGO_MANIFEST_DIR 编译期锚定，不依赖进程 CWD。
 pub async fn migrate(db: &SqlxClient) -> Result<(), String> {
-    let sql = std::fs::read_to_string("migrations/0001_rule_tables.sql")
-        .map_err(|e| format!("read migration: {e}"))?;
+    let sql = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/migrations/0001_rule_tables.sql"
+    ))
+    .map_err(|e| format!("read migration: {e}"))?;
     db.execute_script(&sql)
         .await
         .map_err(|e| format!("migrate: {e}"))?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn migration_file_exists() {
+        let f = concat!(env!("CARGO_MANIFEST_DIR"), "/migrations/0001_rule_tables.sql");
+        assert!(std::path::Path::new(f).is_file(), "{f} missing");
+    }
 }
 
 impl RuleStore {

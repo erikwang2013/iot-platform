@@ -8,8 +8,21 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub struct Db(pub Arc<SqlxClient>);
 
+/// 单一副本存于 ecat-access/migrations/，此处经 CARGO_MANIFEST_DIR 锚定跨包引用，
+/// 不依赖进程 CWD（iot-device 启动即调 migrate）。
+const MIGRATION_SQL: [&str; 2] = [
+    concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../ecat-access/migrations/0001_init.sql"
+    ),
+    concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../ecat-access/migrations/0002_vendor_auth.sql"
+    ),
+];
+
 pub async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    for file in ["migrations/0001_init.sql", "migrations/0002_vendor_auth.sql"] {
+    for file in MIGRATION_SQL {
         db.execute_script(&std::fs::read_to_string(file)?).await?;
     }
     Ok(())
@@ -58,4 +71,16 @@ fn db_err(e: ecat_data::RdbmsError) -> (axum::http::StatusCode, String) {
         axum::http::StatusCode::INTERNAL_SERVER_ERROR,
         format!("db error: {e}"),
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn migrate_sql_files_exist() {
+        for f in MIGRATION_SQL {
+            assert!(std::path::Path::new(f).is_file(), "{f} missing");
+        }
+    }
 }
