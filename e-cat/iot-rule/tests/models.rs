@@ -1,4 +1,4 @@
-use iot_rule::models::{AlertMessage, EventMessage, NewRule, Rule};
+use ecat_rule::models::{AlertMessage, EventMessage, NewRule, Rule};
 use serde_json::json;
 
 #[test]

@@ -2,9 +2,9 @@
 //! `cargo test -p iot-rule --test rule_flow -- --ignored`
 use ecat_data::RdbmsClient;
 use ecat_data_sqlx::SqlxClient;
-use iot_rule::models::{EventMessage, NewRule};
-use iot_rule::push::PushHub;
-use iot_rule::store::{RuleStore, migrate};
+use ecat_rule::models::{EventMessage, NewRule};
+use ecat_rule::push::PushHub;
+use ecat_rule::store::{RuleStore, migrate};
 use serde_json::json;
 use std::sync::Arc;
 
@@ -63,7 +63,7 @@ async fn engine_fires_rule_and_alert_reaches_store_and_hub() {
         value: json!(25.0),
         ts: 1_690_000_000_000,
     };
-    assert!(iot_rule::engine::evaluate(&low, &rules).is_empty());
+    assert!(ecat_rule::engine::evaluate(&low, &rules).is_empty());
 
     // 匹配事件 → evaluate 命中 → 推送 hub + 落告警记录
     let high = EventMessage {
@@ -74,7 +74,7 @@ async fn engine_fires_rule_and_alert_reaches_store_and_hub() {
         value: json!(35.0),
         ts: 1_690_000_000_001,
     };
-    let msgs = iot_rule::engine::evaluate(&high, &rules);
+    let msgs = ecat_rule::engine::evaluate(&high, &rules);
     assert_eq!(msgs.len(), 1);
     assert_eq!(msgs[0].rule_id, rule.id);
     hub.publish("itest-tenant", &msgs[0]);
@@ -110,7 +110,7 @@ async fn ws_handshake_verifies_jwt() {
         axum::serve(
             listener,
             axum::Router::new()
-                .route("/ws", axum::routing::get(iot_rule::ws::ws_handler))
+                .route("/ws", axum::routing::get(ecat_rule::ws::ws_handler))
                 .with_state(PushHub::new()),
         )
         .await

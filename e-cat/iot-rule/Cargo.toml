@@ -6,24 +6,19 @@ edition = "2024"
 [dependencies]
 ecat = { path = "../ecat" }
 ecat-transport-http.workspace = true
-ecat-data = { path = "../ecat-data" }
 ecat-data-sqlx = { path = "../ecat-data-sqlx" }
 ecat-middleware = { path = "../ecat-middleware" }
-ecat-iot = { path = "../ecat-iot" }
 ecat-health = { path = "../ecat-health" }
-ecat-mq = { path = "../ecat-mq" }
 ecat-mq-kafka = { path = "../ecat-mq-kafka" }
-ecat-auth = { path = "../ecat-auth" }
+ecat-rule = { path = "../ecat-rule" }
 axum = { workspace = true, features = ["ws"] }
-serde.workspace = true
-serde_json.workspace = true
 tokio = { workspace = true, features = ["full"] }
-tracing.workspace = true
 reqwest = { version = "0.12", features = ["json"] }
-uuid = { version = "1", features = ["v4"] }
-futures-util = "0.3"
 
 [dev-dependencies]
+ecat-auth = { path = "../ecat-auth" }
+ecat-data = { path = "../ecat-data" }
+serde_json.workspace = true
 tower-util = "0.3"
 tower.workspace = true
 jsonwebtoken = "9"

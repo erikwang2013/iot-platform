@@ -1,5 +1,5 @@
-use iot_rule::models::AlertMessage;
-use iot_rule::runner::webhook_payload;
+use ecat_rule::models::AlertMessage;
+use ecat_rule::runner::webhook_payload;
 use serde_json::json;
 
 #[test]

@@ -1,5 +1,5 @@
-use iot_rule::models::AlertMessage;
-use iot_rule::push::PushHub;
+use ecat_rule::models::AlertMessage;
+use ecat_rule::push::PushHub;
 use serde_json::json;
 
 fn msg(tenant: &str) -> AlertMessage {

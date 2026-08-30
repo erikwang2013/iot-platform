@@ -1,7 +1,7 @@
 use axum::{Router, middleware, routing::get};
 use ecat_data_sqlx::SqlxClient;
 use ecat_mq_kafka::KafkaMq;
-use iot_rule::{api::{self, ApiState}, push::PushHub, store::RuleStore, ws};
+use ecat_rule::{api::{self, ApiState}, push::PushHub, store::RuleStore, ws};
 use std::sync::Arc;
 
 #[tokio::main]
@@ -17,18 +17,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         std::env::var("KAFKA_BROKERS").unwrap_or_else(|_| "localhost:9092".into());
 
     let db = SqlxClient::connect(&db_url).await?;
-    iot_rule::store::migrate(&db).await?;
+    ecat_rule::store::migrate(&db).await?;
     let db = Arc::new(db);
     let store = Arc::new(RuleStore::new(db.clone()));
 
-    let kafka = Arc::new(KafkaMq::from_config(iot_rule::engine::kafka_config(&kafka_brokers)).await?);
+    let kafka = Arc::new(KafkaMq::from_config(ecat_rule::engine::kafka_config(&kafka_brokers)).await?);
     let hub = PushHub::new();
     let http = reqwest::Client::new();
 
     // 后台任务：消费 iot.events → 匹配 → 推送/落库/webhook
     let (run_kafka, run_store, run_hub, run_http) = (kafka.clone(), store.clone(), hub.clone(), http.clone());
     tokio::spawn(async move {
-        iot_rule::runner::run(run_kafka, run_store, run_hub, run_http).await;
+        ecat_rule::runner::run(run_kafka, run_store, run_hub, run_http).await;
     });
 
     let api_state = ApiState { store: store.clone() };

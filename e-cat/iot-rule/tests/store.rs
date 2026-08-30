@@ -1,5 +1,5 @@
-use iot_rule::models::NewRule;
-use iot_rule::store::{OPERATORS, validate_rule};
+use ecat_rule::models::NewRule;
+use ecat_rule::store::{OPERATORS, validate_rule};
 
 fn new_rule() -> NewRule {
     NewRule {

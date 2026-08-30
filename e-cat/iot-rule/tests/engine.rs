@@ -1,5 +1,5 @@
-use iot_rule::engine::{TOPIC_EVENTS, evaluate, kafka_config, to_alert_record};
-use iot_rule::models::{EventMessage, Rule};
+use ecat_rule::engine::{TOPIC_EVENTS, evaluate, kafka_config, to_alert_record};
+use ecat_rule::models::{EventMessage, Rule};
 use serde_json::json;
 
 fn rule(id: &str, tenant: &str, device: &str, code: &str, op: &str, th: f64, enabled: bool) -> Rule {
