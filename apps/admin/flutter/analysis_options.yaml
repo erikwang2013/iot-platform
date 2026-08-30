@@ -21,8 +21,9 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    # 页面统一模式：await 后端调用后用 SnackBar 反馈（helper 持有 context）。
+    # 列表页在 ApiList 内，非 Navigator 弹层场景，误报多于收益。
+    use_build_context_synchronously: false
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

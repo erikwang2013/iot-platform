@@ -131,5 +131,8 @@
   "modelReadWrite": "読み書き",
   "wsConnected": "リアルタイム接続確立",
   "wsDisconnected": "リアルタイム接続切断",
-  "commandSent": "コマンド送信済み"
+  "commandSent": "コマンド送信済み",
+  "modelName": "名称",
+  "deviceLifecycleConfirm": "このデバイスにこの操作を実行しますか？",
+  "modelAdd": "追加"
 }

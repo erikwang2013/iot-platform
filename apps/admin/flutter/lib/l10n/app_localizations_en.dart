@@ -405,4 +405,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commandSent => 'Command sent';
+
+  @override
+  String get modelName => 'Name';
+
+  @override
+  String get deviceLifecycleConfirm => 'Perform this action on the device?';
+
+  @override
+  String get modelAdd => 'Add';
 }

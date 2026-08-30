@@ -131,5 +131,8 @@
   "modelReadWrite": "Чтение/запись",
   "wsConnected": "Подключено в реальном времени",
   "wsDisconnected": "Соединение потеряно",
-  "commandSent": "Команда отправлена"
+  "commandSent": "Команда отправлена",
+  "modelName": "Название",
+  "deviceLifecycleConfirm": "Выполнить это действие над устройством?",
+  "modelAdd": "Добавить"
 }

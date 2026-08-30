@@ -405,4 +405,13 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get commandSent => 'कमांड भेजा गया';
+
+  @override
+  String get modelName => 'नाम';
+
+  @override
+  String get deviceLifecycleConfirm => 'डिवाइस पर यह कार्रवाई करें?';
+
+  @override
+  String get modelAdd => 'जोड़ें';
 }

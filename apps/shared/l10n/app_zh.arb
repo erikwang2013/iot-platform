@@ -131,5 +131,8 @@
   "modelReadWrite": "读写",
   "wsConnected": "实时连接已建立",
   "wsDisconnected": "实时连接断开",
-  "commandSent": "指令已下发"
+  "commandSent": "指令已下发",
+  "modelName": "名称",
+  "deviceLifecycleConfirm": "确定对该设备执行此操作？",
+  "modelAdd": "添加"
 }

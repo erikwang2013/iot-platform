@@ -131,5 +131,8 @@
   "modelReadWrite": "Read/write",
   "wsConnected": "Live connection established",
   "wsDisconnected": "Live connection lost",
-  "commandSent": "Command sent"
+  "commandSent": "Command sent",
+  "modelName": "Name",
+  "deviceLifecycleConfirm": "Perform this action on the device?",
+  "modelAdd": "Add"
 }

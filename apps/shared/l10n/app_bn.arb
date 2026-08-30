@@ -131,5 +131,8 @@
   "modelReadWrite": "পড়া/লেখা",
   "wsConnected": "লাইভ সংযোগ স্থাপিত",
   "wsDisconnected": "লাইভ সংযোগ বিচ্ছিন্ন",
-  "commandSent": "কমান্ড পাঠানো হয়েছে"
+  "commandSent": "কমান্ড পাঠানো হয়েছে",
+  "modelName": "নাম",
+  "deviceLifecycleConfirm": "ডিভাইসে এই কাজটি করবেন?",
+  "modelAdd": "যোগ করুন"
 }

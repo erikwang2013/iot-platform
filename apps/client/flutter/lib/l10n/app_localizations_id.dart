@@ -405,4 +405,13 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get commandSent => 'Perintah terkirim';
+
+  @override
+  String get modelName => 'Nama';
+
+  @override
+  String get deviceLifecycleConfirm => 'Lakukan tindakan ini pada perangkat?';
+
+  @override
+  String get modelAdd => 'Tambah';
 }

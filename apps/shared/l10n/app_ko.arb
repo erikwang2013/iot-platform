@@ -131,5 +131,8 @@
   "modelReadWrite": "읽기/쓰기",
   "wsConnected": "실시간 연결됨",
   "wsDisconnected": "실시간 연결 끊김",
-  "commandSent": "명령 전송됨"
+  "commandSent": "명령 전송됨",
+  "modelName": "이름",
+  "deviceLifecycleConfirm": "이 기기에 이 작업을 수행하시겠습니까?",
+  "modelAdd": "추가"
 }

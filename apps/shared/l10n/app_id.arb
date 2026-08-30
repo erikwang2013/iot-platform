@@ -131,5 +131,8 @@
   "modelReadWrite": "Baca/tulis",
   "wsConnected": "Koneksi langsung terbentuk",
   "wsDisconnected": "Koneksi langsung terputus",
-  "commandSent": "Perintah terkirim"
+  "commandSent": "Perintah terkirim",
+  "modelName": "Nama",
+  "deviceLifecycleConfirm": "Lakukan tindakan ini pada perangkat?",
+  "modelAdd": "Tambah"
 }

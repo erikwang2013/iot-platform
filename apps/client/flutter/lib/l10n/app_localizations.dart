@@ -911,6 +911,24 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'指令已下发'**
   String get commandSent;
+
+  /// No description provided for @modelName.
+  ///
+  /// In zh, this message translates to:
+  /// **'名称'**
+  String get modelName;
+
+  /// No description provided for @deviceLifecycleConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定对该设备执行此操作？'**
+  String get deviceLifecycleConfirm;
+
+  /// No description provided for @modelAdd.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加'**
+  String get modelAdd;
 }
 
 class _AppLocalizationsDelegate

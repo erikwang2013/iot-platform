@@ -403,4 +403,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get commandSent => '명령 전송됨';
+
+  @override
+  String get modelName => '이름';
+
+  @override
+  String get deviceLifecycleConfirm => '이 기기에 이 작업을 수행하시겠습니까?';
+
+  @override
+  String get modelAdd => '추가';
 }

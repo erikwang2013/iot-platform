@@ -131,5 +131,8 @@
   "modelReadWrite": "Lecture/écriture",
   "wsConnected": "Connexion temps réel établie",
   "wsDisconnected": "Connexion temps réel perdue",
-  "commandSent": "Commande envoyée"
+  "commandSent": "Commande envoyée",
+  "modelName": "Nom",
+  "deviceLifecycleConfirm": "Effectuer cette action sur l'appareil ?",
+  "modelAdd": "Ajouter"
 }

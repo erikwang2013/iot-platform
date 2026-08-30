@@ -403,4 +403,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get commandSent => '指令已下发';
+
+  @override
+  String get modelName => '名称';
+
+  @override
+  String get deviceLifecycleConfirm => '确定对该设备执行此操作？';
+
+  @override
+  String get modelAdd => '添加';
 }

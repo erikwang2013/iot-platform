@@ -405,4 +405,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get commandSent => 'Команда отправлена';
+
+  @override
+  String get modelName => 'Название';
+
+  @override
+  String get deviceLifecycleConfirm =>
+      'Выполнить это действие над устройством?';
+
+  @override
+  String get modelAdd => 'Добавить';
 }

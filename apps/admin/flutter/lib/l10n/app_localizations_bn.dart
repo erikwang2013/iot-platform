@@ -405,4 +405,13 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get commandSent => 'কমান্ড পাঠানো হয়েছে';
+
+  @override
+  String get modelName => 'নাম';
+
+  @override
+  String get deviceLifecycleConfirm => 'ডিভাইসে এই কাজটি করবেন?';
+
+  @override
+  String get modelAdd => 'যোগ করুন';
 }

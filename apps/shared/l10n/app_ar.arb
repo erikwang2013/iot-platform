@@ -131,5 +131,8 @@
   "modelReadWrite": "قراءة/كتابة",
   "wsConnected": "تم إنشاء الاتصال المباشر",
   "wsDisconnected": "انقطع الاتصال المباشر",
-  "commandSent": "تم إرسال الأمر"
+  "commandSent": "تم إرسال الأمر",
+  "modelName": "الاسم",
+  "deviceLifecycleConfirm": "تنفيذ هذا الإجراء على الجهاز؟",
+  "modelAdd": "إضافة"
 }

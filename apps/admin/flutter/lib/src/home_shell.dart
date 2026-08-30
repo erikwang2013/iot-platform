@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import 'pages/cdn_page.dart';
+import 'pages/devices_page.dart';
+import 'pages/history_page.dart';
+import 'pages/models_page.dart';
+import 'pages/rules_page.dart';
+import 'pages/tenants_page.dart';
 import 'settings_page.dart';
 
+/// 管理端外壳：抽屉导航 + IndexedStack。
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -16,55 +23,65 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final pages = [
+      const DevicesPage(),
+      const ModelsPage(),
+      const RulesPage(),
+      const HistoryPage(),
+      const CdnPage(),
+      const TenantsPage(),
+      const SettingsPage(),
+    ];
     return Scaffold(
-      body: IndexedStack(
-        index: _index,
-        children: const [
-          _PlaceholderPage(icon: Icons.dashboard_outlined),
-          _PlaceholderPage(icon: Icons.devices_outlined),
-          _PlaceholderPage(icon: Icons.notifications_outlined),
-          SettingsPage(),
-        ],
-      ),
-      bottomNavigationBar: NavigationBar(
+      body: IndexedStack(index: _index, children: pages),
+      drawer: NavigationDrawer(
         selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.dashboard_outlined),
-            selectedIcon: const Icon(Icons.dashboard),
-            label: l10n.navDashboard,
+        onDestinationSelected: (i) {
+          setState(() => _index = i);
+          Navigator.pop(context);
+        },
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+            child: Text(l10n.appName,
+                style: Theme.of(context).textTheme.titleMedium),
           ),
-          NavigationDestination(
+          const Divider(height: 1),
+          NavigationDrawerDestination(
             icon: const Icon(Icons.devices_outlined),
             selectedIcon: const Icon(Icons.devices),
-            label: l10n.navDevices,
+            label: Text(l10n.navDevices),
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.notifications_outlined),
-            selectedIcon: const Icon(Icons.notifications),
-            label: l10n.navAlerts,
+          NavigationDrawerDestination(
+            icon: const Icon(Icons.view_in_ar_outlined),
+            selectedIcon: const Icon(Icons.view_in_ar),
+            label: Text(l10n.navModels),
           ),
-          NavigationDestination(
+          NavigationDrawerDestination(
+            icon: const Icon(Icons.rule_outlined),
+            selectedIcon: const Icon(Icons.rule),
+            label: Text(l10n.navRules),
+          ),
+          NavigationDrawerDestination(
+            icon: const Icon(Icons.show_chart),
+            label: Text(l10n.navHistory),
+          ),
+          NavigationDrawerDestination(
+            icon: const Icon(Icons.cloud_outlined),
+            selectedIcon: const Icon(Icons.cloud),
+            label: Text(l10n.navCdn),
+          ),
+          NavigationDrawerDestination(
+            icon: const Icon(Icons.business_outlined),
+            selectedIcon: const Icon(Icons.business),
+            label: Text(l10n.navTenants),
+          ),
+          NavigationDrawerDestination(
             icon: const Icon(Icons.settings_outlined),
             selectedIcon: const Icon(Icons.settings),
-            label: l10n.navSettings,
+            label: Text(l10n.navSettings),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _PlaceholderPage extends StatelessWidget {
-  final IconData icon;
-  const _PlaceholderPage({required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Icon(icon, size: 64, color: Theme.of(context).colorScheme.outline),
       ),
     );
   }

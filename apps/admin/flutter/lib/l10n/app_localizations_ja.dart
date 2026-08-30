@@ -403,4 +403,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get commandSent => 'コマンド送信済み';
+
+  @override
+  String get modelName => '名称';
+
+  @override
+  String get deviceLifecycleConfirm => 'このデバイスにこの操作を実行しますか？';
+
+  @override
+  String get modelAdd => '追加';
 }
