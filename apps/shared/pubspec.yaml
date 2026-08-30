@@ -1,0 +1,11 @@
+name: iot_shared
+description: Shared Dart code (API client, models, alert WebSocket) for IoT admin and client apps.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  http: ^1.6.0
+  web_socket_channel: ^3.0.3

@@ -218,4 +218,191 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorNotFound => 'Resource not found';
+
+  @override
+  String get commonEnabled => 'Enabled';
+
+  @override
+  String get commonEdit => 'Edit';
+
+  @override
+  String get commonSearch => 'Search';
+
+  @override
+  String get errorBackendNotReady =>
+      'Backend API not ready, please check services are running';
+
+  @override
+  String get navModels => 'Thing Models';
+
+  @override
+  String get navRules => 'Rules & Alerts';
+
+  @override
+  String get navHistory => 'History';
+
+  @override
+  String get navCdn => 'CDN';
+
+  @override
+  String get navTenants => 'Tenants & Users';
+
+  @override
+  String get deviceEnable => 'Enable';
+
+  @override
+  String get deviceDisable => 'Disable';
+
+  @override
+  String get deviceUnbind => 'Unbind';
+
+  @override
+  String get ruleName => 'Rule name';
+
+  @override
+  String get ruleDeviceId => 'Device ID';
+
+  @override
+  String get ruleCode => 'Property code';
+
+  @override
+  String get ruleOperator => 'Operator';
+
+  @override
+  String get ruleThreshold => 'Threshold';
+
+  @override
+  String get ruleWebhook => 'Webhook URL';
+
+  @override
+  String get ruleCreate => 'New rule';
+
+  @override
+  String get ruleEdit => 'Edit rule';
+
+  @override
+  String get ruleDeleteConfirm => 'Delete this rule?';
+
+  @override
+  String get alertStatus => 'Status';
+
+  @override
+  String get alertActive => 'Active';
+
+  @override
+  String get alertAcknowledged => 'Acknowledged';
+
+  @override
+  String get historyLastHour => 'Last 1 hour';
+
+  @override
+  String get historyLastDay => 'Last 24 hours';
+
+  @override
+  String get historyLastWeek => 'Last 7 days';
+
+  @override
+  String get historyFetch => 'Query';
+
+  @override
+  String get historyNoData => 'No data';
+
+  @override
+  String get cdnType => 'Provider';
+
+  @override
+  String get cdnDomain => 'Domain';
+
+  @override
+  String get cdnRegion => 'Region';
+
+  @override
+  String get cdnTest => 'Test';
+
+  @override
+  String get cdnRefresh => 'Refresh';
+
+  @override
+  String get cdnPurge => 'Preload';
+
+  @override
+  String get cdnSignedUrl => 'Signed URL';
+
+  @override
+  String get cdnAddVendor => 'Add provider';
+
+  @override
+  String get cdnUrlHint => 'Enter URL';
+
+  @override
+  String get cdnSignedUrlResult => 'Signed URL: ';
+
+  @override
+  String get tenantName => 'Tenant name';
+
+  @override
+  String get tenantQuota => 'Device quota';
+
+  @override
+  String get tenantAdd => 'Add tenant';
+
+  @override
+  String get userUsername => 'Username';
+
+  @override
+  String get userPassword => 'Password';
+
+  @override
+  String get userRole => 'Role';
+
+  @override
+  String get userTenant => 'Tenant';
+
+  @override
+  String get roleAdmin => 'Admin';
+
+  @override
+  String get roleOperator => 'Operator';
+
+  @override
+  String get roleReadonly => 'Read-only';
+
+  @override
+  String get userAdd => 'Add user';
+
+  @override
+  String get modelProperty => 'Properties';
+
+  @override
+  String get modelEvent => 'Events';
+
+  @override
+  String get modelService => 'Services';
+
+  @override
+  String get modelIdentifier => 'Identifier';
+
+  @override
+  String get modelType => 'Type';
+
+  @override
+  String get modelUnit => 'Unit';
+
+  @override
+  String get modelRw => 'Access';
+
+  @override
+  String get modelReadonly => 'Read-only';
+
+  @override
+  String get modelReadWrite => 'Read/write';
+
+  @override
+  String get wsConnected => 'Live connection established';
+
+  @override
+  String get wsDisconnected => 'Live connection lost';
+
+  @override
+  String get commandSent => 'Command sent';
 }

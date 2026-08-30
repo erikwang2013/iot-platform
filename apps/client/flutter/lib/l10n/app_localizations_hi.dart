@@ -218,4 +218,191 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get errorNotFound => 'संसाधन नहीं मिला';
+
+  @override
+  String get commonEnabled => 'सक्षम';
+
+  @override
+  String get commonEdit => 'संपादित करें';
+
+  @override
+  String get commonSearch => 'खोजें';
+
+  @override
+  String get errorBackendNotReady =>
+      'बैकएंड API तैयार नहीं है, कृपया सेवाओं के चालू होने की जाँच करें';
+
+  @override
+  String get navModels => 'थिंग मॉडल';
+
+  @override
+  String get navRules => 'नियम और अलर्ट';
+
+  @override
+  String get navHistory => 'इतिहास';
+
+  @override
+  String get navCdn => 'CDN';
+
+  @override
+  String get navTenants => 'टेनेंट और उपयोगकर्ता';
+
+  @override
+  String get deviceEnable => 'सक्षम करें';
+
+  @override
+  String get deviceDisable => 'अक्षम करें';
+
+  @override
+  String get deviceUnbind => 'अनबाइंड';
+
+  @override
+  String get ruleName => 'नियम का नाम';
+
+  @override
+  String get ruleDeviceId => 'डिवाइस ID';
+
+  @override
+  String get ruleCode => 'प्रॉपर्टी कोड';
+
+  @override
+  String get ruleOperator => 'ऑपरेटर';
+
+  @override
+  String get ruleThreshold => 'सीमा';
+
+  @override
+  String get ruleWebhook => 'वेबहुक URL';
+
+  @override
+  String get ruleCreate => 'नया नियम';
+
+  @override
+  String get ruleEdit => 'नियम संपादित करें';
+
+  @override
+  String get ruleDeleteConfirm => 'यह नियम हटाएँ?';
+
+  @override
+  String get alertStatus => 'स्थिति';
+
+  @override
+  String get alertActive => 'सक्रिय';
+
+  @override
+  String get alertAcknowledged => 'स्वीकृत';
+
+  @override
+  String get historyLastHour => 'पिछला 1 घंटा';
+
+  @override
+  String get historyLastDay => 'पिछले 24 घंटे';
+
+  @override
+  String get historyLastWeek => 'पिछले 7 दिन';
+
+  @override
+  String get historyFetch => 'क्वेरी';
+
+  @override
+  String get historyNoData => 'कोई डेटा नहीं';
+
+  @override
+  String get cdnType => 'प्रदाता';
+
+  @override
+  String get cdnDomain => 'डोमेन';
+
+  @override
+  String get cdnRegion => 'क्षेत्र';
+
+  @override
+  String get cdnTest => 'कनेक्शन परीक्षण';
+
+  @override
+  String get cdnRefresh => 'रीफ़्रेश';
+
+  @override
+  String get cdnPurge => 'प्रीलोड';
+
+  @override
+  String get cdnSignedUrl => 'हस्ताक्षरित URL';
+
+  @override
+  String get cdnAddVendor => 'प्रदाता जोड़ें';
+
+  @override
+  String get cdnUrlHint => 'URL दर्ज करें';
+
+  @override
+  String get cdnSignedUrlResult => 'हस्ताक्षरित URL: ';
+
+  @override
+  String get tenantName => 'टेनेंट नाम';
+
+  @override
+  String get tenantQuota => 'डिवाइस कोटा';
+
+  @override
+  String get tenantAdd => 'टेनेंट जोड़ें';
+
+  @override
+  String get userUsername => 'उपयोगकर्ता नाम';
+
+  @override
+  String get userPassword => 'पासवर्ड';
+
+  @override
+  String get userRole => 'भूमिका';
+
+  @override
+  String get userTenant => 'टेनेंट';
+
+  @override
+  String get roleAdmin => 'प्रशासक';
+
+  @override
+  String get roleOperator => 'ऑपरेटर';
+
+  @override
+  String get roleReadonly => 'केवल पढ़ें';
+
+  @override
+  String get userAdd => 'उपयोगकर्ता जोड़ें';
+
+  @override
+  String get modelProperty => 'प्रॉपर्टी';
+
+  @override
+  String get modelEvent => 'ईवेंट';
+
+  @override
+  String get modelService => 'सेवाएँ';
+
+  @override
+  String get modelIdentifier => 'पहचानकर्ता';
+
+  @override
+  String get modelType => 'प्रकार';
+
+  @override
+  String get modelUnit => 'इकाई';
+
+  @override
+  String get modelRw => 'पहुँच';
+
+  @override
+  String get modelReadonly => 'केवल पढ़ें';
+
+  @override
+  String get modelReadWrite => 'पढ़ें/लिखें';
+
+  @override
+  String get wsConnected => 'लाइव कनेक्शन स्थापित';
+
+  @override
+  String get wsDisconnected => 'लाइव कनेक्शन टूटा';
+
+  @override
+  String get commandSent => 'कमांड भेजा गया';
 }

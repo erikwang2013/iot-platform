@@ -539,6 +539,378 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'资源不存在'**
   String get errorNotFound;
+
+  /// No description provided for @commonEnabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用'**
+  String get commonEnabled;
+
+  /// No description provided for @commonEdit.
+  ///
+  /// In zh, this message translates to:
+  /// **'编辑'**
+  String get commonEdit;
+
+  /// No description provided for @commonSearch.
+  ///
+  /// In zh, this message translates to:
+  /// **'搜索'**
+  String get commonSearch;
+
+  /// No description provided for @errorBackendNotReady.
+  ///
+  /// In zh, this message translates to:
+  /// **'后端接口未就绪，请确认服务已启动'**
+  String get errorBackendNotReady;
+
+  /// No description provided for @navModels.
+  ///
+  /// In zh, this message translates to:
+  /// **'物模型'**
+  String get navModels;
+
+  /// No description provided for @navRules.
+  ///
+  /// In zh, this message translates to:
+  /// **'规则告警'**
+  String get navRules;
+
+  /// No description provided for @navHistory.
+  ///
+  /// In zh, this message translates to:
+  /// **'历史曲线'**
+  String get navHistory;
+
+  /// No description provided for @navCdn.
+  ///
+  /// In zh, this message translates to:
+  /// **'CDN 管理'**
+  String get navCdn;
+
+  /// No description provided for @navTenants.
+  ///
+  /// In zh, this message translates to:
+  /// **'租户与用户'**
+  String get navTenants;
+
+  /// No description provided for @deviceEnable.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用'**
+  String get deviceEnable;
+
+  /// No description provided for @deviceDisable.
+  ///
+  /// In zh, this message translates to:
+  /// **'停用'**
+  String get deviceDisable;
+
+  /// No description provided for @deviceUnbind.
+  ///
+  /// In zh, this message translates to:
+  /// **'解绑'**
+  String get deviceUnbind;
+
+  /// No description provided for @ruleName.
+  ///
+  /// In zh, this message translates to:
+  /// **'规则名称'**
+  String get ruleName;
+
+  /// No description provided for @ruleDeviceId.
+  ///
+  /// In zh, this message translates to:
+  /// **'设备 ID'**
+  String get ruleDeviceId;
+
+  /// No description provided for @ruleCode.
+  ///
+  /// In zh, this message translates to:
+  /// **'属性标识'**
+  String get ruleCode;
+
+  /// No description provided for @ruleOperator.
+  ///
+  /// In zh, this message translates to:
+  /// **'运算符'**
+  String get ruleOperator;
+
+  /// No description provided for @ruleThreshold.
+  ///
+  /// In zh, this message translates to:
+  /// **'阈值'**
+  String get ruleThreshold;
+
+  /// No description provided for @ruleWebhook.
+  ///
+  /// In zh, this message translates to:
+  /// **'Webhook 地址'**
+  String get ruleWebhook;
+
+  /// No description provided for @ruleCreate.
+  ///
+  /// In zh, this message translates to:
+  /// **'新建规则'**
+  String get ruleCreate;
+
+  /// No description provided for @ruleEdit.
+  ///
+  /// In zh, this message translates to:
+  /// **'编辑规则'**
+  String get ruleEdit;
+
+  /// No description provided for @ruleDeleteConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定删除该规则？'**
+  String get ruleDeleteConfirm;
+
+  /// No description provided for @alertStatus.
+  ///
+  /// In zh, this message translates to:
+  /// **'状态'**
+  String get alertStatus;
+
+  /// No description provided for @alertActive.
+  ///
+  /// In zh, this message translates to:
+  /// **'未处理'**
+  String get alertActive;
+
+  /// No description provided for @alertAcknowledged.
+  ///
+  /// In zh, this message translates to:
+  /// **'已确认'**
+  String get alertAcknowledged;
+
+  /// No description provided for @historyLastHour.
+  ///
+  /// In zh, this message translates to:
+  /// **'近 1 小时'**
+  String get historyLastHour;
+
+  /// No description provided for @historyLastDay.
+  ///
+  /// In zh, this message translates to:
+  /// **'近 24 小时'**
+  String get historyLastDay;
+
+  /// No description provided for @historyLastWeek.
+  ///
+  /// In zh, this message translates to:
+  /// **'近 7 天'**
+  String get historyLastWeek;
+
+  /// No description provided for @historyFetch.
+  ///
+  /// In zh, this message translates to:
+  /// **'查询'**
+  String get historyFetch;
+
+  /// No description provided for @historyNoData.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无数据'**
+  String get historyNoData;
+
+  /// No description provided for @cdnType.
+  ///
+  /// In zh, this message translates to:
+  /// **'厂商类型'**
+  String get cdnType;
+
+  /// No description provided for @cdnDomain.
+  ///
+  /// In zh, this message translates to:
+  /// **'加速域名'**
+  String get cdnDomain;
+
+  /// No description provided for @cdnRegion.
+  ///
+  /// In zh, this message translates to:
+  /// **'区域'**
+  String get cdnRegion;
+
+  /// No description provided for @cdnTest.
+  ///
+  /// In zh, this message translates to:
+  /// **'连通测试'**
+  String get cdnTest;
+
+  /// No description provided for @cdnRefresh.
+  ///
+  /// In zh, this message translates to:
+  /// **'刷新'**
+  String get cdnRefresh;
+
+  /// No description provided for @cdnPurge.
+  ///
+  /// In zh, this message translates to:
+  /// **'预热'**
+  String get cdnPurge;
+
+  /// No description provided for @cdnSignedUrl.
+  ///
+  /// In zh, this message translates to:
+  /// **'签名 URL'**
+  String get cdnSignedUrl;
+
+  /// No description provided for @cdnAddVendor.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加厂商'**
+  String get cdnAddVendor;
+
+  /// No description provided for @cdnUrlHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入 URL'**
+  String get cdnUrlHint;
+
+  /// No description provided for @cdnSignedUrlResult.
+  ///
+  /// In zh, this message translates to:
+  /// **'签名 URL：'**
+  String get cdnSignedUrlResult;
+
+  /// No description provided for @tenantName.
+  ///
+  /// In zh, this message translates to:
+  /// **'租户名称'**
+  String get tenantName;
+
+  /// No description provided for @tenantQuota.
+  ///
+  /// In zh, this message translates to:
+  /// **'设备配额'**
+  String get tenantQuota;
+
+  /// No description provided for @tenantAdd.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加租户'**
+  String get tenantAdd;
+
+  /// No description provided for @userUsername.
+  ///
+  /// In zh, this message translates to:
+  /// **'用户名'**
+  String get userUsername;
+
+  /// No description provided for @userPassword.
+  ///
+  /// In zh, this message translates to:
+  /// **'密码'**
+  String get userPassword;
+
+  /// No description provided for @userRole.
+  ///
+  /// In zh, this message translates to:
+  /// **'角色'**
+  String get userRole;
+
+  /// No description provided for @userTenant.
+  ///
+  /// In zh, this message translates to:
+  /// **'所属租户'**
+  String get userTenant;
+
+  /// No description provided for @roleAdmin.
+  ///
+  /// In zh, this message translates to:
+  /// **'管理员'**
+  String get roleAdmin;
+
+  /// No description provided for @roleOperator.
+  ///
+  /// In zh, this message translates to:
+  /// **'操作员'**
+  String get roleOperator;
+
+  /// No description provided for @roleReadonly.
+  ///
+  /// In zh, this message translates to:
+  /// **'只读'**
+  String get roleReadonly;
+
+  /// No description provided for @userAdd.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加用户'**
+  String get userAdd;
+
+  /// No description provided for @modelProperty.
+  ///
+  /// In zh, this message translates to:
+  /// **'属性'**
+  String get modelProperty;
+
+  /// No description provided for @modelEvent.
+  ///
+  /// In zh, this message translates to:
+  /// **'事件'**
+  String get modelEvent;
+
+  /// No description provided for @modelService.
+  ///
+  /// In zh, this message translates to:
+  /// **'服务'**
+  String get modelService;
+
+  /// No description provided for @modelIdentifier.
+  ///
+  /// In zh, this message translates to:
+  /// **'标识符'**
+  String get modelIdentifier;
+
+  /// No description provided for @modelType.
+  ///
+  /// In zh, this message translates to:
+  /// **'数据类型'**
+  String get modelType;
+
+  /// No description provided for @modelUnit.
+  ///
+  /// In zh, this message translates to:
+  /// **'单位'**
+  String get modelUnit;
+
+  /// No description provided for @modelRw.
+  ///
+  /// In zh, this message translates to:
+  /// **'读写权限'**
+  String get modelRw;
+
+  /// No description provided for @modelReadonly.
+  ///
+  /// In zh, this message translates to:
+  /// **'只读'**
+  String get modelReadonly;
+
+  /// No description provided for @modelReadWrite.
+  ///
+  /// In zh, this message translates to:
+  /// **'读写'**
+  String get modelReadWrite;
+
+  /// No description provided for @wsConnected.
+  ///
+  /// In zh, this message translates to:
+  /// **'实时连接已建立'**
+  String get wsConnected;
+
+  /// No description provided for @wsDisconnected.
+  ///
+  /// In zh, this message translates to:
+  /// **'实时连接断开'**
+  String get wsDisconnected;
+
+  /// No description provided for @commandSent.
+  ///
+  /// In zh, this message translates to:
+  /// **'指令已下发'**
+  String get commandSent;
 }
 
 class _AppLocalizationsDelegate

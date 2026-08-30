@@ -217,4 +217,190 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get errorNotFound => '리소스를 찾을 수 없습니다';
+
+  @override
+  String get commonEnabled => '활성화';
+
+  @override
+  String get commonEdit => '편집';
+
+  @override
+  String get commonSearch => '검색';
+
+  @override
+  String get errorBackendNotReady => '백엔드 API가 준비되지 않았습니다. 서비스 시작을 확인하세요';
+
+  @override
+  String get navModels => '사물 모델';
+
+  @override
+  String get navRules => '규칙 및 알림';
+
+  @override
+  String get navHistory => '히스토리';
+
+  @override
+  String get navCdn => 'CDN';
+
+  @override
+  String get navTenants => '테넌트 및 사용자';
+
+  @override
+  String get deviceEnable => '활성화';
+
+  @override
+  String get deviceDisable => '비활성화';
+
+  @override
+  String get deviceUnbind => '연결 해제';
+
+  @override
+  String get ruleName => '규칙 이름';
+
+  @override
+  String get ruleDeviceId => '기기 ID';
+
+  @override
+  String get ruleCode => '속성 코드';
+
+  @override
+  String get ruleOperator => '연산자';
+
+  @override
+  String get ruleThreshold => '임계값';
+
+  @override
+  String get ruleWebhook => '웹훅 URL';
+
+  @override
+  String get ruleCreate => '규칙 생성';
+
+  @override
+  String get ruleEdit => '규칙 편집';
+
+  @override
+  String get ruleDeleteConfirm => '이 규칙을 삭제하시겠습니까?';
+
+  @override
+  String get alertStatus => '상태';
+
+  @override
+  String get alertActive => '미처리';
+
+  @override
+  String get alertAcknowledged => '확인됨';
+
+  @override
+  String get historyLastHour => '최근 1시간';
+
+  @override
+  String get historyLastDay => '최근 24시간';
+
+  @override
+  String get historyLastWeek => '최근 7일';
+
+  @override
+  String get historyFetch => '조회';
+
+  @override
+  String get historyNoData => '데이터 없음';
+
+  @override
+  String get cdnType => '제공업체';
+
+  @override
+  String get cdnDomain => '도메인';
+
+  @override
+  String get cdnRegion => '리전';
+
+  @override
+  String get cdnTest => '연결 테스트';
+
+  @override
+  String get cdnRefresh => '새로고침';
+
+  @override
+  String get cdnPurge => '프리로드';
+
+  @override
+  String get cdnSignedUrl => '서명 URL';
+
+  @override
+  String get cdnAddVendor => '제공업체 추가';
+
+  @override
+  String get cdnUrlHint => 'URL 입력';
+
+  @override
+  String get cdnSignedUrlResult => '서명 URL: ';
+
+  @override
+  String get tenantName => '테넌트 이름';
+
+  @override
+  String get tenantQuota => '기기 할당량';
+
+  @override
+  String get tenantAdd => '테넌트 추가';
+
+  @override
+  String get userUsername => '사용자 이름';
+
+  @override
+  String get userPassword => '비밀번호';
+
+  @override
+  String get userRole => '역할';
+
+  @override
+  String get userTenant => '테넌트';
+
+  @override
+  String get roleAdmin => '관리자';
+
+  @override
+  String get roleOperator => '운영자';
+
+  @override
+  String get roleReadonly => '읽기 전용';
+
+  @override
+  String get userAdd => '사용자 추가';
+
+  @override
+  String get modelProperty => '속성';
+
+  @override
+  String get modelEvent => '이벤트';
+
+  @override
+  String get modelService => '서비스';
+
+  @override
+  String get modelIdentifier => '식별자';
+
+  @override
+  String get modelType => '유형';
+
+  @override
+  String get modelUnit => '단위';
+
+  @override
+  String get modelRw => '접근';
+
+  @override
+  String get modelReadonly => '읽기 전용';
+
+  @override
+  String get modelReadWrite => '읽기/쓰기';
+
+  @override
+  String get wsConnected => '실시간 연결됨';
+
+  @override
+  String get wsDisconnected => '실시간 연결 끊김';
+
+  @override
+  String get commandSent => '명령 전송됨';
 }

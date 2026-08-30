@@ -218,4 +218,191 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorNotFound => 'المورد غير موجود';
+
+  @override
+  String get commonEnabled => 'مفعّل';
+
+  @override
+  String get commonEdit => 'تعديل';
+
+  @override
+  String get commonSearch => 'بحث';
+
+  @override
+  String get errorBackendNotReady =>
+      'واجهة الخادم غير جاهزة، تأكد من تشغيل الخدمات';
+
+  @override
+  String get navModels => 'نماذج الأشياء';
+
+  @override
+  String get navRules => 'القواعد والتنبيهات';
+
+  @override
+  String get navHistory => 'السجل';
+
+  @override
+  String get navCdn => 'CDN';
+
+  @override
+  String get navTenants => 'المستأجرون والمستخدمون';
+
+  @override
+  String get deviceEnable => 'تفعيل';
+
+  @override
+  String get deviceDisable => 'تعطيل';
+
+  @override
+  String get deviceUnbind => 'فك الربط';
+
+  @override
+  String get ruleName => 'اسم القاعدة';
+
+  @override
+  String get ruleDeviceId => 'معرّف الجهاز';
+
+  @override
+  String get ruleCode => 'رمز الخاصية';
+
+  @override
+  String get ruleOperator => 'العامل';
+
+  @override
+  String get ruleThreshold => 'الحد';
+
+  @override
+  String get ruleWebhook => 'رابط Webhook';
+
+  @override
+  String get ruleCreate => 'قاعدة جديدة';
+
+  @override
+  String get ruleEdit => 'تعديل القاعدة';
+
+  @override
+  String get ruleDeleteConfirm => 'حذف هذه القاعدة؟';
+
+  @override
+  String get alertStatus => 'الحالة';
+
+  @override
+  String get alertActive => 'نشط';
+
+  @override
+  String get alertAcknowledged => 'مؤكَّد';
+
+  @override
+  String get historyLastHour => 'آخر ساعة';
+
+  @override
+  String get historyLastDay => 'آخر 24 ساعة';
+
+  @override
+  String get historyLastWeek => 'آخر 7 أيام';
+
+  @override
+  String get historyFetch => 'استعلام';
+
+  @override
+  String get historyNoData => 'لا توجد بيانات';
+
+  @override
+  String get cdnType => 'المزود';
+
+  @override
+  String get cdnDomain => 'النطاق';
+
+  @override
+  String get cdnRegion => 'المنطقة';
+
+  @override
+  String get cdnTest => 'اختبار الاتصال';
+
+  @override
+  String get cdnRefresh => 'تحديث';
+
+  @override
+  String get cdnPurge => 'تسخين';
+
+  @override
+  String get cdnSignedUrl => 'رابط موقّع';
+
+  @override
+  String get cdnAddVendor => 'إضافة مزود';
+
+  @override
+  String get cdnUrlHint => 'أدخل الرابط';
+
+  @override
+  String get cdnSignedUrlResult => 'الرابط الموقّع: ';
+
+  @override
+  String get tenantName => 'اسم المستأجر';
+
+  @override
+  String get tenantQuota => 'حصص الأجهزة';
+
+  @override
+  String get tenantAdd => 'إضافة مستأجر';
+
+  @override
+  String get userUsername => 'اسم المستخدم';
+
+  @override
+  String get userPassword => 'كلمة المرور';
+
+  @override
+  String get userRole => 'الدور';
+
+  @override
+  String get userTenant => 'المستأجر';
+
+  @override
+  String get roleAdmin => 'مدير';
+
+  @override
+  String get roleOperator => 'مشغّل';
+
+  @override
+  String get roleReadonly => 'قراءة فقط';
+
+  @override
+  String get userAdd => 'إضافة مستخدم';
+
+  @override
+  String get modelProperty => 'الخصائص';
+
+  @override
+  String get modelEvent => 'الأحداث';
+
+  @override
+  String get modelService => 'الخدمات';
+
+  @override
+  String get modelIdentifier => 'المعرّف';
+
+  @override
+  String get modelType => 'النوع';
+
+  @override
+  String get modelUnit => 'الوحدة';
+
+  @override
+  String get modelRw => 'الوصول';
+
+  @override
+  String get modelReadonly => 'قراءة فقط';
+
+  @override
+  String get modelReadWrite => 'قراءة/كتابة';
+
+  @override
+  String get wsConnected => 'تم إنشاء الاتصال المباشر';
+
+  @override
+  String get wsDisconnected => 'انقطع الاتصال المباشر';
+
+  @override
+  String get commandSent => 'تم إرسال الأمر';
 }

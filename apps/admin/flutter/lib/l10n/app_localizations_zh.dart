@@ -217,4 +217,190 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get errorNotFound => '资源不存在';
+
+  @override
+  String get commonEnabled => '启用';
+
+  @override
+  String get commonEdit => '编辑';
+
+  @override
+  String get commonSearch => '搜索';
+
+  @override
+  String get errorBackendNotReady => '后端接口未就绪，请确认服务已启动';
+
+  @override
+  String get navModels => '物模型';
+
+  @override
+  String get navRules => '规则告警';
+
+  @override
+  String get navHistory => '历史曲线';
+
+  @override
+  String get navCdn => 'CDN 管理';
+
+  @override
+  String get navTenants => '租户与用户';
+
+  @override
+  String get deviceEnable => '启用';
+
+  @override
+  String get deviceDisable => '停用';
+
+  @override
+  String get deviceUnbind => '解绑';
+
+  @override
+  String get ruleName => '规则名称';
+
+  @override
+  String get ruleDeviceId => '设备 ID';
+
+  @override
+  String get ruleCode => '属性标识';
+
+  @override
+  String get ruleOperator => '运算符';
+
+  @override
+  String get ruleThreshold => '阈值';
+
+  @override
+  String get ruleWebhook => 'Webhook 地址';
+
+  @override
+  String get ruleCreate => '新建规则';
+
+  @override
+  String get ruleEdit => '编辑规则';
+
+  @override
+  String get ruleDeleteConfirm => '确定删除该规则？';
+
+  @override
+  String get alertStatus => '状态';
+
+  @override
+  String get alertActive => '未处理';
+
+  @override
+  String get alertAcknowledged => '已确认';
+
+  @override
+  String get historyLastHour => '近 1 小时';
+
+  @override
+  String get historyLastDay => '近 24 小时';
+
+  @override
+  String get historyLastWeek => '近 7 天';
+
+  @override
+  String get historyFetch => '查询';
+
+  @override
+  String get historyNoData => '暂无数据';
+
+  @override
+  String get cdnType => '厂商类型';
+
+  @override
+  String get cdnDomain => '加速域名';
+
+  @override
+  String get cdnRegion => '区域';
+
+  @override
+  String get cdnTest => '连通测试';
+
+  @override
+  String get cdnRefresh => '刷新';
+
+  @override
+  String get cdnPurge => '预热';
+
+  @override
+  String get cdnSignedUrl => '签名 URL';
+
+  @override
+  String get cdnAddVendor => '添加厂商';
+
+  @override
+  String get cdnUrlHint => '输入 URL';
+
+  @override
+  String get cdnSignedUrlResult => '签名 URL：';
+
+  @override
+  String get tenantName => '租户名称';
+
+  @override
+  String get tenantQuota => '设备配额';
+
+  @override
+  String get tenantAdd => '添加租户';
+
+  @override
+  String get userUsername => '用户名';
+
+  @override
+  String get userPassword => '密码';
+
+  @override
+  String get userRole => '角色';
+
+  @override
+  String get userTenant => '所属租户';
+
+  @override
+  String get roleAdmin => '管理员';
+
+  @override
+  String get roleOperator => '操作员';
+
+  @override
+  String get roleReadonly => '只读';
+
+  @override
+  String get userAdd => '添加用户';
+
+  @override
+  String get modelProperty => '属性';
+
+  @override
+  String get modelEvent => '事件';
+
+  @override
+  String get modelService => '服务';
+
+  @override
+  String get modelIdentifier => '标识符';
+
+  @override
+  String get modelType => '数据类型';
+
+  @override
+  String get modelUnit => '单位';
+
+  @override
+  String get modelRw => '读写权限';
+
+  @override
+  String get modelReadonly => '只读';
+
+  @override
+  String get modelReadWrite => '读写';
+
+  @override
+  String get wsConnected => '实时连接已建立';
+
+  @override
+  String get wsDisconnected => '实时连接断开';
+
+  @override
+  String get commandSent => '指令已下发';
 }

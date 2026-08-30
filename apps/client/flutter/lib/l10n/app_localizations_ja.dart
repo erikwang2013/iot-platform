@@ -217,4 +217,190 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get errorNotFound => 'リソースが見つかりません';
+
+  @override
+  String get commonEnabled => '有効';
+
+  @override
+  String get commonEdit => '編集';
+
+  @override
+  String get commonSearch => '検索';
+
+  @override
+  String get errorBackendNotReady => 'バックエンドAPIが準備できていません。サービスの起動を確認してください';
+
+  @override
+  String get navModels => '物モデル';
+
+  @override
+  String get navRules => 'ルールとアラート';
+
+  @override
+  String get navHistory => '履歴';
+
+  @override
+  String get navCdn => 'CDN';
+
+  @override
+  String get navTenants => 'テナントとユーザー';
+
+  @override
+  String get deviceEnable => '有効化';
+
+  @override
+  String get deviceDisable => '無効化';
+
+  @override
+  String get deviceUnbind => '解除';
+
+  @override
+  String get ruleName => 'ルール名';
+
+  @override
+  String get ruleDeviceId => 'デバイスID';
+
+  @override
+  String get ruleCode => 'プロパティコード';
+
+  @override
+  String get ruleOperator => '演算子';
+
+  @override
+  String get ruleThreshold => 'しきい値';
+
+  @override
+  String get ruleWebhook => 'Webhook URL';
+
+  @override
+  String get ruleCreate => '新規ルール';
+
+  @override
+  String get ruleEdit => 'ルール編集';
+
+  @override
+  String get ruleDeleteConfirm => 'このルールを削除しますか？';
+
+  @override
+  String get alertStatus => 'ステータス';
+
+  @override
+  String get alertActive => '未処理';
+
+  @override
+  String get alertAcknowledged => '確認済み';
+
+  @override
+  String get historyLastHour => '直近1時間';
+
+  @override
+  String get historyLastDay => '直近24時間';
+
+  @override
+  String get historyLastWeek => '直近7日';
+
+  @override
+  String get historyFetch => '照会';
+
+  @override
+  String get historyNoData => 'データなし';
+
+  @override
+  String get cdnType => 'プロバイダー';
+
+  @override
+  String get cdnDomain => 'ドメイン';
+
+  @override
+  String get cdnRegion => 'リージョン';
+
+  @override
+  String get cdnTest => '接続テスト';
+
+  @override
+  String get cdnRefresh => 'リフレッシュ';
+
+  @override
+  String get cdnPurge => 'プリロード';
+
+  @override
+  String get cdnSignedUrl => '署名付きURL';
+
+  @override
+  String get cdnAddVendor => 'プロバイダー追加';
+
+  @override
+  String get cdnUrlHint => 'URLを入力';
+
+  @override
+  String get cdnSignedUrlResult => '署名付きURL: ';
+
+  @override
+  String get tenantName => 'テナント名';
+
+  @override
+  String get tenantQuota => 'デバイス割当';
+
+  @override
+  String get tenantAdd => 'テナント追加';
+
+  @override
+  String get userUsername => 'ユーザー名';
+
+  @override
+  String get userPassword => 'パスワード';
+
+  @override
+  String get userRole => 'ロール';
+
+  @override
+  String get userTenant => 'テナント';
+
+  @override
+  String get roleAdmin => '管理者';
+
+  @override
+  String get roleOperator => 'オペレーター';
+
+  @override
+  String get roleReadonly => '読み取り専用';
+
+  @override
+  String get userAdd => 'ユーザー追加';
+
+  @override
+  String get modelProperty => 'プロパティ';
+
+  @override
+  String get modelEvent => 'イベント';
+
+  @override
+  String get modelService => 'サービス';
+
+  @override
+  String get modelIdentifier => '識別子';
+
+  @override
+  String get modelType => 'タイプ';
+
+  @override
+  String get modelUnit => '単位';
+
+  @override
+  String get modelRw => 'アクセス';
+
+  @override
+  String get modelReadonly => '読み取り専用';
+
+  @override
+  String get modelReadWrite => '読み書き';
+
+  @override
+  String get wsConnected => 'リアルタイム接続確立';
+
+  @override
+  String get wsDisconnected => 'リアルタイム接続切断';
+
+  @override
+  String get commandSent => 'コマンド送信済み';
 }

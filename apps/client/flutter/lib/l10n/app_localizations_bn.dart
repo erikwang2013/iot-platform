@@ -218,4 +218,191 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get errorNotFound => 'সম্পদ পাওয়া যায়নি';
+
+  @override
+  String get commonEnabled => 'সক্রিয়';
+
+  @override
+  String get commonEdit => 'সম্পাদনা';
+
+  @override
+  String get commonSearch => 'অনুসন্ধান';
+
+  @override
+  String get errorBackendNotReady =>
+      'ব্যাকএন্ড API প্রস্তুত নয়, পরিষেবা চালু আছে কি না যাচাই করুন';
+
+  @override
+  String get navModels => 'থিং মডেল';
+
+  @override
+  String get navRules => 'নিয়ম ও সতর্কতা';
+
+  @override
+  String get navHistory => 'ইতিহাস';
+
+  @override
+  String get navCdn => 'CDN';
+
+  @override
+  String get navTenants => 'টেন্যান্ট ও ব্যবহারকারী';
+
+  @override
+  String get deviceEnable => 'সক্রিয় করুন';
+
+  @override
+  String get deviceDisable => 'নিষ্ক্রিয় করুন';
+
+  @override
+  String get deviceUnbind => 'আনবাইন্ড';
+
+  @override
+  String get ruleName => 'নিয়মের নাম';
+
+  @override
+  String get ruleDeviceId => 'ডিভাইস ID';
+
+  @override
+  String get ruleCode => 'প্রপার্টি কোড';
+
+  @override
+  String get ruleOperator => 'অপারেটর';
+
+  @override
+  String get ruleThreshold => 'সীমা';
+
+  @override
+  String get ruleWebhook => 'ওয়েবহুক URL';
+
+  @override
+  String get ruleCreate => 'নতুন নিয়ম';
+
+  @override
+  String get ruleEdit => 'নিয়ম সম্পাদনা';
+
+  @override
+  String get ruleDeleteConfirm => 'এই নিয়মটি মুছবেন?';
+
+  @override
+  String get alertStatus => 'অবস্থা';
+
+  @override
+  String get alertActive => 'সক্রিয়';
+
+  @override
+  String get alertAcknowledged => 'স্বীকৃত';
+
+  @override
+  String get historyLastHour => 'শেষ ১ ঘণ্টা';
+
+  @override
+  String get historyLastDay => 'শেষ ২৪ ঘণ্টা';
+
+  @override
+  String get historyLastWeek => 'শেষ ৭ দিন';
+
+  @override
+  String get historyFetch => 'কোয়েরি';
+
+  @override
+  String get historyNoData => 'কোনো তথ্য নেই';
+
+  @override
+  String get cdnType => 'প্রদানকারী';
+
+  @override
+  String get cdnDomain => 'ডোমেইন';
+
+  @override
+  String get cdnRegion => 'অঞ্চল';
+
+  @override
+  String get cdnTest => 'সংযোগ পরীক্ষা';
+
+  @override
+  String get cdnRefresh => 'রিফ্রেশ';
+
+  @override
+  String get cdnPurge => 'প্রিলোড';
+
+  @override
+  String get cdnSignedUrl => 'স্বাক্ষরিত URL';
+
+  @override
+  String get cdnAddVendor => 'প্রদানকারী যোগ করুন';
+
+  @override
+  String get cdnUrlHint => 'URL লিখুন';
+
+  @override
+  String get cdnSignedUrlResult => 'স্বাক্ষরিত URL: ';
+
+  @override
+  String get tenantName => 'টেন্যান্টের নাম';
+
+  @override
+  String get tenantQuota => 'ডিভাইস কোটা';
+
+  @override
+  String get tenantAdd => 'টেন্যান্ট যোগ করুন';
+
+  @override
+  String get userUsername => 'ব্যবহারকারীর নাম';
+
+  @override
+  String get userPassword => 'পাসওয়ার্ড';
+
+  @override
+  String get userRole => 'ভূমিকা';
+
+  @override
+  String get userTenant => 'টেন্যান্ট';
+
+  @override
+  String get roleAdmin => 'অ্যাডমিন';
+
+  @override
+  String get roleOperator => 'অপারেটর';
+
+  @override
+  String get roleReadonly => 'শুধু পড়া';
+
+  @override
+  String get userAdd => 'ব্যবহারকারী যোগ করুন';
+
+  @override
+  String get modelProperty => 'প্রপার্টি';
+
+  @override
+  String get modelEvent => 'ইভেন্ট';
+
+  @override
+  String get modelService => 'সেবা';
+
+  @override
+  String get modelIdentifier => 'শনাক্তকারী';
+
+  @override
+  String get modelType => 'ধরন';
+
+  @override
+  String get modelUnit => 'একক';
+
+  @override
+  String get modelRw => 'অ্যাক্সেস';
+
+  @override
+  String get modelReadonly => 'শুধু পড়া';
+
+  @override
+  String get modelReadWrite => 'পড়া/লেখা';
+
+  @override
+  String get wsConnected => 'লাইভ সংযোগ স্থাপিত';
+
+  @override
+  String get wsDisconnected => 'লাইভ সংযোগ বিচ্ছিন্ন';
+
+  @override
+  String get commandSent => 'কমান্ড পাঠানো হয়েছে';
 }

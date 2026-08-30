@@ -218,4 +218,191 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get errorNotFound => 'Ressource introuvable';
+
+  @override
+  String get commonEnabled => 'Activé';
+
+  @override
+  String get commonEdit => 'Modifier';
+
+  @override
+  String get commonSearch => 'Rechercher';
+
+  @override
+  String get errorBackendNotReady =>
+      'API backend indisponible, vérifiez que les services tournent';
+
+  @override
+  String get navModels => 'Modèles d\'objets';
+
+  @override
+  String get navRules => 'Règles et alertes';
+
+  @override
+  String get navHistory => 'Historique';
+
+  @override
+  String get navCdn => 'CDN';
+
+  @override
+  String get navTenants => 'Locataires et utilisateurs';
+
+  @override
+  String get deviceEnable => 'Activer';
+
+  @override
+  String get deviceDisable => 'Désactiver';
+
+  @override
+  String get deviceUnbind => 'Dissocier';
+
+  @override
+  String get ruleName => 'Nom de la règle';
+
+  @override
+  String get ruleDeviceId => 'ID appareil';
+
+  @override
+  String get ruleCode => 'Code propriété';
+
+  @override
+  String get ruleOperator => 'Opérateur';
+
+  @override
+  String get ruleThreshold => 'Seuil';
+
+  @override
+  String get ruleWebhook => 'URL webhook';
+
+  @override
+  String get ruleCreate => 'Nouvelle règle';
+
+  @override
+  String get ruleEdit => 'Modifier la règle';
+
+  @override
+  String get ruleDeleteConfirm => 'Supprimer cette règle ?';
+
+  @override
+  String get alertStatus => 'Statut';
+
+  @override
+  String get alertActive => 'Actif';
+
+  @override
+  String get alertAcknowledged => 'Accusé';
+
+  @override
+  String get historyLastHour => '1 dernière heure';
+
+  @override
+  String get historyLastDay => '24 dernières heures';
+
+  @override
+  String get historyLastWeek => '7 derniers jours';
+
+  @override
+  String get historyFetch => 'Interroger';
+
+  @override
+  String get historyNoData => 'Aucune donnée';
+
+  @override
+  String get cdnType => 'Fournisseur';
+
+  @override
+  String get cdnDomain => 'Domaine';
+
+  @override
+  String get cdnRegion => 'Région';
+
+  @override
+  String get cdnTest => 'Test de connexion';
+
+  @override
+  String get cdnRefresh => 'Rafraîchir';
+
+  @override
+  String get cdnPurge => 'Préchauffer';
+
+  @override
+  String get cdnSignedUrl => 'URL signée';
+
+  @override
+  String get cdnAddVendor => 'Ajouter un fournisseur';
+
+  @override
+  String get cdnUrlHint => 'Saisir l\'URL';
+
+  @override
+  String get cdnSignedUrlResult => 'URL signée : ';
+
+  @override
+  String get tenantName => 'Nom du locataire';
+
+  @override
+  String get tenantQuota => 'Quota d\'appareils';
+
+  @override
+  String get tenantAdd => 'Ajouter un locataire';
+
+  @override
+  String get userUsername => 'Nom d\'utilisateur';
+
+  @override
+  String get userPassword => 'Mot de passe';
+
+  @override
+  String get userRole => 'Rôle';
+
+  @override
+  String get userTenant => 'Locataire';
+
+  @override
+  String get roleAdmin => 'Administrateur';
+
+  @override
+  String get roleOperator => 'Opérateur';
+
+  @override
+  String get roleReadonly => 'Lecture seule';
+
+  @override
+  String get userAdd => 'Ajouter un utilisateur';
+
+  @override
+  String get modelProperty => 'Propriétés';
+
+  @override
+  String get modelEvent => 'Événements';
+
+  @override
+  String get modelService => 'Services';
+
+  @override
+  String get modelIdentifier => 'Identifiant';
+
+  @override
+  String get modelType => 'Type';
+
+  @override
+  String get modelUnit => 'Unité';
+
+  @override
+  String get modelRw => 'Accès';
+
+  @override
+  String get modelReadonly => 'Lecture seule';
+
+  @override
+  String get modelReadWrite => 'Lecture/écriture';
+
+  @override
+  String get wsConnected => 'Connexion temps réel établie';
+
+  @override
+  String get wsDisconnected => 'Connexion temps réel perdue';
+
+  @override
+  String get commandSent => 'Commande envoyée';
 }

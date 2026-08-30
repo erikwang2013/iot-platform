@@ -218,4 +218,191 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get errorNotFound => 'Ресурс не найден';
+
+  @override
+  String get commonEnabled => 'Включено';
+
+  @override
+  String get commonEdit => 'Изменить';
+
+  @override
+  String get commonSearch => 'Поиск';
+
+  @override
+  String get errorBackendNotReady =>
+      'Бэкенд недоступен, проверьте запуск сервисов';
+
+  @override
+  String get navModels => 'Модели вещей';
+
+  @override
+  String get navRules => 'Правила и алерты';
+
+  @override
+  String get navHistory => 'История';
+
+  @override
+  String get navCdn => 'CDN';
+
+  @override
+  String get navTenants => 'Тенанты и пользователи';
+
+  @override
+  String get deviceEnable => 'Включить';
+
+  @override
+  String get deviceDisable => 'Отключить';
+
+  @override
+  String get deviceUnbind => 'Отвязать';
+
+  @override
+  String get ruleName => 'Название правила';
+
+  @override
+  String get ruleDeviceId => 'ID устройства';
+
+  @override
+  String get ruleCode => 'Код свойства';
+
+  @override
+  String get ruleOperator => 'Оператор';
+
+  @override
+  String get ruleThreshold => 'Порог';
+
+  @override
+  String get ruleWebhook => 'Webhook URL';
+
+  @override
+  String get ruleCreate => 'Новое правило';
+
+  @override
+  String get ruleEdit => 'Изменить правило';
+
+  @override
+  String get ruleDeleteConfirm => 'Удалить это правило?';
+
+  @override
+  String get alertStatus => 'Статус';
+
+  @override
+  String get alertActive => 'Активен';
+
+  @override
+  String get alertAcknowledged => 'Подтверждён';
+
+  @override
+  String get historyLastHour => 'Последний час';
+
+  @override
+  String get historyLastDay => 'Последние 24 ч';
+
+  @override
+  String get historyLastWeek => 'Последние 7 дней';
+
+  @override
+  String get historyFetch => 'Запрос';
+
+  @override
+  String get historyNoData => 'Нет данных';
+
+  @override
+  String get cdnType => 'Провайдер';
+
+  @override
+  String get cdnDomain => 'Домен';
+
+  @override
+  String get cdnRegion => 'Регион';
+
+  @override
+  String get cdnTest => 'Проверка связи';
+
+  @override
+  String get cdnRefresh => 'Обновить';
+
+  @override
+  String get cdnPurge => 'Прогрев';
+
+  @override
+  String get cdnSignedUrl => 'Подписанный URL';
+
+  @override
+  String get cdnAddVendor => 'Добавить провайдера';
+
+  @override
+  String get cdnUrlHint => 'Введите URL';
+
+  @override
+  String get cdnSignedUrlResult => 'Подписанный URL: ';
+
+  @override
+  String get tenantName => 'Название тенанта';
+
+  @override
+  String get tenantQuota => 'Квота устройств';
+
+  @override
+  String get tenantAdd => 'Добавить тенанта';
+
+  @override
+  String get userUsername => 'Имя пользователя';
+
+  @override
+  String get userPassword => 'Пароль';
+
+  @override
+  String get userRole => 'Роль';
+
+  @override
+  String get userTenant => 'Тенант';
+
+  @override
+  String get roleAdmin => 'Администратор';
+
+  @override
+  String get roleOperator => 'Оператор';
+
+  @override
+  String get roleReadonly => 'Только чтение';
+
+  @override
+  String get userAdd => 'Добавить пользователя';
+
+  @override
+  String get modelProperty => 'Свойства';
+
+  @override
+  String get modelEvent => 'События';
+
+  @override
+  String get modelService => 'Сервисы';
+
+  @override
+  String get modelIdentifier => 'Идентификатор';
+
+  @override
+  String get modelType => 'Тип';
+
+  @override
+  String get modelUnit => 'Единица';
+
+  @override
+  String get modelRw => 'Доступ';
+
+  @override
+  String get modelReadonly => 'Только чтение';
+
+  @override
+  String get modelReadWrite => 'Чтение/запись';
+
+  @override
+  String get wsConnected => 'Подключено в реальном времени';
+
+  @override
+  String get wsDisconnected => 'Соединение потеряно';
+
+  @override
+  String get commandSent => 'Команда отправлена';
 }
