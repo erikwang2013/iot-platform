@@ -79,6 +79,8 @@
   "navHistory": "Riwayat",
   "navCdn": "CDN",
   "navTenants": "Tenant & Pengguna",
+  "navScreen": "Dasbor data",
+  "screenAlerts": "Peringatan terbaru",
   "deviceEnable": "Aktifkan",
   "deviceDisable": "Nonaktifkan",
   "deviceUnbind": "Lepas",

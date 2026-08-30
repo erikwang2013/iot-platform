@@ -79,6 +79,8 @@
   "navHistory": "履歴",
   "navCdn": "CDN",
   "navTenants": "テナントとユーザー",
+  "navScreen": "データ大画面",
+  "screenAlerts": "最近のアラート",
   "deviceEnable": "有効化",
   "deviceDisable": "無効化",
   "deviceUnbind": "解除",

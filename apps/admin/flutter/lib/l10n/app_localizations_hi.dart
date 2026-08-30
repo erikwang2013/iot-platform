@@ -248,6 +248,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get navTenants => 'टेनेंट और उपयोगकर्ता';
 
   @override
+  String get navScreen => 'डेटा डैशबोर्ड';
+
+  @override
+  String get screenAlerts => 'हालिया चेतावनी';
+
+  @override
   String get deviceEnable => 'सक्षम करें';
 
   @override

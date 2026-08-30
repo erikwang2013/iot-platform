@@ -79,6 +79,8 @@
   "navHistory": "ইতিহাস",
   "navCdn": "CDN",
   "navTenants": "টেন্যান্ট ও ব্যবহারকারী",
+  "navScreen": "ডেটা ড্যাশবোর্ড",
+  "screenAlerts": "সাম্প্রতিক সতর্কতা",
   "deviceEnable": "সক্রিয় করুন",
   "deviceDisable": "নিষ্ক্রিয় করুন",
   "deviceUnbind": "আনবাইন্ড",

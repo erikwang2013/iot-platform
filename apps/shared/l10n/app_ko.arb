@@ -79,6 +79,8 @@
   "navHistory": "히스토리",
   "navCdn": "CDN",
   "navTenants": "테넌트 및 사용자",
+  "navScreen": "데이터 대시보드",
+  "screenAlerts": "최근 알림",
   "deviceEnable": "활성화",
   "deviceDisable": "비활성화",
   "deviceUnbind": "연결 해제",

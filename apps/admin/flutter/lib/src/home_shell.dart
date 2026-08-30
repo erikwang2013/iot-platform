@@ -8,6 +8,7 @@ import 'pages/history_page.dart';
 import 'pages/models_page.dart';
 import 'pages/reports_page.dart';
 import 'pages/rules_page.dart';
+import 'pages/screen_page.dart';
 import 'pages/tenants_page.dart';
 import 'settings_page.dart';
 
@@ -27,6 +28,7 @@ class _HomeShellState extends State<HomeShell> {
     final l10n = AppLocalizations.of(context)!;
     final pages = [
       const DashboardPage(),
+      const ScreenPage(),
       const DevicesPage(),
       const ModelsPage(),
       const RulesPage(),
@@ -55,6 +57,11 @@ class _HomeShellState extends State<HomeShell> {
             icon: const Icon(Icons.dashboard_outlined),
             selectedIcon: const Icon(Icons.dashboard),
             label: Text(l10n.navDashboard),
+          ),
+          NavigationDrawerDestination(
+            icon: const Icon(Icons.monitor_heart_outlined),
+            selectedIcon: const Icon(Icons.monitor_heart),
+            label: Text(l10n.navScreen),
           ),
           NavigationDrawerDestination(
             icon: const Icon(Icons.devices_outlined),

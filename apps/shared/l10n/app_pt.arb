@@ -79,6 +79,8 @@
   "navHistory": "Histórico",
   "navCdn": "CDN",
   "navTenants": "Inquilinos e usuários",
+  "navScreen": "Painel de dados",
+  "screenAlerts": "Alertas recentes",
   "deviceEnable": "Ativar",
   "deviceDisable": "Desativar",
   "deviceUnbind": "Desvincular",

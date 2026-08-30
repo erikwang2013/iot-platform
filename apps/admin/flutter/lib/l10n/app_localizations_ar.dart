@@ -248,6 +248,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navTenants => 'المستأجرون والمستخدمون';
 
   @override
+  String get navScreen => 'لوحة البيانات';
+
+  @override
+  String get screenAlerts => 'التنبيهات الأخيرة';
+
+  @override
   String get deviceEnable => 'تفعيل';
 
   @override

@@ -79,6 +79,8 @@
   "navHistory": "Verlauf",
   "navCdn": "CDN",
   "navTenants": "Mandanten & Benutzer",
+  "navScreen": "Daten-Dashboard",
+  "screenAlerts": "Neueste Warnungen",
   "deviceEnable": "Aktivieren",
   "deviceDisable": "Deaktivieren",
   "deviceUnbind": "Entkoppeln",

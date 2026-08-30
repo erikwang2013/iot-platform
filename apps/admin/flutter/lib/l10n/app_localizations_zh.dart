@@ -246,6 +246,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navTenants => '租户与用户';
 
   @override
+  String get navScreen => '数据大屏';
+
+  @override
+  String get screenAlerts => '最近告警';
+
+  @override
   String get deviceEnable => '启用';
 
   @override

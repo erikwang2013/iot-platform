@@ -594,6 +594,18 @@ abstract class AppLocalizations {
   /// **'租户与用户'**
   String get navTenants;
 
+  /// No description provided for @navScreen.
+  ///
+  /// In zh, this message translates to:
+  /// **'数据大屏'**
+  String get navScreen;
+
+  /// No description provided for @screenAlerts.
+  ///
+  /// In zh, this message translates to:
+  /// **'最近告警'**
+  String get screenAlerts;
+
   /// No description provided for @deviceEnable.
   ///
   /// In zh, this message translates to:

@@ -248,6 +248,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get navTenants => 'Mandanten & Benutzer';
 
   @override
+  String get navScreen => 'Daten-Dashboard';
+
+  @override
+  String get screenAlerts => 'Neueste Warnungen';
+
+  @override
   String get deviceEnable => 'Aktivieren';
 
   @override

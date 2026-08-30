@@ -246,6 +246,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get navTenants => 'テナントとユーザー';
 
   @override
+  String get navScreen => 'データ大画面';
+
+  @override
+  String get screenAlerts => '最近のアラート';
+
+  @override
   String get deviceEnable => '有効化';
 
   @override

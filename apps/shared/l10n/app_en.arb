@@ -79,6 +79,8 @@
   "navHistory": "History",
   "navCdn": "CDN",
   "navTenants": "Tenants & Users",
+  "navScreen": "Data Dashboard",
+  "screenAlerts": "Recent Alerts",
   "deviceEnable": "Enable",
   "deviceDisable": "Disable",
   "deviceUnbind": "Unbind",

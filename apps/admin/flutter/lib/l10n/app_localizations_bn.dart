@@ -248,6 +248,12 @@ class AppLocalizationsBn extends AppLocalizations {
   String get navTenants => 'টেন্যান্ট ও ব্যবহারকারী';
 
   @override
+  String get navScreen => 'ডেটা ড্যাশবোর্ড';
+
+  @override
+  String get screenAlerts => 'সাম্প্রতিক সতর্কতা';
+
+  @override
   String get deviceEnable => 'সক্রিয় করুন';
 
   @override

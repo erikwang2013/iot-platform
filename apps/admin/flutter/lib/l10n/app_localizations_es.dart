@@ -248,6 +248,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navTenants => 'Inquilinos y usuarios';
 
   @override
+  String get navScreen => 'Panel de datos';
+
+  @override
+  String get screenAlerts => 'Alertas recientes';
+
+  @override
   String get deviceEnable => 'Habilitar';
 
   @override

@@ -248,6 +248,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navTenants => 'Тенанты и пользователи';
 
   @override
+  String get navScreen => 'Панель данных';
+
+  @override
+  String get screenAlerts => 'Последние оповещения';
+
+  @override
   String get deviceEnable => 'Включить';
 
   @override

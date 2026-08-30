@@ -248,6 +248,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get navTenants => 'Tenant & Pengguna';
 
   @override
+  String get navScreen => 'Dasbor data';
+
+  @override
+  String get screenAlerts => 'Peringatan terbaru';
+
+  @override
   String get deviceEnable => 'Aktifkan';
 
   @override

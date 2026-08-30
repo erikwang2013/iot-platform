@@ -79,6 +79,8 @@
   "navHistory": "历史曲线",
   "navCdn": "CDN 管理",
   "navTenants": "租户与用户",
+  "navScreen": "数据大屏",
+  "screenAlerts": "最近告警",
   "deviceEnable": "启用",
   "deviceDisable": "停用",
   "deviceUnbind": "解绑",

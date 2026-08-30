@@ -246,6 +246,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get navTenants => '테넌트 및 사용자';
 
   @override
+  String get navScreen => '데이터 대시보드';
+
+  @override
+  String get screenAlerts => '최근 알림';
+
+  @override
   String get deviceEnable => '활성화';
 
   @override

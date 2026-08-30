@@ -79,6 +79,8 @@
   "navHistory": "السجل",
   "navCdn": "CDN",
   "navTenants": "المستأجرون والمستخدمون",
+  "navScreen": "لوحة البيانات",
+  "screenAlerts": "التنبيهات الأخيرة",
   "deviceEnable": "تفعيل",
   "deviceDisable": "تعطيل",
   "deviceUnbind": "فك الربط",

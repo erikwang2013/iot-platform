@@ -79,6 +79,8 @@
   "navHistory": "इतिहास",
   "navCdn": "CDN",
   "navTenants": "टेनेंट और उपयोगकर्ता",
+  "navScreen": "डेटा डैशबोर्ड",
+  "screenAlerts": "हालिया चेतावनी",
   "deviceEnable": "सक्षम करें",
   "deviceDisable": "अक्षम करें",
   "deviceUnbind": "अनबाइंड",

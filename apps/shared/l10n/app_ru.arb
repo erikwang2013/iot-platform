@@ -79,6 +79,8 @@
   "navHistory": "История",
   "navCdn": "CDN",
   "navTenants": "Тенанты и пользователи",
+  "navScreen": "Панель данных",
+  "screenAlerts": "Последние оповещения",
   "deviceEnable": "Включить",
   "deviceDisable": "Отключить",
   "deviceUnbind": "Отвязать",

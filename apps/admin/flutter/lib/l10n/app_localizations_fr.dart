@@ -248,6 +248,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navTenants => 'Locataires et utilisateurs';
 
   @override
+  String get navScreen => 'Tableau de données';
+
+  @override
+  String get screenAlerts => 'Alertes récentes';
+
+  @override
   String get deviceEnable => 'Activer';
 
   @override

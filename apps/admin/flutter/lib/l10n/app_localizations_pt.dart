@@ -248,6 +248,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get navTenants => 'Inquilinos e usuários';
 
   @override
+  String get navScreen => 'Painel de dados';
+
+  @override
+  String get screenAlerts => 'Alertas recentes';
+
+  @override
   String get deviceEnable => 'Ativar';
 
   @override
