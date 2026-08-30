@@ -3,9 +3,17 @@ name = "ecat-device"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "iot-device"
+path = "src/main.rs"
+
 [dependencies]
-ecat-data = { path = "../ecat-data" }
+ecat = { path = "../ecat" }
+ecat-transport-http.workspace = true
 ecat-data-sqlx = { path = "../ecat-data-sqlx" }
+ecat-health = { path = "../ecat-health" }
+ecat-data = { path = "../ecat-data" }
 axum.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+tokio = { workspace = true, features = ["full"] }

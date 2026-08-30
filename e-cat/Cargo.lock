@@ -1636,10 +1636,14 @@ name = "ecat-device"
 version = "0.1.0"
 dependencies = [
  "axum 0.8.9",
+ "ecat",
  "ecat-data",
  "ecat-data-sqlx",
+ "ecat-health",
+ "ecat-transport-http",
  "serde",
  "serde_json",
+ "tokio",
 ]
 
 [[package]]
