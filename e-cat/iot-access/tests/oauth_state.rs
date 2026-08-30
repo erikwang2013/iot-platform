@@ -1,6 +1,6 @@
 use ecat_security::crypto::{decrypt, derive_key, encrypt};
-use iot_access::oauth::{decode_state, encode_state, encode_state_at};
-use iot_access::store::creds_json;
+use ecat_access::oauth::{decode_state, encode_state, encode_state_at};
+use ecat_access::store::creds_json;
 
 fn set_key() {
     // edition 2024 中 set_var 为 unsafe；state 签名密钥取自 IOT_CRED_ENCRYPT_KEY

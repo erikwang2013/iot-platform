@@ -1,5 +1,5 @@
 use axum::http::StatusCode;
-use iot_access::webhook::{WebhookPayload, normalize_event, verify_webhook_signature};
+use ecat_access::webhook::{WebhookPayload, normalize_event, verify_webhook_signature};
 
 #[test]
 fn signature_missing_header_is_401() {

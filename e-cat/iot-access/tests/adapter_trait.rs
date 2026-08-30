@@ -1,6 +1,6 @@
 use async_trait::async_trait;
-use iot_access::adapter::{AdapterError, VendorAdapter, VendorCreds};
-use iot_access::models::{DeviceRecord, EventMessage, PropertyValue};
+use ecat_access::adapter::{AdapterError, VendorAdapter, VendorCreds};
+use ecat_access::models::{DeviceRecord, EventMessage, PropertyValue};
 use serde_json::json;
 
 struct Dummy;

@@ -1,4 +1,4 @@
-use iot_access::mqtt::parse_payload;
+use ecat_access::mqtt::parse_payload;
 
 #[test]
 fn payload_with_code_value_ts() {

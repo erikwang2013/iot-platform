@@ -1,5 +1,5 @@
-use iot_access::adapters::tuya::{sign, TuyaAdapter};
-use iot_access::adapter::VendorCreds;
+use ecat_access::adapters::tuya::{sign, TuyaAdapter};
+use ecat_access::adapter::VendorCreds;
 
 #[test]
 fn sign_matches_hmac_sha256_hex() {

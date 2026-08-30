@@ -3,7 +3,7 @@ use ecat_data_redis::RedisCache;
 use ecat_data_sqlx::SqlxClient;
 use ecat_mq_kafka::KafkaMq;
 use ecat_mq_mqtt::MqttMq;
-use iot_access::{
+use ecat_access::{
     api::{self, ApiState},
     oauth::{self, OauthState},
     store::Store,
@@ -69,7 +69,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let (mqtt_run_mqtt, mqtt_run_store, mqtt_run_redis, mqtt_run_kafka) =
         (mqtt.clone(), store.clone(), redis.clone(), kafka.clone());
     tokio::spawn(async move {
-        iot_access::mqtt::run(mqtt_run_mqtt, mqtt_run_store, mqtt_run_redis, mqtt_run_kafka)
+        ecat_access::mqtt::run(mqtt_run_mqtt, mqtt_run_store, mqtt_run_redis, mqtt_run_kafka)
             .await;
     });
 

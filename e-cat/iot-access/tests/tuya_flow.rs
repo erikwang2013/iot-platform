@@ -1,7 +1,7 @@
 mod mock_tuya;
 
-use iot_access::adapter::{VendorAdapter, VendorCreds};
-use iot_access::adapters::tuya::TuyaAdapter;
+use ecat_access::adapter::{VendorAdapter, VendorCreds};
+use ecat_access::adapters::tuya::TuyaAdapter;
 
 fn creds(access_token: &str, refresh_token: &str) -> VendorCreds {
     VendorCreds {
