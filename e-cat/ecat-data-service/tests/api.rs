@@ -1,8 +1,4 @@
 use ecat_data_service::api::{HistoryQuery, build_history_sql};
-use serde::Deserialize;
-
-#[derive(Deserialize)]
-struct Q(HistoryQuery);
 
 #[test]
 fn raw_query_is_qualified_and_tenant_scoped() {
