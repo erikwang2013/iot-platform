@@ -1,9 +1,12 @@
-use axum::{Router, response::IntoResponse, routing::{get, post, put}};
+use axum::{Router, response::IntoResponse, routing::{delete, get, post, put}};
 use ecat_auth::JwtAuthCompat;
 use ecat_health::HealthRegistry;
 use ecat_gateway::{
     api_version::ApiVersionLayer,
-    proxy::{ProxyState, access_proxy, access_proxy_open, cdn_proxy, data_proxy, rule_proxy},
+    proxy::{
+        ProxyState, access_proxy, access_proxy_open, auth_proxy, cdn_proxy, console_proxy,
+        data_proxy, device_proxy, rule_proxy,
+    },
 };
 use ecat_middleware::{MemoryStore, RateLimitLayer, RateLimitStore, RedisRateLimitStore};
 use ecat_security::SecurityBodyCompatLayer;
@@ -12,14 +15,6 @@ use std::time::Duration;
 
 async fn submit() -> &'static str {
     "ok"
-}
-
-async fn devices() -> &'static str {
-    "admin-devices"
-}
-
-async fn me() -> &'static str {
-    "client-me"
 }
 
 #[tokio::main]
@@ -74,14 +69,39 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/cdn/providers/{id}/prefetch", post(cdn_proxy))
         .route("/cdn/tasks", get(cdn_proxy))
         .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
-        .with_state(proxy_state);
+        .with_state(proxy_state.clone());
 
-    let admin_api = Router::new()
-        .route("/devices", get(devices))
-        .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?);
-    let client_api = Router::new()
-        .route("/me", get(me))
-        .layer(JwtAuthCompat::new(&secret, &["sub"])?);
+    // 管理面（/api/*）：租户/用户/物模型 → iot-access；设备/OTA → iot-device。
+    // 双面都要求 sub+role：客户端登录 token 也带 role（P5 401 根因），
+    // 客户端设备列表走 /api/devices 同样受此校验。
+    let console_admin = Router::new()
+        .route("/tenants", get(console_proxy).post(console_proxy))
+        .route("/tenants/{id}", delete(console_proxy))
+        .route("/users", get(console_proxy).post(console_proxy))
+        .route("/users/{id}", delete(console_proxy))
+        .route("/models/things", get(console_proxy).post(console_proxy))
+        .route("/models/things/{id}", get(console_proxy).delete(console_proxy))
+        .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
+        .with_state(proxy_state.clone());
+    let device_admin = Router::new()
+        .route("/devices", get(device_proxy))
+        .route("/devices/{id}", put(device_proxy).delete(device_proxy))
+        .route("/devices/{id}/unbind", post(device_proxy))
+        .route("/ota/firmwares", get(device_proxy).post(device_proxy))
+        .route("/ota/firmwares/{id}", delete(device_proxy))
+        .route("/ota/tasks", get(device_proxy).post(device_proxy))
+        .layer(JwtAuthCompat::new(&secret, &["sub", "role"])?)
+        .with_state(proxy_state.clone());
+    // 登录端点：管理端 /api/auth/login 与客户端 /admin/auth/login 同一 handler，
+    // 独立更严的按 IP 限流（10 次/分钟）防爆破；全局 100 次/分钟限流仍叠加生效
+    let login_router = Router::new()
+        .route("/auth/login", post(auth_proxy))
+        .layer(
+            tower::ServiceBuilder::new()
+                .layer(axum::error_handling::HandleErrorLayer::new(rate_limit_error))
+                .layer(login_rate_limit()),
+        )
+        .with_state(proxy_state);
 
     let router = Router::new()
         .merge(HealthRegistry::new().into_router())
@@ -92,8 +112,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .nest("/api", data_admin)
         .nest("/api", rule_admin)
         .nest("/api", cdn_admin)
-        .nest("/api", admin_api)
-        .nest("/admin", client_api)
+        .nest("/api", console_admin)
+        .nest("/api", device_admin)
+        .nest("/api", login_router.clone())
+        .nest("/admin", login_router)
         .layer(ApiVersionLayer)
         // 严格模式 + 1MB 体上限：与原 scan.rs 语义一致（任意 severity 即 403）
         .layer(
@@ -153,6 +175,24 @@ async fn rate_limit(redis_url: &str) -> RateLimitLayer<axum::body::Body> {
             {
                 Some(axum::extract::ConnectInfo(addr)) => format!("ip:{}", addr.ip()),
                 None => "global".into(),
+            }
+        })
+}
+
+/// 登录防爆破：按来源 IP 10 次/分钟（LOGIN_RATE_LIMIT_MAX 可配），
+/// 独立内存存储，Redis 故障不影响登录可用性。
+fn login_rate_limit() -> RateLimitLayer<axum::body::Body> {
+    let max = env_u32("LOGIN_RATE_LIMIT_MAX", 10);
+    let window_secs = env_u32("LOGIN_RATE_LIMIT_WINDOW_SECS", 60);
+    RateLimitLayer::new(max, Duration::from_secs(window_secs as u64))
+        .with_store(Arc::new(MemoryStore::new()))
+        .with_key_fn(|req: &axum::http::Request<axum::body::Body>| {
+            match req
+                .extensions()
+                .get::<axum::extract::ConnectInfo<std::net::SocketAddr>>()
+            {
+                Some(axum::extract::ConnectInfo(addr)) => format!("login:{}", addr.ip()),
+                None => "login:global".into(),
             }
         })
 }
