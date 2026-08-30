@@ -89,7 +89,23 @@ fn validate(q: &HistoryQuery) -> Result<(), (StatusCode, String)> {
             return Err((StatusCode::BAD_REQUEST, "interval required when agg set".into()));
         }
     }
+    if let Some(interval) = &q.interval {
+        if !valid_interval(interval) {
+            return Err((
+                StatusCode::BAD_REQUEST,
+                "interval must match [0-9]+(s|m|h|d)".into(),
+            ));
+        }
+    }
     Ok(())
+}
+
+/// 白名单校验 TDengine INTERVAL 语法（如 5m/1h/30s），防语句塑形注入。
+fn valid_interval(s: &str) -> bool {
+    let b = s.as_bytes();
+    b.len() >= 2
+        && matches!(b.last(), Some(b's' | b'm' | b'h' | b'd'))
+        && b[..b.len() - 1].iter().all(u8::is_ascii_digit)
 }
 
 /// GET /api/data/export?device_id=&code=&start=&end=&format=csv|xlsx

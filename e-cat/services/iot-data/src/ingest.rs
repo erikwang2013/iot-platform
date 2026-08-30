@@ -35,15 +35,28 @@ pub async fn run(td: Arc<TdengineClient>, kafka: Arc<KafkaMq>) {
     };
     let mut stream = poll_fn(move |cx| stream.poll_recv(cx)).boxed();
     let mut buf: Vec<EventMessage> = Vec::with_capacity(BATCH_SIZE);
-    while let Some(Ok(raw)) = stream.next().await {
-        match serde_json::from_slice::<EventMessage>(&raw) {
-            Ok(ev) => {
-                buf.push(ev);
-                if buf.len() >= BATCH_SIZE {
+    // 低事件量（< BATCH_SIZE）时靠时间冲刷，防止数据无限滞留内存
+    let mut ticker = tokio::time::interval(std::time::Duration::from_secs(1));
+    loop {
+        tokio::select! {
+            msg = stream.next() => match msg {
+                Some(Ok(raw)) => match serde_json::from_slice::<EventMessage>(&raw) {
+                    Ok(ev) => {
+                        buf.push(ev);
+                        if buf.len() >= BATCH_SIZE {
+                            flush(&td, &mut buf).await;
+                        }
+                    }
+                    Err(e) => tracing::warn!(error = %e, "drop unparseable event"),
+                },
+                Some(Err(e)) => tracing::warn!(error = %e, "kafka recv error"),
+                None => break,
+            },
+            _ = ticker.tick() => {
+                if !buf.is_empty() {
                     flush(&td, &mut buf).await;
                 }
             }
-            Err(e) => tracing::warn!(error = %e, "drop unparseable event"),
         }
     }
     // 流结束（订阅中断）时冲刷剩余
