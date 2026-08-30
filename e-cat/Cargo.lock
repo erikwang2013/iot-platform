@@ -2917,7 +2917,6 @@ dependencies = [
  "serde_json",
  "tokio",
  "tower 0.5.3",
- "tower-util",
  "tracing",
 ]
 
@@ -2955,6 +2954,30 @@ dependencies = [
  "tower 0.5.3",
  "tower-util",
  "tracing",
+]
+
+[[package]]
+name = "iot-rule"
+version = "0.1.0"
+dependencies = [
+ "axum 0.8.9",
+ "ecat",
+ "ecat-auth",
+ "ecat-data",
+ "ecat-data-sqlx",
+ "ecat-mq",
+ "ecat-mq-kafka",
+ "ecat-transport-http",
+ "futures-util",
+ "jsonwebtoken",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tower 0.5.3",
+ "tower-util",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]

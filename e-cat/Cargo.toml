@@ -61,6 +61,7 @@ members = [
     "services/iot-device",
     "services/iot-access",
     "services/iot-data",
+    "services/iot-rule",
 ]
 resolver = "2"
 
