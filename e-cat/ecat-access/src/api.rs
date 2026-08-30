@@ -1,4 +1,4 @@
-use crate::adapter::adapter_for;
+use crate::adapter::{adapter_for, VendorCreds};
 use crate::store::Store;
 use axum::{
     Json,
@@ -23,9 +23,32 @@ pub struct ApiState {
 /// 构造受保护 API 路由（挂载见 main.rs，路径前缀 /api/access）。
 pub fn router(api: ApiState) -> axum::Router {
     axum::Router::new()
+        .route("/vendors/{vendor}/creds", axum::routing::put(save_creds))
         .route("/vendors/{vendor}/import", axum::routing::post(import_devices))
         .route("/devices/{device_id}/command", axum::routing::post(send_command))
         .with_state(api)
+}
+
+/// PUT /api/access/vendors/{vendor}/creds（受保护）
+/// 直填凭据（AK/SK 类厂商无 OAuth：huawei/aws/azure；涂鸦/小米也可用），AES 加密落库。
+pub async fn save_creds(
+    State(api): State<ApiState>,
+    axum::Extension(tenant_id): axum::Extension<String>,
+    Path(vendor): Path<String>,
+    Json(creds): Json<VendorCreds>,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    // 输入校验：系统边界，未知厂商/空凭据直接拒绝
+    if adapter_for(&vendor).is_err() {
+        return Err((StatusCode::BAD_REQUEST, format!("unknown vendor {vendor}")));
+    }
+    if creds.client_id.trim().is_empty() || creds.client_secret.trim().is_empty() {
+        return Err((StatusCode::BAD_REQUEST, "client_id and client_secret required".into()));
+    }
+    api.store
+        .save_creds(&tenant_id, &vendor, &serde_json::to_value(&creds).unwrap())
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    Ok(Json(json!({ "ok": true, "vendor": vendor })))
 }
 
 /// POST /api/access/vendors/{vendor}/import（受保护）

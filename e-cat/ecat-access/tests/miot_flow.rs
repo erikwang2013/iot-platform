@@ -96,3 +96,19 @@ async fn sign_is_uppercase_hmac() {
     assert_eq!(s, mock_miot::sign("mock-miot-secret", "mock-miot-client", "1690000000000", "at-1"));
     assert_eq!(s, s.to_uppercase());
 }
+
+#[tokio::test]
+async fn exchange_authorization_code_returns_creds() {
+    mock_miot::spawn();
+    let _g = EnvGuard::set(&[
+        ("MIOT_OPENAPI_BASE", mock_miot::BASE),
+        ("MIOT_CLIENT_SECRET", mock_miot::CLIENT_SECRET),
+    ]);
+    let creds = ecat_access::adapters::miot::exchange_authorization_code("code-1", mock_miot::CLIENT_ID)
+        .await
+        .unwrap();
+    assert_eq!(creds.access_token, "miot-at-code-1");
+    assert_eq!(creds.refresh_token, "miot-rt-code-1");
+    assert_eq!(creds.client_secret, mock_miot::CLIENT_SECRET);
+    assert!(creds.expires_at > 0);
+}

@@ -38,8 +38,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let mqtt_url = std::env::var("MQTT_URL").unwrap_or_else(|_| "tcp://localhost:1883".into());
     let tuya_client_id =
         std::env::var("TUYA_CLIENT_ID").unwrap_or_else(|_| "dev-tuya-client-id".into());
+    let miot_client_id =
+        std::env::var("MIOT_CLIENT_ID").unwrap_or_else(|_| "dev-miot-client-id".into());
     // 测试/演示指向 mock：export TUYA_OPENAPI_BASE=http://127.0.0.1:18084
-    // TUYA_CLIENT_SECRET 由 oauth::exchange_authorization_code 读取
+    // TUYA_CLIENT_SECRET / MIOT_CLIENT_SECRET 由各 exchange 函数读取
 
     let db = SqlxClient::connect(&db_url).await?;
     migrate(&db).await?;
@@ -55,6 +57,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let oauth_state = OauthState {
         store: store.clone(),
         tuya_client_id,
+        miot_client_id,
         callback_base,
     };
     let api_state = ApiState {

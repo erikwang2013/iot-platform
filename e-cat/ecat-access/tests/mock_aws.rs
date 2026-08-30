@@ -1,6 +1,6 @@
 //! AWS IoT mock：绑定 127.0.0.1:18087，独立实现 SigV4 签名校验（与适配器分开写，
 //! 交叉验证），校验通过后返回固定数据。
-use axum::{Json, Router, extract::{Path, State}, http::HeaderMap, routing::{get, post}};
+use axum::{Json, Router, extract::{Path, State}, http::HeaderMap, routing::get};
 use serde_json::{Value, json};
 
 pub const BASE: &str = "http://127.0.0.1:18087";

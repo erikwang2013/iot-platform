@@ -6,7 +6,6 @@ use serde_json::{Value, json};
 pub const BASE: &str = "http://127.0.0.1:18088";
 pub const HUB: &str = "127.0.0.1:18088";
 pub const KEY: &str = "mock-azure-key"; // base64 编码的共享访问密钥
-pub const DEVICE_ID: &str = "azure-dev-1";
 
 fn b64_decode(s: &str) -> Vec<u8> {
     use base64::Engine;

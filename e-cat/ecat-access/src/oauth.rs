@@ -70,6 +70,8 @@ pub struct OauthState {
     pub store: Arc<Store>,
     /// 涂鸦开放平台 client_id（授权 URL 用）
     pub tuya_client_id: String,
+    /// 小米开放平台 client_id（授权 URL 用）
+    pub miot_client_id: String,
     /// 授权完成后浏览器跳回的地址（含 /api/access/oauth/callback）
     pub callback_base: String,
 }
@@ -96,14 +98,25 @@ pub async fn authorize_url(
         .and_then(|v| v.to_str().ok())
         .ok_or((StatusCode::UNAUTHORIZED, "missing x-tenant-id".to_string()))?
         .to_string();
-    if req.vendor != "tuya" {
-        return Err((StatusCode::BAD_REQUEST, format!("vendor {} not supported", req.vendor)));
-    }
     let state = encode_state(&tenant_id, &req.vendor);
-    let url = format!(
-        "https://openapi.tuyacn.com/oauth2/auth?client_id={}&response_type=code&redirect_uri={}&state={}",
-        oauth.tuya_client_id, oauth.callback_base, state
-    );
+    let url = match req.vendor.as_str() {
+        // 授权码 OAuth 厂商；AK/SK 类（huawei/aws/azure）无 OAuth，走
+        // PUT /api/access/vendors/{vendor}/creds 直填凭据
+        "tuya" => format!(
+            "https://openapi.tuyacn.com/oauth2/auth?client_id={}&response_type=code&redirect_uri={}&state={}",
+            oauth.tuya_client_id, oauth.callback_base, state
+        ),
+        "miot" => format!(
+            "https://api.open.home.miot.com/oauth/authorize?client_id={}&response_type=code&redirect_uri={}&state={}",
+            oauth.miot_client_id, oauth.callback_base, state
+        ),
+        v => {
+            return Err((
+                StatusCode::BAD_REQUEST,
+                format!("vendor {v} has no OAuth; use PUT /api/access/vendors/{v}/creds"),
+            ))
+        }
+    };
     Ok(Json(AuthorizeResp { url }))
 }
 
@@ -121,15 +134,19 @@ pub async fn callback(
     Query(q): Query<CallbackQuery>,
 ) -> Result<impl axum::response::IntoResponse, (StatusCode, String)> {
     let (tenant_id, vendor) = decode_state(&q.state).map_err(|e| (StatusCode::BAD_REQUEST, e))?;
-    if vendor != "tuya" {
-        return Err((StatusCode::BAD_REQUEST, "unsupported vendor in state".into()));
+    let creds = match vendor.as_str() {
+        "tuya" => exchange_authorization_code(&q.code, &oauth.tuya_client_id).await,
+        "miot" => crate::adapters::miot::exchange_authorization_code(
+            &q.code,
+            &oauth.miot_client_id,
+        )
+        .await,
+        v => return Err((StatusCode::BAD_REQUEST, format!("unsupported vendor {v} in state"))),
     }
-    let creds = exchange_authorization_code(&q.code, &oauth.tuya_client_id)
-        .await
-        .map_err(|e| (StatusCode::BAD_GATEWAY, e))?;
+    .map_err(|e| (StatusCode::BAD_GATEWAY, e))?;
     oauth
         .store
-        .save_creds(&tenant_id, "tuya", &serde_json::to_value(&creds).unwrap())
+        .save_creds(&tenant_id, &vendor, &serde_json::to_value(&creds).unwrap())
         .await
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
     Ok((

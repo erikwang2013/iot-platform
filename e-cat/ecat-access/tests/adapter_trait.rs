@@ -1,7 +1,18 @@
 use async_trait::async_trait;
-use ecat_access::adapter::{AdapterError, VendorAdapter, VendorCreds};
+use ecat_access::adapter::{AdapterError, VendorAdapter, VendorCreds, adapter_for};
 use ecat_access::models::{DeviceRecord, EventMessage, PropertyValue};
 use serde_json::json;
+
+#[test]
+fn registry_covers_all_p4_vendors() {
+    for v in ["tuya", "miot", "huawei", "aws", "azure"] {
+        assert!(adapter_for(v).is_ok(), "adapter_for({v}) should resolve");
+    }
+    assert!(matches!(
+        adapter_for("nope"),
+        Err(AdapterError::UnknownVendor(_))
+    ));
+}
 
 struct Dummy;
 

@@ -136,6 +136,46 @@ fn is_token_error(msg: &str) -> bool {
     msg.contains("400006") || msg.contains("400004") || msg.contains("token")
 }
 
+/// 用授权码换 token（OAuth 授权码接入；签名时 access_token 约定为空串）。
+pub async fn exchange_authorization_code(
+    code: &str,
+    client_id: &str,
+) -> Result<VendorCreds, String> {
+    let base = std::env::var("MIOT_OPENAPI_BASE")
+        .unwrap_or_else(|_| "https://api.open.home.miot.com".into());
+    let client_secret = std::env::var("MIOT_CLIENT_SECRET")
+        .map_err(|_| "MIOT_CLIENT_SECRET not set".to_string())?;
+    let t = now_ms();
+    let sign = sign(client_id, &t, "", &client_secret);
+    let url = format!(
+        "{base}/oauth/token?grant_type=authorization_code&code={code}&client_id={client_id}"
+    );
+    let resp = reqwest::Client::new()
+        .get(&url)
+        .header("client_id", client_id)
+        .header("t", &t)
+        .header("sign", sign)
+        .send()
+        .await
+        .map_err(|e| format!("miot token request: {e}"))?;
+    let body: Value = resp
+        .json()
+        .await
+        .map_err(|e| format!("miot token parse: {e}"))?;
+    if body["code"].as_i64() != Some(0) {
+        return Err(format!("miot token error: {body}"));
+    }
+    let d = &body["data"];
+    Ok(VendorCreds {
+        client_id: client_id.to_string(),
+        client_secret,
+        uid: String::new(),
+        access_token: d["access_token"].as_str().unwrap_or("").to_string(),
+        refresh_token: d["refresh_token"].as_str().unwrap_or("").to_string(),
+        expires_at: now_secs() + d["expires_in"].as_i64().unwrap_or(2592000),
+    })
+}
+
 impl Default for MiAdapter {
     fn default() -> Self {
         Self::new()
