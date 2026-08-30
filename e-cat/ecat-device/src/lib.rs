@@ -60,6 +60,66 @@ pub async fn list_devices(
     Ok(axum::Json(json!({"devices": devices})))
 }
 
+/// GET /api/devices/stats：设备总数/在线/离线 + 厂商分布（租户隔离）。
+pub async fn device_stats(
+    State(db): State<Db>,
+    tenant: axum::Extension<String>,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    let rows = db
+        .0
+        .query_with(
+            "SELECT status, COUNT(*) AS n FROM devices WHERE tenant_id = ? GROUP BY status",
+            &[json!(tenant.as_str())],
+        )
+        .await
+        .map_err(db_err)?;
+    let counts: Vec<(String, i64)> = rows
+        .iter()
+        .map(|r| {
+            (
+                r.get("status").and_then(Value::as_str).unwrap_or_default().to_string(),
+                r.get("n").and_then(Value::as_i64).unwrap_or(0),
+            )
+        })
+        .collect();
+    let (total, online, offline) = stats_from_counts(&counts);
+    let vendors = db
+        .0
+        .query_with(
+            "SELECT vendor, COUNT(*) AS n FROM devices WHERE tenant_id = ? \
+             GROUP BY vendor ORDER BY n DESC",
+            &[json!(tenant.as_str())],
+        )
+        .await
+        .map_err(db_err)?;
+    let vendors: Vec<Value> = vendors
+        .iter()
+        .map(|r| {
+            json!({
+                "vendor": r.get("vendor").and_then(Value::as_str).unwrap_or_default(),
+                "count": r.get("n").and_then(Value::as_i64).unwrap_or(0),
+            })
+        })
+        .collect();
+    Ok(Json(json!({ "total": total, "online": online, "offline": offline, "vendors": vendors })))
+}
+
+/// status 计数 → (总数, 在线, 离线)。enabled/disabled/unbound 只计入总数。
+fn stats_from_counts(counts: &[(String, i64)]) -> (i64, i64, i64) {
+    let mut total = 0;
+    let mut online = 0;
+    let mut offline = 0;
+    for (status, n) in counts {
+        total += n;
+        match status.as_str() {
+            "online" => online += n,
+            "offline" => offline += n,
+            _ => {}
+        }
+    }
+    (total, online, offline)
+}
+
 fn db_err(e: ecat_data::RdbmsError) -> (axum::http::StatusCode, String) {
     // 细节只进日志，客户端只收通用文案
     tracing::warn!(error = %e, "devices query failed");
@@ -327,5 +387,16 @@ mod tests {
         assert!(!MIGRATION_SQL[0].trim().is_empty());
         assert!(!MIGRATION_SQL[1].trim().is_empty());
         assert!(!MIGRATION_SQL[2].trim().is_empty());
+    }
+
+    #[test]
+    fn stats_from_counts_totals() {
+        let c = vec![
+            ("online".to_string(), 3),
+            ("offline".to_string(), 2),
+            ("enabled".to_string(), 5),
+        ];
+        assert_eq!(stats_from_counts(&c), (10, 3, 2));
+        assert_eq!(stats_from_counts(&[]), (0, 0, 0));
     }
 }

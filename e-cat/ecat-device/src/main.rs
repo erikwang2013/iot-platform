@@ -1,8 +1,8 @@
 use axum::{Router, middleware, routing::{delete, get, post, put}};
 use ecat_data_sqlx::SqlxClient;
 use ecat_device::{
-    Db, create_firmware, create_ota_task, delete_device, delete_firmware, list_devices,
-    list_firmwares, list_ota_tasks, migrate, unbind_device, update_device,
+    Db, create_firmware, create_ota_task, delete_device, delete_firmware, device_stats,
+    list_devices, list_firmwares, list_ota_tasks, migrate, unbind_device, update_device,
 };
 use std::sync::Arc;
 
@@ -21,6 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // 受保护路由：需网关 secret + x-tenant-id（与 ecat-access/rule/data 一致）
     let devices = Router::new()
         .route("/", get(list_devices))
+        .route("/stats", get(device_stats))
         .route("/{id}", put(update_device).delete(delete_device))
         .route("/{id}/unbind", post(unbind_device))
         .with_state(Db(db.clone()));
