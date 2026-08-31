@@ -55,6 +55,33 @@ class ApiClient {
       _send('PUT', path, body: body);
   Future<dynamic> delete(String path) => _send('DELETE', path);
 
+  /// multipart 上传（OTA 固件等二进制文件）：字段 + 单文件，复用同一鉴权头。
+  Future<dynamic> postMultipart(
+    String path, {
+    required Map<String, String> fields,
+    required List<int> fileBytes,
+    String filename = 'file',
+    String fileField = 'file',
+  }) async {
+    final uri = Uri.parse('$baseUrl$path');
+    final req = http.MultipartRequest('POST', uri);
+    final token = tokenProvider();
+    req.headers['X-API-Version'] = 'v1';
+    if (token != null) req.headers['Authorization'] = 'Bearer $token';
+    req.fields.addAll(fields);
+    req.files.add(
+        http.MultipartFile.fromBytes(fileField, fileBytes, filename: filename));
+    final resp = await http.Response.fromStream(await req.send());
+    if (resp.statusCode == 401) {
+      onUnauthorized?.call();
+      return null;
+    }
+    if (resp.statusCode >= 400) {
+      throw ApiException(resp.statusCode, _errMsg(resp.body));
+    }
+    return jsonDecode(resp.body);
+  }
+
   Future<dynamic> _send(String method, String path,
       {Map<String, String>? query, Object? body}) async {
     final uri = Uri.parse('$baseUrl$path').replace(queryParameters: query);

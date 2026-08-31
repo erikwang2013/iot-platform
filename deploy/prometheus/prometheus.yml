@@ -1,0 +1,33 @@
+# C-3 Prometheus 抓取配置：各业务服务 /metrics（MetricsLayer 全局 registry）。
+# 业务服务在 app profile（docker compose --profile app up），未启动时抓取失败属正常。
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["prometheus:9090"]
+
+  - job_name: iot-gateway
+    static_configs:
+      - targets: ["iot-gateway:8080"]
+
+  - job_name: iot-device
+    static_configs:
+      - targets: ["iot-device:8081"]
+
+  - job_name: iot-access
+    static_configs:
+      - targets: ["iot-access:8082"]
+
+  - job_name: iot-data
+    static_configs:
+      - targets: ["iot-data:8083"]
+
+  - job_name: iot-rule
+    static_configs:
+      - targets: ["iot-rule:8084"]
+
+  - job_name: iot-cdn
+    static_configs:
+      - targets: ["iot-cdn:8085"]

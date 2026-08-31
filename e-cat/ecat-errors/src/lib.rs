@@ -1,8 +1,10 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
 mod codes;
+mod i18n;
 
 use codes::ErrorCodeExt;
 pub use ecat_protos::errors::ErrorCode;
+pub use i18n::{localize, locale_from_accept_language};
 use std::collections::HashMap;
 
 #[derive(Debug, thiserror::Error)]
@@ -34,6 +36,12 @@ impl Error {
 
     pub fn message(&self) -> &str {
         &self.message
+    }
+
+    /// 按语言取用户可见消息（zh 命中映射表，其余返回英文原文）；
+    /// 内部日志请用 [`Error::message`] 保持原文。
+    pub fn message_localized(&self, locale: Option<&str>) -> String {
+        localize(locale, &self.message)
     }
 
     pub fn with_metadata(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {

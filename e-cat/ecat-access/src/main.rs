@@ -1,4 +1,5 @@
 use axum::{Router, middleware};
+use ecat_data::RdbmsClient;
 use ecat_data_redis::RedisCache;
 use ecat_data_sqlx::SqlxClient;
 use ecat_mq_kafka::KafkaMq;
@@ -25,6 +26,48 @@ async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send
         include_str!("../migrations/0007_command_queue.sql"),
     ] {
         db.execute_script(sql).await?;
+    }
+    // api_keys.scope（C-5 开放写）：老库补列（MySQL 8 无 ADD COLUMN IF NOT
+    // EXISTS，先查 information_schema；新库由 0006 CREATE TABLE 直接建）。
+    let exists = db
+        .query_with(
+            "SELECT COUNT(*) AS n FROM information_schema.COLUMNS \
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'api_keys' AND COLUMN_NAME = 'scope'",
+            &[],
+        )
+        .await?;
+    let n = exists
+        .first()
+        .and_then(|r| r.get("n"))
+        .and_then(serde_json::Value::as_i64)
+        .unwrap_or(0);
+    if n == 0 {
+        db.execute_with(
+            "ALTER TABLE api_keys ADD COLUMN scope VARCHAR(16) NOT NULL DEFAULT 'read'",
+            &[],
+        )
+        .await?;
+    }
+    // vendor_credentials.key_version（密钥轮换，见 store.rs KeyRing）：老库补列
+    let exists = db
+        .query_with(
+            "SELECT COUNT(*) AS n FROM information_schema.COLUMNS \
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'vendor_credentials' \
+             AND COLUMN_NAME = 'key_version'",
+            &[],
+        )
+        .await?;
+    let n = exists
+        .first()
+        .and_then(|r| r.get("n"))
+        .and_then(serde_json::Value::as_i64)
+        .unwrap_or(0);
+    if n == 0 {
+        db.execute_with(
+            "ALTER TABLE vendor_credentials ADD COLUMN key_version INT NOT NULL DEFAULT 1",
+            &[],
+        )
+        .await?;
     }
     Ok(())
 }
@@ -165,7 +208,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         // 登录（管理端 /api/auth/login 与客户端 /admin/auth/login）走网关节流，
         // 顶层挂载避开 /api/access 前缀
         .nest("/api/auth", login.clone())
-        .nest("/admin/auth", login);
+        .nest("/admin/auth", login)
+        // C-3 Prometheus：/metrics 公开（scrape 端点），MetricsLayer 记请求数/时延/状态码
+        .merge(ecat_metrics::metrics_router())
+        .layer(ecat_metrics::MetricsLayer::new());
 
     let bind = std::env::var("HTTP_BIND").unwrap_or_else(|_| "0.0.0.0:8082".into());
     let srv = ecat_transport_http::HttpServer::new(bind).router(router);

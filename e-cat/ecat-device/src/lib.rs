@@ -29,23 +29,25 @@ pub async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + 
     }
     // MySQL 8 无 ADD COLUMN IF NOT EXISTS，老库补列需先查 information_schema；
     // 新装库由 0003 CREATE TABLE 直接建全列，此处查询返回 1 跳过
-    for (column, ddl) in OTA_TASK_EXTRA_COLUMNS {
-        let exists = db
-            .query_with(
-                "SELECT COUNT(*) AS n FROM information_schema.COLUMNS \
-                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ota_upgrade_tasks' \
-                 AND COLUMN_NAME = ?",
-                &[json!(column)],
-            )
-            .await?;
-        let n = exists
-            .first()
-            .and_then(|r| r.get("n"))
-            .and_then(Value::as_i64)
-            .unwrap_or(0);
-        if n == 0 {
-            db.execute_with(&format!("ALTER TABLE ota_upgrade_tasks ADD COLUMN {ddl}"), &[])
+    for (table, cols) in EXTRA_COLUMNS_BY_TABLE {
+        for (column, ddl) in cols {
+            let exists = db
+                .query_with(
+                    "SELECT COUNT(*) AS n FROM information_schema.COLUMNS \
+                     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? \
+                     AND COLUMN_NAME = ?",
+                    &[json!(table), json!(column)],
+                )
                 .await?;
+            let n = exists
+                .first()
+                .and_then(|r| r.get("n"))
+                .and_then(Value::as_i64)
+                .unwrap_or(0);
+            if n == 0 {
+                db.execute_with(&format!("ALTER TABLE {table} ADD COLUMN {ddl}"), &[])
+                    .await?;
+            }
         }
     }
     Ok(())
@@ -54,6 +56,15 @@ pub async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + 
 const OTA_TASK_EXTRA_COLUMNS: [(&str, &str); 2] = [
     ("progress", "progress INT NOT NULL DEFAULT 0"),
     ("message", "message VARCHAR(512) NOT NULL DEFAULT ''"),
+];
+
+const OTA_FIRMWARE_EXTRA_COLUMNS: [(&str, &str); 1] =
+    [("sha256", "sha256 CHAR(64) NOT NULL DEFAULT ''")];
+
+/// 老库补列清单：表 → (列名, DDL)。
+const EXTRA_COLUMNS_BY_TABLE: [(&str, &[(&str, &str)]); 2] = [
+    ("ota_upgrade_tasks", &OTA_TASK_EXTRA_COLUMNS),
+    ("ota_firmwares", &OTA_FIRMWARE_EXTRA_COLUMNS),
 ];
 
 #[derive(Serialize)]
@@ -293,9 +304,28 @@ pub async fn delete_device(
     Ok(Json(json!({ "ok": true })))
 }
 
-// ---------- OTA 骨架：固件版本表 + 升级任务 ----------
-// 固件 URL 指向 S3/CDN 签名下载地址（设计文档 §7 分发链路），
-// 真实设备回环升级依赖设备端实现，属环境依赖。
+// ---------- OTA：固件版本表 + 升级任务 ----------
+// 固件来源二选一：URL 直填（S3/CDN 签名地址，向后兼容）或二进制上传
+// （multipart，落 FIRMWARE_DIR，url 指向本服务下载端点，sha256 入库校验）。
+
+/// 固件二进制上限 64MB（DefaultBodyLimit 与业务校验双保险）。
+pub const MAX_FIRMWARE_SIZE: usize = 64 * 1024 * 1024;
+
+/// 固件存储目录：FIRMWARE_DIR 环境变量，默认 ./firmwares。
+fn firmware_dir() -> String {
+    std::env::var("FIRMWARE_DIR").unwrap_or_else(|_| "./firmwares".into())
+}
+
+fn sha256_hex(data: &[u8]) -> String {
+    use sha2::{Digest, Sha256};
+    let digest = Sha256::digest(data);
+    digest.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+fn io_err(e: std::io::Error) -> (axum::http::StatusCode, String) {
+    tracing::warn!(error = %e, "firmware file io failed");
+    (StatusCode::INTERNAL_SERVER_ERROR, "firmware storage failed".into())
+}
 
 #[derive(Serialize)]
 struct FirmwareRow {
@@ -304,6 +334,7 @@ struct FirmwareRow {
     version: String,
     url: String,
     description: String,
+    sha256: String,
 }
 
 pub async fn list_firmwares(
@@ -313,7 +344,7 @@ pub async fn list_firmwares(
     let rows = db
         .0
         .query_with(
-            "SELECT id, name, version, url, description FROM ota_firmwares WHERE tenant_id = ? ORDER BY created_at",
+            "SELECT id, name, version, url, description, sha256 FROM ota_firmwares WHERE tenant_id = ? ORDER BY created_at",
             &[json!(tenant.as_str())],
         )
         .await
@@ -326,6 +357,7 @@ pub async fn list_firmwares(
             version: r.get("version").and_then(Value::as_str).unwrap_or("").to_string(),
             url: r.get("url").and_then(Value::as_str).unwrap_or("").to_string(),
             description: r.get("description").and_then(Value::as_str).unwrap_or("").to_string(),
+            sha256: r.get("sha256").and_then(Value::as_str).unwrap_or("").to_string(),
         })
         .collect();
     Ok(Json(json!({ "firmwares": items })))
@@ -335,7 +367,8 @@ pub async fn list_firmwares(
 pub struct FirmwareReq {
     pub name: String,
     pub version: String,
-    pub url: String,
+    /// 向后兼容：URL 直填仍可用；不填则由上传端点生成下载地址。
+    pub url: Option<String>,
     pub description: Option<String>,
 }
 
@@ -344,8 +377,8 @@ pub async fn create_firmware(
     tenant: axum::Extension<String>,
     Json(req): Json<FirmwareReq>,
 ) -> Result<Json<Value>, (StatusCode, String)> {
-    if req.name.trim().is_empty() || req.version.trim().is_empty() || req.url.trim().is_empty() {
-        return Err((StatusCode::BAD_REQUEST, "name/version/url required".into()));
+    if req.name.trim().is_empty() || req.version.trim().is_empty() {
+        return Err((StatusCode::BAD_REQUEST, "name/version required".into()));
     }
     let id = uuid::Uuid::new_v4().to_string();
     db.0
@@ -356,13 +389,117 @@ pub async fn create_firmware(
                 json!(tenant.as_str()),
                 json!(req.name.trim()),
                 json!(req.version.trim()),
-                json!(req.url.trim()),
+                json!(req.url.unwrap_or_default().trim()),
                 json!(req.description.unwrap_or_default()),
             ],
         )
         .await
         .map_err(db_err)?;
     Ok(Json(json!({ "id": id })))
+}
+
+/// POST /api/ota/firmwares/upload：multipart 固件二进制上传。
+/// 字段：name/version/description（文本）+ file（二进制）；落盘 FIRMWARE_DIR/{id}.bin，
+/// 返回 url（本服务下载端点）+ sha256（入库，供设备端校验完整性）。
+pub async fn upload_firmware(
+    State(db): State<Db>,
+    tenant: axum::Extension<String>,
+    mut mp: axum::extract::Multipart,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    let mut name = String::new();
+    let mut version = String::new();
+    let mut description = String::new();
+    let mut data: Option<Vec<u8>> = None;
+    while let Some(field) = mp
+        .next_field()
+        .await
+        .map_err(|e| (StatusCode::BAD_REQUEST, format!("multipart: {e}")))?
+    {
+        match field.name() {
+            Some("name") => name = field.text().await.unwrap_or_default(),
+            Some("version") => version = field.text().await.unwrap_or_default(),
+            Some("description") => description = field.text().await.unwrap_or_default(),
+            Some("file") => {
+                let bytes = field
+                    .bytes()
+                    .await
+                    .map_err(|e| (StatusCode::BAD_REQUEST, format!("read file: {e}")))?;
+                if bytes.len() > MAX_FIRMWARE_SIZE {
+                    return Err((
+                        StatusCode::PAYLOAD_TOO_LARGE,
+                        format!("firmware exceeds {MAX_FIRMWARE_SIZE} bytes"),
+                    ));
+                }
+                data = Some(bytes.to_vec());
+            }
+            _ => {}
+        }
+    }
+    if name.trim().is_empty() || version.trim().is_empty() {
+        return Err((StatusCode::BAD_REQUEST, "name/version required".into()));
+    }
+    let bytes = data
+        .filter(|d| !d.is_empty())
+        .ok_or_else(|| (StatusCode::BAD_REQUEST, "file field required".into()))?;
+    let id = uuid::Uuid::new_v4().to_string();
+    let sha256 = sha256_hex(&bytes);
+    let dir = firmware_dir();
+    tokio::fs::create_dir_all(&dir).await.map_err(io_err)?;
+    tokio::fs::write(std::path::Path::new(&dir).join(format!("{id}.bin")), &bytes)
+        .await
+        .map_err(io_err)?;
+    let url = format!("/api/ota/firmwares/{id}/download");
+    db.0
+        .execute_with(
+            "INSERT INTO ota_firmwares (id, tenant_id, name, version, url, description, sha256) \
+             VALUES (?, ?, ?, ?, ?, ?, ?)",
+            &[
+                json!(id),
+                json!(tenant.as_str()),
+                json!(name.trim()),
+                json!(version.trim()),
+                json!(url),
+                json!(description),
+                json!(sha256),
+            ],
+        )
+        .await
+        .map_err(db_err)?;
+    Ok(Json(json!({ "id": id, "url": url, "sha256": sha256 })))
+}
+
+/// GET /api/ota/firmwares/{id}/download：固件二进制下载（租户隔离校验后读盘）。
+pub async fn download_firmware(
+    State(db): State<Db>,
+    tenant: axum::Extension<String>,
+    Path(id): Path<String>,
+) -> Result<axum::response::Response, (StatusCode, String)> {
+    use axum::response::IntoResponse;
+    // 防路径穿越：固件 id 必须形如 UUID 才允许拼盘路径
+    if id.len() != 36 || !id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
+        return Err((StatusCode::BAD_REQUEST, "invalid firmware id".into()));
+    }
+    let rows = db
+        .0
+        .query_with(
+            "SELECT id FROM ota_firmwares WHERE id = ? AND tenant_id = ?",
+            &[json!(id), json!(tenant.as_str())],
+        )
+        .await
+        .map_err(db_err)?;
+    if rows.is_empty() {
+        return Err((StatusCode::NOT_FOUND, "firmware not found".into()));
+    }
+    let path = std::path::Path::new(&firmware_dir()).join(format!("{id}.bin"));
+    let bytes = tokio::fs::read(&path).await.map_err(|e| {
+        tracing::warn!(error = %e, "firmware file read failed");
+        (StatusCode::NOT_FOUND, "firmware file not found".into())
+    })?;
+    Ok((
+        [(axum::http::header::CONTENT_TYPE, "application/octet-stream")],
+        bytes,
+    )
+        .into_response())
 }
 
 pub async fn delete_firmware(
@@ -564,6 +701,27 @@ mod tests {
         assert!(!MIGRATION_SQL[0].trim().is_empty());
         assert!(!MIGRATION_SQL[1].trim().is_empty());
         assert!(!MIGRATION_SQL[2].trim().is_empty());
+    }
+
+    #[test]
+    fn sha256_hex_known_vector() {
+        // SHA-256("") 与 SHA-256("abc") 标准向量
+        assert_eq!(
+            sha256_hex(b""),
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        );
+        assert_eq!(
+            sha256_hex(b"abc"),
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+    }
+
+    #[test]
+    fn firmware_id_shape_guard() {
+        let ok = "550e8400-e29b-41d4-a716-446655440000";
+        assert_eq!(ok.len(), 36);
+        assert!(ok.chars().all(|c| c.is_ascii_alphanumeric() || c == '-'));
+        assert!(!("../etc/passwd".chars().all(|c| c.is_ascii_alphanumeric() || c == '-')));
     }
 
     #[test]

@@ -4,7 +4,7 @@ use axum::{
     Router,
     extract::{Path, Query, State},
     http::StatusCode,
-    routing::{delete, get},
+    routing::{delete, get, post},
 };
 use ecat_security::crypto::hmac_sha256_hex;
 use serde::Deserialize;
@@ -64,6 +64,7 @@ pub fn router(state: ConsoleState) -> Router {
                 .route("/", get(list_api_keys).post(create_api_key))
                 .route("/{id}", delete(revoke_api_key)),
         )
+        .route("/keys/rotate", post(rotate_creds_key))
         .with_state(state)
 }
 
@@ -101,6 +102,27 @@ pub async fn list_audit(
         })
         .collect();
     Ok(Json(json!({ "page": page, "size": size, "total": events.len(), "events": events })))
+}
+
+/// POST /api/keys/rotate：凭据加密密钥轮换（仅 admin）。
+/// 生成新随机密钥成为 current（新数据用新密钥，key_version=2），旧密钥移入
+/// 宽限窗口（旧数据仍可解密），并持久化 cred_keys.json（重启不丢）。
+/// 返回新密钥，供运维同步到 IOT_CRED_ENCRYPT_KEY 环境变量。
+pub async fn rotate_creds_key(
+    State(s): State<ConsoleState>,
+    headers: axum::http::HeaderMap,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    require_admin(&headers)?;
+    let new_key = s
+        .store
+        .rotate_key()
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    Ok(Json(json!({
+        "ok": true,
+        "key_version": s.store.key_version(),
+        "key": new_key,
+        "hint": "set IOT_CRED_ENCRYPT_KEY=<key> (previous key stays decryptable via grace window; remove IOT_CRED_ENCRYPT_KEY_OLD only after re-encryption)",
+    })))
 }
 
 /// GET /api/tenants：租户列表（平台超管职能；skeleton 全量返回，租户级
@@ -245,6 +267,9 @@ pub async fn list_api_keys(
 #[derive(Deserialize)]
 pub struct ApiKeyReq {
     pub name: String,
+    /// 密钥 scope：read（默认，仅读端点）| write | command（写端点）。
+    #[serde(default)]
+    pub scope: Option<String>,
 }
 
 /// POST /api/api-keys：创建开放 API 密钥。app_secret 仅此一次返回
@@ -260,12 +285,16 @@ pub async fn create_api_key(
     if name.is_empty() {
         return Err((StatusCode::BAD_REQUEST, "name required".into()));
     }
+    let scope = req.scope.as_deref().unwrap_or("read").to_string();
+    if !["read", "write", "command"].contains(&scope.as_str()) {
+        return Err((StatusCode::BAD_REQUEST, "scope must be read|write|command".into()));
+    }
     let (app_id, app_secret) = s
         .store
-        .create_api_key(&tenant_of(tenant), &name)
+        .create_api_key(&tenant_of(tenant), &name, &scope)
         .await
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
-    Ok(Json(json!({ "app_id": app_id, "app_secret": app_secret })))
+    Ok(Json(json!({ "app_id": app_id, "app_secret": app_secret, "scope": scope })))
 }
 
 /// DELETE /api/api-keys/{id}：吊销密钥（幂等；已吊销返回 404）。
@@ -309,6 +338,49 @@ pub async fn list_models(
     Ok(Json(out))
 }
 
+/// 内建品类模板（category → 物模型行）：设备创建时按 category 一键填充。
+/// 元组：identifier, name, type, data_type, unit, rw
+#[allow(clippy::type_complexity)]
+const TEMPLATE_ROWS: [(&str, &[(&str, &str, &str, &str, &str, &str)]); 3] = [
+    ("thermo-hygrometer", &[
+        ("temperature", "温度", "property", "float", "°C", "r"),
+        ("humidity", "湿度", "property", "float", "%RH", "r"),
+        ("temp_alarm", "温度告警", "event", "string", "", ""),
+        ("hum_alarm", "湿度告警", "event", "string", "", ""),
+    ]),
+    ("switch_panel", &[
+        ("switch_1", "开关 1", "property", "bool", "", "rw"),
+        ("switch_2", "开关 2", "property", "bool", "", "rw"),
+        ("switch_3", "开关 3", "property", "bool", "", "rw"),
+        ("switch_event", "开关事件", "event", "string", "", ""),
+    ]),
+    ("smart_plug", &[
+        ("power", "功率", "property", "float", "W", "r"),
+        ("on_off", "通断", "property", "bool", "", "rw"),
+        ("overload_alarm", "过载告警", "event", "string", "", ""),
+    ]),
+];
+
+/// 品类模板 → 物模型行（带 version: 1）；未知品类返回 None。
+fn category_templates(category: &str) -> Option<Vec<Value>> {
+    let rows = TEMPLATE_ROWS.iter().find(|(name, _)| *name == category)?.1;
+    Some(
+        rows.iter()
+            .map(|(identifier, name, kind, dt, unit, rw)| {
+                json!({
+                    "identifier": identifier,
+                    "name": name,
+                    "type": kind,
+                    "data_type": dt,
+                    "unit": unit,
+                    "rw": rw,
+                    "version": 1,
+                })
+            })
+            .collect(),
+    )
+}
+
 #[derive(Deserialize)]
 pub struct ModelReq {
     pub identifier: String,
@@ -319,6 +391,8 @@ pub struct ModelReq {
     pub unit: Option<String>,
     pub rw: Option<String>,
     pub device_id: Option<String>,
+    /// 品类模板：传入时一键填充该品类全部属性/事件（忽略 identifier 等单行字段）
+    pub category: Option<String>,
 }
 
 pub async fn create_model(
@@ -327,6 +401,16 @@ pub async fn create_model(
     Json(req): Json<ModelReq>,
 ) -> Result<Json<Value>, (StatusCode, String)> {
     let tenant_id = tenant_of(tenant);
+    if let Some(cat) = req.category.as_deref().map(str::trim).filter(|c| !c.is_empty()) {
+        let items = category_templates(cat)
+            .ok_or_else(|| (StatusCode::BAD_REQUEST, format!("unknown category '{cat}'")))?;
+        let ids = s
+            .store
+            .create_model_template(&tenant_id, req.device_id.as_deref(), &items)
+            .await
+            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+        return Ok(Json(json!({ "ids": ids })));
+    }
     if req.identifier.trim().is_empty() || req.name.trim().is_empty() {
         return Err((StatusCode::BAD_REQUEST, "identifier and name required".into()));
     }
@@ -340,6 +424,7 @@ pub async fn create_model(
         "data_type": req.data_type.unwrap_or_default(),
         "unit": req.unit.unwrap_or_default(),
         "rw": req.rw.unwrap_or_else(|| "rw".into()),
+        "version": 1,
     });
     let id = s
         .store
@@ -390,4 +475,22 @@ pub async fn device_model(
         }
     }
     Ok(Json(grouped))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::category_templates;
+
+    #[test]
+    fn templates_exist_for_known_categories() {
+        for cat in ["thermo-hygrometer", "switch_panel", "smart_plug"] {
+            let rows = category_templates(cat).expect("known category");
+            assert!(!rows.is_empty());
+            for r in &rows {
+                assert_eq!(r["version"], 1, "模板行默认 version=1");
+                assert!(r["type"].as_str().is_some());
+            }
+        }
+        assert_eq!(category_templates("bogus"), None);
+    }
 }

@@ -3,6 +3,9 @@
 # backend services relocated under e-cat/ (vendored .gitignore may be overwritten by framework upgrades)
 e-cat/services/*/target
 
+# 凭据密钥轮换文件（KeyRing 持久化，含真实密钥材料，防误提交）
+cred_keys.json
+
 # legacy rules (from pre-P0 root .gitignore)
 runtime
 /.idea

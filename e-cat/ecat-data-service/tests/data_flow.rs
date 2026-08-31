@@ -95,7 +95,10 @@ async fn http_history_handler_returns_points() {
         .await
         .expect("ingest insert");
 
-    let app = ecat_data_service::api::router(ApiState { td: td.clone() });
+    let app = ecat_data_service::api::router(ApiState {
+        td: td.clone(),
+        dialect: ecat_data_service::td::Dialect::Tdengine,
+    });
     let resp = app
         .oneshot(
             Request::builder()

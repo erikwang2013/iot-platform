@@ -41,6 +41,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         ecat_rule::runner::run(run_kafka, run_store, run_bridge, run_http).await;
     });
 
+    // 定时任务：每日汇总报表（C-线）——每小时兜底生成前一日报表
+    // （幂等：已生成跳过；重启后自动补生成）。启动即先生成一次，
+    // 不等首个 tick（scheduler 首跑在第一个 interval 之后）。
+    ecat_rule::report::run_once(db.clone()).await;
+    let mut scheduler = ecat_scheduler::Scheduler::new();
+    let report_interval = std::env::var("REPORT_INTERVAL_SECS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(3600u64);
+    ecat_rule::report::register(
+        &mut scheduler,
+        db.clone(),
+        std::time::Duration::from_secs(report_interval),
+    );
+    tokio::spawn(async move { scheduler.run().await });
+
     let api_state = ApiState { store: store.clone() };
 
     // 受保护路由：需网关 secret + x-tenant-id（网关反代注入）
@@ -57,10 +73,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .with_check(ecat_health::db_check(db.clone()))
         .into_router();
 
+    // C-3 Prometheus：/metrics 公开（scrape 端点），MetricsLayer 记请求数/时延/状态码
     let router = Router::new()
         .merge(health_router)
         .merge(ws_route)
-        .nest("/api/rule", protected);
+        .nest("/api/rule", protected)
+        .merge(ecat_metrics::metrics_router())
+        .layer(ecat_metrics::MetricsLayer::new());
 
     let bind = std::env::var("HTTP_BIND").unwrap_or_else(|_| "0.0.0.0:8084".into());
     let srv = ecat_transport_http::HttpServer::new(bind).router(router);

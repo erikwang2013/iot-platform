@@ -10,6 +10,7 @@ path = "src/main.rs"
 [dependencies]
 ecat = { path = "../ecat" }
 ecat-auth = { path = "../ecat-auth" }
+ecat-errors = { path = "../ecat-errors" }
 ecat-transport.workspace = true
 ecat-transport-http.workspace = true
 ecat-health = { path = "../ecat-health" }
@@ -21,6 +22,7 @@ ecat-data-sqlx = { path = "../ecat-data-sqlx" }
 ecat-openapi = { path = "../ecat-openapi" }
 ecat-registry = { path = "../ecat-registry" }
 ecat-registry-consul = { path = "../ecat-registry-consul" }
+ecat-metrics.workspace = true
 async-trait.workspace = true
 axum.workspace = true
 http.workspace = true

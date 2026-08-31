@@ -38,6 +38,15 @@ pub fn decrypt(key: &[u8; 32], enc: &str) -> Result<Vec<u8>, String> {
         .map_err(|e| format!("aes decrypt (密钥错误或密文被篡改): {e}"))
 }
 
+/// 生成新随机 AES 密钥字符串（base64 随机 32 字节；与 env 值同形态，直接用于
+/// IOT_CRED_ENCRYPT_KEY / 密钥轮换文件，经 derive_key 派生后使用）。
+pub fn new_key_b64() -> String {
+    use base64::Engine;
+    let mut k = [0u8; 32];
+    rand::RngCore::fill_bytes(&mut rand::thread_rng(), &mut k);
+    base64::engine::general_purpose::STANDARD.encode(k)
+}
+
 /// HMAC-SHA256 十六进制摘要（密码哈希、webhook 验签共用；登录密码落库哈希
 /// 与验签走同一实现，避免两处算法漂移）。
 pub fn hmac_sha256_hex(secret: &str, raw: &[u8]) -> String {
@@ -105,6 +114,17 @@ mod tests {
         assert_eq!(digest, "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8");
         assert!(verify_hmac_sha256_hex("key", msg, &digest));
         assert!(!verify_hmac_sha256_hex("key", msg, "deadbeef"));
+    }
+
+    #[test]
+    fn new_key_b64_is_env_usable() {
+        let b64 = new_key_b64();
+        let key = derive_key(&b64);
+        assert_eq!(key.len(), 32);
+        // 同值派生确定性：轮换文件持久化后可还原同一把 AES 密钥
+        assert_eq!(derive_key(&b64), key);
+        // 两次生成不同
+        assert_ne!(new_key_b64(), new_key_b64());
     }
 
     #[test]

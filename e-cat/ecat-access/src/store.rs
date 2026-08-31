@@ -1,9 +1,10 @@
 use ecat_data::RdbmsClient;
-use ecat_security::crypto::{decrypt, derive_key, encrypt};
+use crate::keyring::KeyRing;
+use ecat_security::crypto::encrypt;
 use ecat_data_sqlx::SqlxClient;
 use serde::Serialize;
 use serde_json::{Value, json};
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 #[derive(Debug, Clone)]
 pub struct UserRow {
@@ -35,6 +36,8 @@ pub struct ApiKeyRow {
     pub id: String,
     pub tenant_id: String,
     pub name: String,
+    /// 密钥 scope：read（默认，仅读端点）| write | command（写端点）。
+    pub scope: String,
     pub created_at: String,
     pub revoked: bool,
 }
@@ -51,42 +54,71 @@ pub struct AuditRow {
     pub created_at: String,
 }
 
-#[derive(Clone)]
 pub struct Store {
     pub db: Arc<SqlxClient>,
-    pub key: [u8; 32],
+    keys: RwLock<KeyRing>,
+}
+
+impl Clone for Store {
+    fn clone(&self) -> Self {
+        Self { db: self.db.clone(), keys: RwLock::new(self.keys.read().unwrap().clone()) }
+    }
 }
 
 impl Store {
     pub fn new(db: Arc<SqlxClient>, enc_key_env: &str) -> Self {
-        Self { db, key: derive_key(enc_key_env) }
+        Self { db, keys: RwLock::new(KeyRing::load(enc_key_env)) }
+    }
+
+    /// 当前密钥版本（新写入数据的版本号）。
+    pub fn key_version(&self) -> i64 {
+        self.keys.read().unwrap().version()
+    }
+
+    /// 轮换密钥（见 keyring::KeyRing::rotate）；失败返回 Err(String)。
+    pub fn rotate_key(&self) -> Result<String, String> {
+        self.keys.write().unwrap().rotate()
     }
 
     /// 保存（或更新）租户在某厂商的凭据；失败返回 Err(String)。
+    /// 新数据一律用当前密钥加密，落 key_version（1=环境密钥 / 2=轮换后）。
     pub async fn save_creds(
         &self,
         tenant_id: &str,
         vendor: &str,
         cfg: &Value,
     ) -> Result<(), String> {
-        let enc = encrypt(&self.key, &creds_json(cfg)).map_err(|e| e.to_string())?;
+        // 锁内只取数据，guard 在 await 前释放（RwLock guard 非 Send，跨 await 会让 future 非 Send）
+        let (enc, version) = {
+            let ring = self.keys.read().unwrap();
+            (
+                encrypt(ring.current_key(), &creds_json(cfg)).map_err(|e| e.to_string())?,
+                ring.version(),
+            )
+        };
         let id = uuid::Uuid::new_v4().to_string();
-        let sql = "INSERT INTO vendor_credentials (id, tenant_id, vendor, config_encrypted, status) \
-                   VALUES (?, ?, ?, ?, 'active') \
-                   ON DUPLICATE KEY UPDATE config_encrypted = VALUES(config_encrypted)";
+        let sql = "INSERT INTO vendor_credentials (id, tenant_id, vendor, config_encrypted, status, key_version) \
+                   VALUES (?, ?, ?, ?, 'active', ?) \
+                   ON DUPLICATE KEY UPDATE config_encrypted = VALUES(config_encrypted), \
+                                          key_version = VALUES(key_version)";
         self.db
-            .execute_with(sql, &[json!(id), json!(tenant_id), json!(vendor), json!(enc)])
+            .execute_with(
+                sql,
+                &[json!(id), json!(tenant_id), json!(vendor), json!(enc), json!(version)],
+            )
             .await
             .map_err(|e| format!("save creds: {e}"))?;
         Ok(())
     }
 
     /// 读取并解密凭据；无记录返回 Err("no credentials")。
+    /// 按行内 key_version 选主密钥，失败回退另一把（宽限窗口）。
     pub async fn load_creds(&self, tenant_id: &str, vendor: &str) -> Result<Value, String> {
         let rows = self
             .db
             .query_with(
-                "SELECT config_encrypted FROM vendor_credentials WHERE tenant_id = ? AND vendor = ?",
+                "SELECT config_encrypted, key_version FROM vendor_credentials \
+                 WHERE tenant_id = ? AND vendor = ?",
                 &[json!(tenant_id), json!(vendor)],
             )
             .await
@@ -96,7 +128,13 @@ impl Store {
             .and_then(|r| r.get("config_encrypted"))
             .and_then(Value::as_str)
             .ok_or_else(|| "no credentials".to_string())?;
-        let plain = decrypt(&self.key, enc)?;
+        let version = rows
+            .first()
+            .and_then(|r| r.get("key_version"))
+            .and_then(Value::as_i64)
+            .unwrap_or(1);
+        let ring = self.keys.read().unwrap();
+        let plain = ring.decrypt(version, enc)?;
         serde_json::from_slice(&plain).map_err(|e| format!("creds json: {e}"))
     }
 
@@ -494,6 +532,30 @@ impl Store {
         Ok(id)
     }
 
+    /// 批量插入品类模板物模型行（逐行独立 INSERT 保持简单，模板 ≤5 行）。
+    pub async fn create_model_template(
+        &self,
+        tenant_id: &str,
+        device_id: Option<&str>,
+        items: &[Value],
+    ) -> Result<Vec<String>, String> {
+        let mut ids = Vec::with_capacity(items.len());
+        for item in items {
+            let id = uuid::Uuid::new_v4().to_string();
+            let schema_str = serde_json::to_string(item).map_err(|e| e.to_string())?;
+            self.db
+                .execute_with(
+                    "INSERT INTO thing_models (id, tenant_id, device_id, schema_json) \
+                     VALUES (?, ?, ?, ?)",
+                    &[json!(id), json!(tenant_id), json!(device_id), json!(schema_str)],
+                )
+                .await
+                .map_err(|e| format!("create model: {e}"))?;
+            ids.push(id);
+        }
+        Ok(ids)
+    }
+
     pub async fn delete_model(&self, tenant_id: &str, model_id: &str) -> Result<bool, String> {
         let n = self
             .db
@@ -636,10 +698,12 @@ impl Store {
 
     /// 创建开放 API 密钥：app_secret 明文仅此一次返回，库中只存
     /// HMAC-SHA256 哈希（app_id 即主键，作为客户端的 API 标识）。
+    /// scope 决定换 token 后的角色（见 auth::role_for_scope）。
     pub async fn create_api_key(
         &self,
         tenant_id: &str,
         name: &str,
+        scope: &str,
     ) -> Result<(String, String), String> {
         let id = uuid::Uuid::new_v4().to_string();
         let secret = format!(
@@ -650,8 +714,9 @@ impl Store {
         let hash = ecat_security::crypto::hmac_sha256_hex(&secret, id.as_bytes());
         self.db
             .execute_with(
-                "INSERT INTO api_keys (id, tenant_id, name, secret_hash) VALUES (?, ?, ?, ?)",
-                &[json!(id), json!(tenant_id), json!(name), json!(hash)],
+                "INSERT INTO api_keys (id, tenant_id, name, secret_hash, scope) \
+                 VALUES (?, ?, ?, ?, ?)",
+                &[json!(id), json!(tenant_id), json!(name), json!(hash), json!(scope)],
             )
             .await
             .map_err(|e| format!("create api key: {e}"))?;
@@ -662,7 +727,7 @@ impl Store {
         let rows = self
             .db
             .query_with(
-                "SELECT id, tenant_id, name, CAST(created_at AS CHAR) AS created_at, \
+                "SELECT id, tenant_id, name, scope, CAST(created_at AS CHAR) AS created_at, \
                  CAST(revoked_at AS CHAR) AS revoked_at \
                  FROM api_keys WHERE tenant_id = ? ORDER BY created_at",
                 &[json!(tenant_id)],
@@ -675,6 +740,7 @@ impl Store {
                 id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
                 tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or("").to_string(),
                 name: r.get("name").and_then(Value::as_str).unwrap_or("").to_string(),
+                scope: r.get("scope").and_then(Value::as_str).unwrap_or("read").to_string(),
                 created_at: r.get("created_at").and_then(Value::as_str).unwrap_or("").to_string(),
                 revoked: r.get("revoked_at").and_then(Value::as_str).is_some(),
             })
@@ -695,16 +761,17 @@ impl Store {
         Ok(n > 0)
     }
 
-    /// 校验开放 API 密钥：存在且未吊销且摘要匹配 → 返回租户 ID；否则 None。
+    /// 校验开放 API 密钥：存在且未吊销且摘要匹配 → 返回 (租户 ID, scope)；
+    /// 否则 None。
     pub async fn verify_api_key(
         &self,
         app_id: &str,
         secret: &str,
-    ) -> Result<Option<String>, String> {
+    ) -> Result<Option<(String, String)>, String> {
         let rows = self
             .db
             .query_with(
-                "SELECT tenant_id, secret_hash, CAST(revoked_at AS CHAR) AS revoked_at \
+                "SELECT tenant_id, scope, secret_hash, CAST(revoked_at AS CHAR) AS revoked_at \
                  FROM api_keys WHERE id = ?",
                 &[json!(app_id)],
             )
@@ -725,6 +792,11 @@ impl Store {
         if !ecat_security::crypto::verify_hmac_sha256_hex(secret, app_id.as_bytes(), hash) {
             return Ok(None);
         }
-        Ok(Some(tenant_id.to_string()))
+        let scope = row
+            .get("scope")
+            .and_then(Value::as_str)
+            .unwrap_or("read")
+            .to_string();
+        Ok(Some((tenant_id.to_string(), scope)))
     }
 }

@@ -3,6 +3,7 @@ pub mod engine;
 pub mod models;
 pub mod notify;
 pub mod push;
+pub mod report;
 pub mod runner;
 pub mod store;
 pub mod ws;

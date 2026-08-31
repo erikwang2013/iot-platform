@@ -68,8 +68,19 @@ pub async fn login(
     })))
 }
 
-/// POST /api/access/open/token：开放 API 客户端凭 app_id/app_secret 换只读
-/// JWT（role=read-only，仅读端点可用）。失败统一 401 通用文案（防枚举）。
+/// 密钥 scope → JWT role 映射：read=read-only（仅读端点）；write/command=
+/// operator（写端点经网关 RBAC 放行）。OTA/租户/用户管理等 admin-only 端点
+/// 不在 operator 范围内，开放密钥一律不可达。
+fn role_for_scope(scope: &str) -> &'static str {
+    match scope {
+        "write" | "command" => "operator",
+        _ => "read-only",
+    }
+}
+
+/// POST /api/access/open/token：开放 API 客户端凭 app_id/app_secret 换 JWT。
+/// role 由密钥 scope 决定（read→read-only 只读；write/command→operator 可写；
+/// 默认 read，向后兼容）。失败统一 401 通用文案（防枚举）。
 pub async fn open_token(
     State(auth): State<AuthState>,
     Json(req): Json<OpenTokenReq>,
@@ -77,19 +88,20 @@ pub async fn open_token(
     if req.app_id.trim().is_empty() || req.app_secret.is_empty() {
         return Err((StatusCode::BAD_REQUEST, "app_id and app_secret required".into()));
     }
-    let tenant_id = match auth.store.verify_api_key(req.app_id.trim(), &req.app_secret).await {
-        Ok(Some(t)) => t,
+    let (tenant_id, scope) = match auth.store.verify_api_key(req.app_id.trim(), &req.app_secret).await {
+        Ok(Some(v)) => v,
         Ok(None) | Err(_) => {
             tracing::warn!("open token failed: invalid or revoked api key");
             return Err((StatusCode::UNAUTHORIZED, "invalid app_id or app_secret".into()));
         }
     };
-    let token = issue_token(&auth.jwt_secret, &tenant_id, "read-only", auth.token_ttl_secs)
+    let role = role_for_scope(&scope);
+    let token = issue_token(&auth.jwt_secret, &tenant_id, role, auth.token_ttl_secs)
         .map_err(|e| {
             tracing::error!(error = %e, "token issue failed");
             (StatusCode::INTERNAL_SERVER_ERROR, "internal error".into())
         })?;
-    Ok(Json(json!({ "token": token, "tenant_id": tenant_id, "role": "read-only" })))
+    Ok(Json(json!({ "token": token, "tenant_id": tenant_id, "role": role, "scope": scope })))
 }
 
 #[cfg(test)]
@@ -104,5 +116,15 @@ mod tests {
         assert!(password_matches(&hash, pepper, "admin123"));
         assert!(!password_matches(&hash, pepper, "wrong"));
         assert!(!password_matches(&hash, "other-pepper", "admin123"));
+    }
+
+    #[test]
+    fn role_for_scope_maps_write_scopes_to_operator() {
+        assert_eq!(role_for_scope("read"), "read-only");
+        assert_eq!(role_for_scope("write"), "operator");
+        assert_eq!(role_for_scope("command"), "operator");
+        // 未知/缺失 scope 回退只读（向后兼容）
+        assert_eq!(role_for_scope(""), "read-only");
+        assert_eq!(role_for_scope("admin"), "read-only");
     }
 }

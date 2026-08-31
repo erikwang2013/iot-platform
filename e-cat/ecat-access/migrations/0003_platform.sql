@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS ota_firmwares (
     version VARCHAR(64) NOT NULL,
     url VARCHAR(512) NOT NULL,
     description VARCHAR(512) NOT NULL DEFAULT '',
+    sha256 CHAR(64) NOT NULL DEFAULT '',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_firmware_tenant_version (tenant_id, version)
 ) ENGINE = InnoDB;

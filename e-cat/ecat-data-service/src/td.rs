@@ -1,20 +1,40 @@
 use ecat_data_tdengine::TdengineClient;
-use ecat_data_tdengine::sql::escape_sql_string;
+use ecat_data_tdengine::sql::{TsPoint, escape_sql_string, ts_to_ms};
 use std::sync::Arc;
 
 /// 库/超级表名。写入与查询一律全限定（TdengineClient 用 /rest/sql 无默认库）。
 pub const DB: &str = "iot";
 pub const STABLE: &str = "devdata";
 
-/// 幂等建库建表。超级表列：ts 主时间列，value 数值列，value_str 字符串列
-/// （非数值 JSON 序列化后存入）；TAGS 用于租户/设备/属性过滤。
+/// 幂等建库建表（按 `TSDB_KIND` 选方言）。TDengine 超级表列：ts 主时间列，
+/// value 数值列，value_str 字符串列（非数值 JSON 序列化后存入）；TAGS 用于
+/// 租户/设备/属性过滤。ClickHouse 见 [`ch_schema_sqls`]。
 pub fn schema_sqls() -> Vec<String> {
+    match tsdb_kind().as_str() {
+        "clickhouse" => ch_schema_sqls(),
+        _ => vec![
+            format!("CREATE DATABASE IF NOT EXISTS {DB} KEEP 365 DAYS"),
+            format!(
+                "CREATE STABLE IF NOT EXISTS {DB}.{STABLE} \
+                 (ts TIMESTAMP, value DOUBLE, value_str NCHAR(255)) \
+                 TAGS (tenant_id NCHAR(64), device_id NCHAR(64), code NCHAR(64))"
+            ),
+        ],
+    }
+}
+
+/// ClickHouse 建库建表（幂等，B-4）。列与 TDengine 超级表对齐（ts/value/value_str/
+/// 三个 tag 列）；ReplacingMergeTree + ORDER BY 全维度：同 (tenant, device, code, ts)
+/// 重复写入合并后仅保留最后版本——等价 TDengine 同 ts 覆盖幂等，查询侧用 FINAL 读取。
+pub fn ch_schema_sqls() -> Vec<String> {
     vec![
-        format!("CREATE DATABASE IF NOT EXISTS {DB} KEEP 365 DAYS"),
+        format!("CREATE DATABASE IF NOT EXISTS {DB}"),
         format!(
-            "CREATE STABLE IF NOT EXISTS {DB}.{STABLE} \
-             (ts TIMESTAMP, value DOUBLE, value_str NCHAR(255)) \
-             TAGS (tenant_id NCHAR(64), device_id NCHAR(64), code NCHAR(64))"
+            "CREATE TABLE IF NOT EXISTS {DB}.{STABLE} \
+             (ts Int64, value Nullable(Float64), value_str String, \
+              tenant_id String, device_id String, code String) \
+             ENGINE = ReplacingMergeTree \
+             ORDER BY (tenant_id, device_id, code, ts)"
         ),
     ]
 }
@@ -59,13 +79,55 @@ pub fn tsdb_kind() -> String {
         .to_ascii_lowercase()
 }
 
+/// 查询方言（与 `TSDB_KIND` 联动）。TDengine 用 INTERVAL/_wstart 与 REST 列序响应，
+/// ClickHouse 用 intDiv 桶对齐 + FINAL。
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Dialect {
+    Tdengine,
+    Clickhouse,
+}
+
+pub fn dialect() -> Dialect {
+    match tsdb_kind().as_str() {
+        "clickhouse" => Dialect::Clickhouse,
+        _ => Dialect::Tdengine,
+    }
+}
+
+/// ClickHouse JSONEachRow 响应（`TsdbClient::query` 返回行对象数组）→ 历史点。
+/// 行格式 `{"ts":<epoch 毫秒>,"value":<数值|null>,"value_str":"..."}`，与 TDengine
+/// `parse_points` 语义一致：value 非空取 value，否则取 value_str。
+pub fn parse_ch_points(resp: &serde_json::Value) -> Result<Vec<TsPoint>, String> {
+    let arr = resp
+        .as_array()
+        .ok_or_else(|| format!("clickhouse: expected row array, got: {resp}"))?;
+    let mut points = Vec::new();
+    for row in arr {
+        let obj = row
+            .as_object()
+            .ok_or_else(|| "clickhouse: row is not an object".to_string())?;
+        let ts = obj
+            .get("ts")
+            .and_then(ts_to_ms)
+            .ok_or_else(|| "clickhouse: bad ts in row".to_string())?;
+        let value = match obj.get("value") {
+            Some(v) if !v.is_null() => v.clone(),
+            _ => obj
+                .get("value_str")
+                .cloned()
+                .unwrap_or(serde_json::Value::Null),
+        };
+        points.push(TsPoint { ts, value });
+    }
+    Ok(points)
+}
+
 /// 按 `TSDB_KIND` 选择并建立时序存储客户端，返回 trait 对象。
 /// - tdengine（默认）：`TDENGINE_URL` / `TDENGINE_USER` / `TDENGINE_PASS`
 /// - clickhouse：`CLICKHOUSE_URL`（含 database query 参数或 `/` 后为库名）
 ///
-/// 注意：当前 history/export 的查询 SQL 为 TDengine 方言（INTERVAL 聚合、
-/// `parse_points`），切到 clickhouse 后需按 ClickHouse 语法重写查询层。
-/// 此处先落地"客户端选择 + 幂等建表"的抽象，全链路 SQL 对齐属验证型后续。
+/// 查询层（api.rs history/export）按 [`dialect()`] 分发两种方言 SQL；写入侧
+/// ingest 目前仍走 TDengine 直连 SQL，ClickHouse 写入路径为验证型后续。
 pub async fn connect_tsdb() -> Arc<dyn ecat_data::TsdbClient> {
     match tsdb_kind().as_str() {
         "clickhouse" => {

@@ -183,8 +183,48 @@ services:
       - "8085:8085"
     depends_on: [mysql]
 
+# ===== 可观测性（C-2 日志 / C-3 指标）：默认 profile，常驻 =====
+# Prometheus 抓取各服务 /metrics；Grafana 预置 Prometheus + Loki 数据源；
+# promtail 经 docker.sock 采集容器 stdout → Loki。业务服务需 --profile app 起。
+  prometheus:
+    image: prom/prometheus:v2.53.2
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - promdata:/prometheus
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - grafanadata:/var/lib/grafana
+      - ./deploy/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+
+  loki:
+    image: grafana/loki:3.2.2
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+
+  promtail:
+    image: grafana/promtail:3.2.2
+    command: -config.file=/etc/promtail/promtail.yml
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./deploy/promtail/promtail.yml:/etc/promtail/promtail.yml:ro
+
 volumes:
   mysqldata:
   kafkadata:
   miniodata:
   opensearchdata:
+  promdata:
+  grafanadata:

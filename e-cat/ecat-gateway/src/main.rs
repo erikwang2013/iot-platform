@@ -13,6 +13,7 @@ use ecat_middleware::{
     AuditState, MemoryStore, RateLimitLayer, RateLimitStore, RedisRateLimitStore,
     audit_middleware,
 };
+use ecat_metrics::MetricsLayer;
 use ecat_security::SecurityBodyCompatLayer;
 use std::sync::Arc;
 use std::time::Duration;
@@ -109,6 +110,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .route("/rule/alerts", get(rule_proxy))
         .route("/rule/alerts/{id}/ack", post(rule_proxy))
         .route("/rule/stats", get(rule_proxy))
+        .route("/rule/reports", get(rule_proxy))
         .route("/rule/channels", get(rule_proxy))
         .route("/rule/channels/{channel}", put(rule_proxy).delete(rule_proxy))
         // 审计层在 JWT 内层：JWT 先注入 AuthClaims，写操作据此记租户/角色；
@@ -256,6 +258,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let router = Router::new()
         .merge(HealthRegistry::new().into_router())
+        // C-3 Prometheus：/metrics 公开（scrape 端点），MetricsLayer 记请求数/时延/状态码
+        .merge(ecat_metrics::metrics_router())
         .route("/api/ping", get(|| async { "pong" }))
         .route("/api/submit", post(submit))
         // OpenAPI 3.0 文档（A-4）：只读端点描述，公开只读，无鉴权（纯文档）
@@ -288,7 +292,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 .layer(axum::error_handling::HandleErrorLayer::new(rate_limit_error))
                 .layer(rate_limit(rate_store))
                 .into_inner(),
-        );
+        )
+        // 最外层：403/429 也计入错误率（MetricsLayer 在 SecurityBody/限流之外）
+        .layer(MetricsLayer::new())
+        // 最最外层：错误消息 i18n（C-线）——Accept-Language 以 zh 开头时，
+        // 把公共 API 常见错误（401/403/404/422/429）响应体翻成中文；
+        // 未命中映射保持原文，内部日志不受影响。
+        .layer(axum::middleware::from_fn(localize_error_body));
 
     let srv = {
         let mut srv = ecat_transport_http::HttpServer::new("0.0.0.0:8080").router(router);
@@ -391,4 +401,53 @@ async fn rate_limit_error(
         "internal error",
     )
         .into_response()
+}
+
+/// 错误消息本地化中间件（C-线 i18n）：Accept-Language 以 zh 开头且响应为
+/// 公共 API 常见错误码（401/403/404/422/429）时，把错误体翻成中文。
+/// 兼容两种错误体：`{"error": "..."}` JSON（JWT 层）与纯文本（handler 元组、
+/// 限流层）。映射只做精确匹配，未命中保持原文。
+async fn localize_error_body(
+    request: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> axum::response::Response {
+    let locale = ecat_errors::locale_from_accept_language(
+        request
+            .headers()
+            .get("accept-language")
+            .and_then(|v| v.to_str().ok()),
+    );
+    let mut response = next.run(request).await;
+    let status = response.status().as_u16();
+    if locale.is_none() || ![401, 403, 404, 422, 429].contains(&status) {
+        return response;
+    }
+    // 错误体都很小；超过 16KB 直接跳过（不可能是常见错误消息）
+    let bytes = match axum::body::to_bytes(std::mem::take(response.body_mut()), 16 * 1024).await {
+        Ok(b) => b,
+        Err(_) => return response,
+    };
+    let is_json = response
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .is_some_and(|ct| ct.starts_with("application/json"));
+    let body: axum::body::Bytes = if is_json {
+        match serde_json::from_slice::<serde_json::Value>(&bytes) {
+            Ok(mut v) => {
+                if let Some(msg) = v.get("error").and_then(serde_json::Value::as_str) {
+                    v["error"] = serde_json::json!(ecat_errors::localize(locale, msg));
+                }
+                serde_json::to_vec(&v).unwrap_or_else(|_| bytes.to_vec()).into()
+            }
+            Err(_) => bytes,
+        }
+    } else if let Ok(text) = std::str::from_utf8(&bytes) {
+        ecat_errors::localize(locale, text).into_bytes().into()
+    } else {
+        bytes
+    };
+    *response.body_mut() = axum::body::Body::from(body);
+    response.headers_mut().remove("content-length");
+    response
 }

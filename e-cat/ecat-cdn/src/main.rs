@@ -32,7 +32,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .with_check(ecat_health::db_check(db))
         .into_router();
 
-    let router = Router::new().merge(health_router).merge(protected);
+    // C-3 Prometheus：/metrics 公开（scrape 端点），MetricsLayer 记请求数/时延/状态码
+    let router = Router::new()
+        .merge(health_router)
+        .merge(protected)
+        .merge(ecat_metrics::metrics_router())
+        .layer(ecat_metrics::MetricsLayer::new());
 
     let bind = std::env::var("HTTP_BIND").unwrap_or_else(|_| "0.0.0.0:8085".into());
     let srv = ecat_transport_http::HttpServer::new(bind).router(router);

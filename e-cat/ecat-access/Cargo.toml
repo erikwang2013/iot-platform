@@ -23,6 +23,7 @@ ecat-mq = { path = "../ecat-mq" }
 ecat-mq-kafka = { path = "../ecat-mq-kafka" }
 ecat-mq-mqtt = { path = "../ecat-mq-mqtt" }
 ecat-scheduler = { path = "../ecat-scheduler" }
+ecat-metrics.workspace = true
 axum.workspace = true
 async-trait.workspace = true
 serde.workspace = true

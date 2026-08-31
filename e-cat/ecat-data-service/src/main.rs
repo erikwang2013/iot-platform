@@ -1,5 +1,4 @@
 use axum::{Router, middleware};
-use ecat_data::TsdbClient;
 use ecat_mq_kafka::KafkaMq;
 use ecat_data_service::api::{self, ApiState};
 use std::sync::Arc;
@@ -16,8 +15,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let kafka_brokers =
         std::env::var("KAFKA_BROKERS").unwrap_or_else(|_| "localhost:9092".into());
 
-    let td = Arc::new(ecat_data_service::td::connect(&td_url, &td_user, &td_pass));
-    // 幂等建库建表
+    // 查询侧：TSDB_KIND 选后端（B-4）tdengine（默认）| clickhouse，幂等建库建表按方言
+    let td = ecat_data_service::td::connect_tsdb().await;
     for sql in ecat_data_service::td::schema_sqls() {
         td.query(&sql).await?;
     }
@@ -51,8 +50,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .await?,
     );
 
-    // 后台任务：消费 iot.events → TDengine
-    let (ingest_td, ingest_kafka) = (td.clone(), kafka.clone());
+    // 后台任务：消费 iot.events → TDengine（写入侧直连；ClickHouse 写入路径为验证型后续，
+    // 查询侧 history/export 已按 TSDB_KIND 双方言支持）
+    let (ingest_td, ingest_kafka) = (
+        Arc::new(ecat_data_service::td::connect(&td_url, &td_user, &td_pass)),
+        kafka.clone(),
+    );
     tokio::spawn(async move {
         ecat_data_service::ingest::run(ingest_td, ingest_kafka).await;
     });
@@ -76,35 +79,47 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     );
     tokio::spawn(async move { scheduler.run().await });
 
-    let api_state = ApiState { td: td.clone() };
+    let api_state = ApiState {
+        td: td.clone(),
+        dialect: ecat_data_service::td::dialect(),
+    };
 
     // 受保护路由：需网关 secret + x-tenant-id
     let protected = Router::new()
         .merge(api::router(api_state))
         .layer(middleware::from_fn(ecat_middleware::tenant_from_header));
 
+    // 健康检查 SQL 随后端方言：TDengine 用 server_status()，ClickHouse 无此函数用 SELECT 1
+    let health_sql = match ecat_data_service::td::dialect() {
+        ecat_data_service::td::Dialect::Clickhouse => "SELECT 1".to_string(),
+        _ => "SELECT server_status()".to_string(),
+    };
     let health_router = ecat_health::HealthRegistry::new()
         .with_check(ecat_health::FnCheck::new("td", {
             let td = td.clone();
             move || {
                 let td = td.clone();
+                let health_sql = health_sql.clone();
                 async move {
-                    td.query("SELECT server_status()")
+                    td.query(&health_sql)
                         .await
                         .map(|_| ())
                         .map_err(|e| {
                             // 细节只进日志，不回给客户端（/ready 无鉴权直接可达）
-                            tracing::warn!(error = %e, "health check tdengine failed");
-                            "tdengine check failed".to_string()
+                            tracing::warn!(error = %e, "health check tsdb failed");
+                            "tsdb check failed".to_string()
                         })
                 }
             }
         }))
         .into_router();
 
+    // C-3 Prometheus：/metrics 公开（scrape 端点），MetricsLayer 记请求数/时延/状态码
     let router = Router::new()
         .merge(health_router)
-        .nest("/api/data", protected);
+        .nest("/api/data", protected)
+        .merge(ecat_metrics::metrics_router())
+        .layer(ecat_metrics::MetricsLayer::new());
 
     let bind = std::env::var("HTTP_BIND").unwrap_or_else(|_| "0.0.0.0:8083".into());
     let srv = ecat_transport_http::HttpServer::new(bind).router(router);

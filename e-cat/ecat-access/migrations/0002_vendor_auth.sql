@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS vendor_credentials (
     vendor VARCHAR(64) NOT NULL,
     config_encrypted TEXT NOT NULL,
     status VARCHAR(32) NOT NULL DEFAULT 'active',
+    key_version INT NOT NULL DEFAULT 1,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uq_cred_tenant_vendor (tenant_id, vendor),

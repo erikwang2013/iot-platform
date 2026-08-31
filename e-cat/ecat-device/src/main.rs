@@ -1,13 +1,19 @@
-use axum::{Router, middleware, routing::{delete, get, post, put}};
+use axum::{
+    Router,
+    extract::DefaultBodyLimit,
+    middleware,
+    routing::{delete, get, post, put},
+};
 use ecat_data_sqlx::SqlxClient;
 use ecat_device::{
-    Db, create_firmware, create_ota_task, delete_device, delete_firmware, device_stats,
+    Db, MAX_FIRMWARE_SIZE, create_firmware, create_ota_task, delete_device, delete_firmware,
+    device_stats, download_firmware,
     groups::{
         add_members, batch_devices, create_group, delete_group, list_device_tags, list_groups,
         remove_members,
     },
     list_devices, list_firmwares, list_ota_tasks, migrate, report_ota_progress, unbind_device,
-    update_device,
+    update_device, upload_firmware,
 };
 use std::sync::Arc;
 
@@ -37,7 +43,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .with_state(Db(db.clone()));
     let ota = Router::new()
         .route("/firmwares", get(list_firmwares).post(create_firmware))
+        .route(
+            "/firmwares/upload",
+            post(upload_firmware).layer(DefaultBodyLimit::max(MAX_FIRMWARE_SIZE)),
+        )
         .route("/firmwares/{id}", delete(delete_firmware))
+        .route("/firmwares/{id}/download", get(download_firmware))
         .route("/tasks", get(list_ota_tasks).post(create_ota_task))
         .route("/tasks/{id}/report", post(report_ota_progress))
         .with_state(Db(db));
@@ -46,7 +57,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .nest("/api/ota", ota)
         .layer(middleware::from_fn(ecat_middleware::tenant_from_header));
 
-    let router = Router::new().merge(health_router).merge(protected);
+    // C-3 Prometheus：/metrics 公开（scrape 端点），MetricsLayer 记请求数/时延/状态码
+    let router = Router::new()
+        .merge(health_router)
+        .merge(protected)
+        .merge(ecat_metrics::metrics_router())
+        .layer(ecat_metrics::MetricsLayer::new());
 
     let srv = ecat_transport_http::HttpServer::new("0.0.0.0:8081").router(router);
     let mut app = ecat::App::builder()

@@ -84,9 +84,10 @@ pub fn validate_channel(channel: &str, c: &serde_json::Value) -> Result<(), Stri
 
 /// 迁移执行（复用 ecat-data-sqlx::execute_script 逐条执行）。
 /// 编译期 include_str! 内联，无运行时文件依赖。
-const MIGRATION_SQL: [&str; 2] = [
+const MIGRATION_SQL: [&str; 3] = [
     include_str!("../migrations/0001_rule_tables.sql"),
     include_str!("../migrations/0002_notify_channels.sql"),
+    include_str!("../migrations/0003_daily_reports.sql"),
 ];
 
 pub fn validate_rule(r: &NewRule) -> Result<(), String> {

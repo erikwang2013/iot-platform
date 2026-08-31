@@ -7,6 +7,7 @@ pub mod command_consumer;
 pub mod command_queue;
 pub mod console;
 pub mod events;
+pub mod keyring;
 pub mod mqtt;
 pub mod models;
 pub mod offline;

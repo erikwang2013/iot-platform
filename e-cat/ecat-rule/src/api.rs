@@ -32,7 +32,27 @@ pub fn router(api: ApiState) -> axum::Router {
             axum::routing::put(upsert_channel).delete(delete_channel),
         )
         .route("/channels", axum::routing::get(list_channels))
+        .route("/reports", axum::routing::get(list_reports))
         .with_state(api)
+}
+
+#[derive(Deserialize)]
+pub struct ReportQuery {
+    pub date: Option<String>,
+}
+
+/// GET /api/rule/reports?date=YYYY-MM-DD：本租户每日汇总报表列表
+/// （倒序最多 30 条；date 可选过滤）。报表由定时任务生成（见 report.rs）。
+pub async fn list_reports(
+    State(api): State<ApiState>,
+    tenant: axum::Extension<String>,
+    Query(q): Query<ReportQuery>,
+) -> Result<Json<Value>, (StatusCode, String)> {
+    let date = q.date.as_deref().filter(|d| !d.is_empty());
+    let reports = crate::report::list_reports(&api.store.db, &tenant, date)
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    Ok(Json(serde_json::json!({ "reports": reports })))
 }
 
 /// GET /api/rule/rules

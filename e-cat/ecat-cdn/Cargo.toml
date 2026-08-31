@@ -14,6 +14,7 @@ ecat-data = { path = "../ecat-data" }
 ecat-data-sqlx = { path = "../ecat-data-sqlx" }
 ecat-middleware = { path = "../ecat-middleware" }
 ecat-health = { path = "../ecat-health" }
+ecat-metrics.workspace = true
 ecat-security = { path = "../ecat-security" }
 async-trait.workspace = true
 axum.workspace = true

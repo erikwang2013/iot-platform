@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:iot_shared/iot_shared.dart';
 import 'package:provider/provider.dart';
@@ -34,48 +35,84 @@ class OtaPage extends StatelessWidget {
     final version = TextEditingController();
     final url = TextEditingController();
     final description = TextEditingController();
+    PlatformFile? picked;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('添加固件'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                  controller: name,
-                  decoration: const InputDecoration(labelText: '固件名称')),
-              TextField(
-                  controller: version,
-                  decoration: const InputDecoration(labelText: '版本号')),
-              TextField(
-                  controller: url,
-                  decoration: const InputDecoration(labelText: '下载 URL（上传功能占位，暂填地址）')),
-              TextField(
-                  controller: description,
-                  decoration: const InputDecoration(labelText: '描述')),
-            ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: const Text('添加固件'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                    controller: name,
+                    decoration: const InputDecoration(labelText: '固件名称')),
+                TextField(
+                    controller: version,
+                    decoration: const InputDecoration(labelText: '版本号')),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.upload_file),
+                  label: Text(picked == null ? '选择固件文件（bin）' : picked!.name),
+                  onPressed: () async {
+                    final result = await FilePicker.platform
+                        .pickFiles(type: FileType.any);
+                    if (result != null && result.files.isNotEmpty) {
+                      setState(() => picked = result.files.first);
+                    }
+                  },
+                ),
+                TextField(
+                    controller: url,
+                    decoration: const InputDecoration(
+                        labelText: '或直填下载 URL（未选文件时使用）')),
+                TextField(
+                    controller: description,
+                    decoration: const InputDecoration(labelText: '描述')),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(l10n(ctx).commonCancel)),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(l10n(ctx).commonSave)),
+          ],
         ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(l10n(ctx).commonCancel)),
-          FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(l10n(ctx).commonSave)),
-        ],
       ),
     );
     if (ok != true) return;
     try {
-      await api.post('/api/ota/firmwares', body: {
-        'name': name.text.trim(),
-        'version': version.text.trim(),
-        'url': url.text.trim(),
-        'description': description.text.trim(),
-      });
-      _toast(context, l10n(context).commonSuccess);
+      if (picked != null && picked!.bytes != null) {
+        // 真实文件上传：multipart → 返回 sha256 校验和
+        final resp = await api.postMultipart(
+          '/api/ota/firmwares/upload',
+          fields: {
+            'name': name.text.trim(),
+            'version': version.text.trim(),
+            'description': description.text.trim(),
+          },
+          fileBytes: picked!.bytes!,
+          filename: picked!.name,
+        );
+        final sha = resp is Map<String, dynamic> ? resp['sha256'] : null;
+        if (sha != null) {
+          _toast(context, '上传成功，SHA-256: $sha');
+        } else {
+          _toast(context, l10n(context).commonSuccess);
+        }
+      } else {
+        // 未选文件 → 回退 URL 直填（向后兼容）
+        await api.post('/api/ota/firmwares', body: {
+          'name': name.text.trim(),
+          'version': version.text.trim(),
+          'url': url.text.trim(),
+          'description': description.text.trim(),
+        });
+        _toast(context, l10n(context).commonSuccess);
+      }
     } catch (e) {
       _toast(context, '$e');
     }
@@ -169,7 +206,8 @@ class OtaPage extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     child: ListTile(
                       title: Text('${f.name} v${f.version}'),
-                      subtitle: Text(f.url),
+                      subtitle: Text(
+                          '${f.url}\n${f.sha256.isNotEmpty ? 'SHA-256: ${f.sha256}' : '无校验和（URL 直填）'}'),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_outline),
                         onPressed: () async {

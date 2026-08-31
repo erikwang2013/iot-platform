@@ -380,6 +380,7 @@ class OtaFirmware {
     this.version = '',
     this.url = '',
     this.description = '',
+    this.sha256 = '',
   });
 
   final String id;
@@ -387,6 +388,7 @@ class OtaFirmware {
   final String version;
   final String url;
   final String description;
+  final String sha256;
 
   factory OtaFirmware.fromJson(Map<String, dynamic> j) => OtaFirmware(
         id: _s(j, 'id'),
@@ -394,6 +396,7 @@ class OtaFirmware {
         version: _s(j, 'version'),
         url: _s(j, 'url'),
         description: _s(j, 'description'),
+        sha256: _s(j, 'sha256'),
       );
 }
 
