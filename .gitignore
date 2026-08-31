@@ -88,6 +88,10 @@ apps/harmonyos/hvigorw.bat
 __pycache__/
 sdk/rust/target
 
+# shared 包（非可运行应用）构建产物与锁文件不入库
+apps/shared/.dart_tool/
+apps/shared/pubspec.lock
+
 # HarmonyOS build artifacts (per-app worktrees)
 apps/*/harmonyos/.hvigor/
 apps/*/harmonyos/**/oh_modules/
