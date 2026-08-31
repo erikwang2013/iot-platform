@@ -44,7 +44,7 @@ token 有效期同登录（JWT_TTL_SECS，默认 24h）。
 | `GET /api/devices/{id}/tags` | 设备标签 |
 | `GET /api/models/things` | 物模型条目 |
 | `GET /api/models/things/{device_id}` | 设备物模型（属性/事件/服务分组） |
-| `GET /api/data/history?device_id=&start=&end=` | 历史曲线 |
+| `GET /api/data/history?device_id=&code=&start=&end=` | 历史曲线（start/end 为 epoch 毫秒，可选） |
 | `GET /api/data/export?...` | 历史导出 |
 | `GET /api/rule/alerts` | 告警记录 |
 | `GET /api/rule/stats` | 规则统计 |
