@@ -10,6 +10,7 @@ path = "src/main.rs"
 [dependencies]
 ecat = { path = "../ecat" }
 ecat-auth = { path = "../ecat-auth" }
+ecat-transport.workspace = true
 ecat-transport-http.workspace = true
 ecat-health = { path = "../ecat-health" }
 ecat-security = { path = "../ecat-security" }

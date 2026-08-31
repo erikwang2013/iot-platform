@@ -1744,6 +1744,7 @@ dependencies = [
  "ecat-middleware",
  "ecat-openapi",
  "ecat-security",
+ "ecat-transport",
  "ecat-transport-http",
  "http",
  "jsonwebtoken",

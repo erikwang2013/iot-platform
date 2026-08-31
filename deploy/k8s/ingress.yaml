@@ -1,0 +1,32 @@
+# HTTPS 入口（C-1）：nginx-ingress 强制 HTTPS + HSTS。
+# 前置：域名 A 记录指向 ingress 负载均衡；cert-manager 或已有证书 Secret。
+# 证书两种方式：
+#   1) cert-manager（推荐）：安装 cert-manager + 配置下面的 ClusterIssuer
+#   2) 手动证书：`kubectl create secret tls iot-tls --cert=tls.crt --key=tls.key`
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: iot-ingress
+  namespace: iot
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"        # http 自动跳 https
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains";
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - iot.example.com        # ← 替换为你的域名
+      secretName: iot-tls        # cert-manager 或手动 Secret
+  rules:
+    - host: iot.example.com      # ← 替换为你的域名
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: iot-gateway
+                port: { number: 8080 }

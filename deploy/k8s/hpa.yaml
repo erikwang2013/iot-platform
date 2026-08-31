@@ -1,0 +1,60 @@
+# 水平自动扩缩（A-3）：为无状态服务配置 HorizontalPodAutoscaler。
+# 依赖 metrics-server（提供 CPU 指标）。启用前先确认：
+#   kubectl top nodes  # 需返回指标
+# 若未安装：kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+# 生效后查看：kubectl -n iot get hpa
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: iot-gateway, namespace: iot }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: iot-gateway }
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: iot-access, namespace: iot }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: iot-access }
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: iot-device, namespace: iot }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: iot-device }
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: iot-rule, namespace: iot }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: iot-rule }
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: iot-cdn, namespace: iot }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: iot-cdn }
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }

@@ -266,7 +266,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 .into_inner(),
         );
 
-    let srv = ecat_transport_http::HttpServer::new("0.0.0.0:8080").router(router);
+    let srv = {
+        let mut srv = ecat_transport_http::HttpServer::new("0.0.0.0:8080").router(router);
+        // B-5 TLS：配置 TLS_CERT + TLS_KEY（PEM）时启用 HTTPS（ingress 前的本地终结也可用）
+        if let (Ok(cert), Ok(key)) = (std::env::var("TLS_CERT"), std::env::var("TLS_KEY")) {
+            let tls = ecat_transport::TlsConfig::new(cert, key);
+            srv = srv.tls(tls);
+            tracing::info!("gateway TLS enabled");
+        }
+        srv
+    };
     let mut app = ecat::App::builder()
         .name("iot-gateway")
         .version("0.1.0")
