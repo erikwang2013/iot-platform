@@ -12,6 +12,58 @@ pub fn webhook_payload(msg: &AlertMessage) -> Vec<u8> {
     serde_json::to_vec(msg).unwrap_or_default()
 }
 
+/// 告警去重窗口（毫秒）：同一 (rule_id, device_id, code) 在该窗口内不重复
+/// 投递（事件风暴防护，D-1）。env ALERT_DEDUP_WINDOW_SECS 默认 300s。
+fn dedup_window_ms() -> i64 {
+    std::env::var("ALERT_DEDUP_WINDOW_SECS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .map(|s: i64| s * 1000)
+        .unwrap_or(300 * 1000)
+}
+
+/// 告警去重器：记录每个 (rule_id, device_id, code) 最近投递时间。
+/// 非线程安全——仅 runner 单任务使用（std::collections::HashMap + Mutex 亦可，
+/// 此处简化：runner 内单一消费循环串行访问）。
+pub struct AlertDedup {
+    last: std::collections::HashMap<(String, String, String), i64>,
+    window_ms: i64,
+}
+
+impl AlertDedup {
+    pub fn new() -> Self {
+        Self {
+            last: std::collections::HashMap::new(),
+            window_ms: dedup_window_ms(),
+        }
+    }
+
+    /// 判断该告警是否应在窗口内抑制。返回 true 表示应投递。
+    /// 窗口 <= 0 时全部投递（关闭去重）。
+    pub fn should_deliver(&mut self, msg: &AlertMessage) -> bool {
+        if self.window_ms <= 0 {
+            return true;
+        }
+        let key = (msg.rule_id.clone(), msg.device_id.clone(), msg.code.clone());
+        let now = msg.ts;
+        let suppress = self
+            .last
+            .get(&key)
+            .map(|last_ts| now - *last_ts < self.window_ms)
+            .unwrap_or(false);
+        if !suppress {
+            self.last.insert(key, now);
+        }
+        !suppress
+    }
+}
+
+impl Default for AlertDedup {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// 后台任务：消费 iot.events → 按事件租户加载规则 → 纯函数 evaluate →
 /// 命中则 WS 推送 + 落告警记录 + 可选 webhook；kind=anomaly（AI 异常检测
 /// 产出）直接入告警流（检测器侧已做 z-score 阈值 + 冷却，无需规则匹配）。
@@ -25,6 +77,8 @@ pub async fn run(kafka: Arc<KafkaMq>, store: Arc<RuleStore>, bridge: AlertBridge
         }
     };
     let mut stream = poll_fn(move |cx| stream.poll_recv(cx)).boxed();
+    // 告警去重（D-1）：同一告警在窗口内只投递一次，防事件风暴重复通知
+    let mut dedup = AlertDedup::new();
     while let Some(Ok(raw)) = stream.next().await {
         let ev: EventMessage = match serde_json::from_slice(&raw) {
             Ok(ev) => ev,
@@ -41,7 +95,9 @@ pub async fn run(kafka: Arc<KafkaMq>, store: Arc<RuleStore>, bridge: AlertBridge
             }
         };
         for msg in evaluate(&ev, &rules) {
-            deliver_alert(&store, &bridge, &http, &msg, &rules).await;
+            if dedup.should_deliver(&msg) {
+                deliver_alert(&store, &bridge, &http, &msg, &rules).await;
+            }
         }
         if ev.kind == "anomaly" {
             let z_threshold = std::env::var("ANOMALY_Z_THRESHOLD")
@@ -59,7 +115,9 @@ pub async fn run(kafka: Arc<KafkaMq>, store: Arc<RuleStore>, bridge: AlertBridge
                 value: ev.value.clone(),
                 ts: ev.ts,
             };
-            deliver_alert(&store, &bridge, &http, &msg, &rules).await;
+            if dedup.should_deliver(&msg) {
+                deliver_alert(&store, &bridge, &http, &msg, &rules).await;
+            }
         }
     }
 }
@@ -103,5 +161,49 @@ async fn notify_webhook(http: &reqwest::Client, url: &str, msg: &AlertMessage) {
         Ok(r) if r.status().is_success() => {}
         Ok(r) => tracing::warn!(status = %r.status().as_u16(), url = %url, "webhook non-2xx"),
         Err(e) => tracing::warn!(error = %e, url = %url, "webhook delivery failed"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    fn msg(rule: &str, dev: &str, code: &str, ts: i64) -> AlertMessage {
+        AlertMessage {
+            rule_id: rule.into(),
+            rule_name: "t".into(),
+            tenant_id: "t1".into(),
+            device_id: dev.into(),
+            code: code.into(),
+            operator: "gt".into(),
+            threshold: 1.0,
+            value: json!(2),
+            ts,
+        }
+    }
+
+    #[test]
+    fn dedup_suppresses_within_window() {
+        let mut d = AlertDedup::new();
+        d.window_ms = 5000;
+        // 首次投递
+        assert!(d.should_deliver(&msg("r1", "d1", "temp", 1000)));
+        // 窗口内重复 → 抑制
+        assert!(!d.should_deliver(&msg("r1", "d1", "temp", 2000)));
+        // 不同 code → 放行
+        assert!(d.should_deliver(&msg("r1", "d1", "hum", 2000)));
+        // 不同设备 → 放行
+        assert!(d.should_deliver(&msg("r1", "d2", "temp", 2000)));
+        // 窗口过后 → 放行
+        assert!(d.should_deliver(&msg("r1", "d1", "temp", 7000)));
+    }
+
+    #[test]
+    fn dedup_disabled_when_window_zero() {
+        let mut d = AlertDedup::new();
+        d.window_ms = 0;
+        assert!(d.should_deliver(&msg("r1", "d1", "temp", 1000)));
+        assert!(d.should_deliver(&msg("r1", "d1", "temp", 1000)));
     }
 }
