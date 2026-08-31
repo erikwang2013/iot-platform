@@ -223,6 +223,35 @@ impl Store {
         Ok(())
     }
 
+    /// 取某厂商当前已入库设备列表（B-2 熔断降级的缓存源）。
+    pub async fn list_vendor_devices(
+        &self,
+        tenant_id: &str,
+        vendor: &str,
+    ) -> Result<Vec<crate::models::DeviceRecord>, String> {
+        let rows = self
+            .db
+            .query_with(
+                "SELECT l.vendor_id, l.vendor_name AS name, l.category, d.status \
+                 FROM device_links l JOIN devices d ON d.id = l.device_id \
+                 WHERE l.tenant_id = ? AND l.vendor = ?",
+                &[json!(tenant_id), json!(vendor)],
+            )
+            .await
+            .map_err(|e| format!("list vendor devices: {e}"))?;
+        Ok(rows
+            .iter()
+            .map(|r| crate::models::DeviceRecord {
+                id: String::new(),
+                vendor_id: r.get("vendor_id").and_then(Value::as_str).unwrap_or("").to_string(),
+                name: r.get("name").and_then(Value::as_str).unwrap_or("").to_string(),
+                category: r.get("category").and_then(Value::as_str).unwrap_or("").to_string(),
+                online: r.get("status").and_then(Value::as_str).unwrap_or("") == "online",
+                properties: Vec::new(),
+            })
+            .collect())
+    }
+
     /// 将设备落库状态标记为 offline（离线巡检 B-1 用）。幂等。
     pub async fn set_device_offline(&self, device_id: &str) -> Result<(), String> {
         self.db

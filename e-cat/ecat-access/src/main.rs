@@ -88,6 +88,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         kafka: kafka.clone(),
         redis: redis.clone(),
         mqtt: mqtt.clone(),
+        // B-2 熔断器：每厂商一个实例（惰性创建的映射保持为空即可，breaker() 自动建）
+        breakers: Arc::new(std::collections::HashMap::new()),
     };
     let webhook_state = WebhookState {
         store: store.clone(),

@@ -1,4 +1,5 @@
 use crate::adapter::{adapter_for, VendorCreds};
+use crate::breaker::{BreakerConfig, CircuitBreaker};
 use crate::store::Store;
 use axum::{
     Json,
@@ -18,6 +19,18 @@ pub struct ApiState {
     pub kafka: Arc<KafkaMq>,
     pub redis: Arc<RedisCache>,
     pub mqtt: Arc<MqttMq>,
+    /// 厂商 API 熔断器（B-2）：按 vendor 隔离，open 时降级到缓存设备列表。
+    pub breakers: Arc<std::collections::HashMap<String, CircuitBreaker>>,
+}
+
+impl ApiState {
+    /// 取指定厂商的熔断器（不存在则惰性创建）。
+    pub fn breaker(&self, vendor: &str) -> CircuitBreaker {
+        self.breakers
+            .get(vendor)
+            .cloned()
+            .unwrap_or_else(|| CircuitBreaker::new(BreakerConfig::default()))
+    }
 }
 
 /// 构造受保护 API 路由（挂载见 main.rs，路径前缀 /api/access）。
@@ -66,10 +79,32 @@ pub async fn import_devices(
         .map_err(|e| (StatusCode::BAD_REQUEST, e))?;
     let creds: crate::adapter::VendorCreds =
         serde_json::from_value(creds).map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
-    let devices = adapter
-        .list_devices(&creds)
-        .await
-        .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
+    // B-2 熔断：open 期间跳过上游调用，降级返回当前已入库设备列表（缓存）
+    let breaker = api.breaker(&vendor);
+    let (devices, degraded) = if breaker.allow() {
+        match adapter.list_devices(&creds).await {
+            Ok(devs) => {
+                breaker.record(true);
+                (devs, false)
+            }
+            Err(e) => {
+                breaker.record(false);
+                // 失败但未熔断：仍降级到缓存并标记（避免整批失败）
+                let cached = api
+                    .store
+                    .list_vendor_devices(&tenant_id, &vendor)
+                    .await
+                    .unwrap_or_default();
+                if cached.is_empty() {
+                    return Err((StatusCode::BAD_GATEWAY, e.to_string()));
+                }
+                (cached, true)
+            }
+        }
+    } else {
+        // 熔断 open：直接返回缓存
+        (api.store.list_vendor_devices(&tenant_id, &vendor).await.unwrap_or_default(), true)
+    };
     // 配额校验（C-5）：仅统计"确实会新增"的设备（已存在复用不占配额），
     // 超限整批拒绝（409），防部分生效。
     let mut adding = 0i64;
@@ -97,7 +132,8 @@ pub async fn import_devices(
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
         imported.push(json!({ "platform_id": platform_id, "vendor_id": d.vendor_id, "name": d.name }));
     }
-    Ok(Json(json!({ "imported": imported, "count": imported.len() })))
+    // degraded=true 表示本次来自缓存（熔断或上游失败降级），供前端展示
+    Ok(Json(json!({ "imported": imported, "count": imported.len(), "degraded": degraded })))
 }
 
 #[derive(Deserialize)]

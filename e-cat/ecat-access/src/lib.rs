@@ -1,6 +1,7 @@
 pub mod adapter;
 pub mod adapters;
 pub mod api;
+pub mod breaker;
 pub mod auth;
 pub mod command_consumer;
 pub mod command_queue;
