@@ -96,7 +96,7 @@ mod tests {
     use axum::body::Body;
     use axum::http::Request;
     use axum::middleware::from_fn_with_state;
-    use axum::routing::{get, post};
+    use axum::routing::post;
     use axum::Router;
     use tower::ServiceExt;
 

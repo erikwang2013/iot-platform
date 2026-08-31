@@ -64,6 +64,7 @@ members = [
     "ecat-rule",
     "ecat-data-service",
     "ecat-cdn",
+    "ecat-edge",
 ]
 resolver = "2"
 

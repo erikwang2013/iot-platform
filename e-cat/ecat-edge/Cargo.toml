@@ -1,0 +1,19 @@
+[package]
+name = "ecat-edge"
+version = "0.1.0"
+edition = "2024"
+description = "轻量边缘网关：本地 SQLite 缓冲 + MQTT 上报 + 断网补传（docs/edge-protocol.md）"
+
+[[bin]]
+name = "iot-edge"
+path = "src/main.rs"
+
+[dependencies]
+ecat-mq-mqtt = { path = "../ecat-mq-mqtt" }
+ecat-mq = { path = "../ecat-mq" }
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio = { workspace = true, features = ["full"] }
+tracing.workspace = true
+rusqlite = { version = "0.31", features = ["bundled"] }
