@@ -130,6 +130,20 @@ pub async fn import_devices(
             .upsert_device(&tenant_id, &vendor, &d.vendor_id, &d.name, &d.category, d.online)
             .await
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+        // T2.8: 设备写入 OpenSearch 索引（同步 index，失败仅 warn 不阻断导入）
+        if let Some(search) = ecat_search::connect_search() {
+            let status = if d.online { "online" } else { "offline" };
+            let doc = json!({
+                "tenant_id": tenant_id,
+                "id": platform_id,
+                "name": d.name,
+                "vendor": vendor,
+                "status": status,
+            });
+            if let Err(e) = search.index("devices", &platform_id, &doc).await {
+                tracing::warn!(error = %e, "device index failed");
+            }
+        }
         imported.push(json!({ "platform_id": platform_id, "vendor_id": d.vendor_id, "name": d.name }));
     }
     // degraded=true 表示本次来自缓存（熔断或上游失败降级），供前端展示

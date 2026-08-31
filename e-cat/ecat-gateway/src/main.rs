@@ -54,7 +54,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // MySQL 不可用时降级空实现（日志告警）——审计属可观测性增强，不阻塞启动。
     let audit_dsn = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "mysql://iot:iot@localhost:3306/iot".into());
-    let audit_state = AuditState(Arc::new(MysqlAuditSink::connect(&audit_dsn).await));
+    // 检索 client：SEARCH_KIND=opensearch|elasticsearch + URL env 未设 → None（禁用，
+    // 审计日志索引跳过、检索 API 503），不破坏无 OpenSearch 的本地环境。
+    let search_client = ecat_search::connect_search();
+    let audit_state = AuditState(Arc::new(
+        MysqlAuditSink::connect(&audit_dsn)
+            .await
+            .with_search(search_client.clone()),
+    ));
 
     // /api/access/* 公开路径：OAuth 回调、涂鸦 Webhook、开放 API 换 token
     // （无 JWT，浏览器/厂商服务器/开放客户端直连）
@@ -115,6 +122,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 .role_policy(ROLES_ALL, ROLES_WRITE),
         )
         .with_state(proxy_state.clone());
+    // /api/search/* 受保护路径：跨 devices/alerts/logs 检索（GET 只读，
+    // 直接持有 SearchClient 查询 OpenSearch，不转发上游）
+    let search_admin = Router::new()
+        .route("/search", get(ecat_gateway::search::search))
+        // 审计层在 JWT 内层：JWT 先注入 AuthClaims，写操作据此记租户/角色；
+        // 401/403 短路（不产生业务事件），与"仅审计成功会话"语义一致。
+        .layer(axum::middleware::from_fn_with_state(
+            audit_state.clone(),
+            audit_middleware,
+        ))
+        .layer(
+            JwtAuthCompat::new(&secret, &["sub", "role"])?
+                .role_policy(ROLES_ALL, &[]),
+        )
+        .with_state(ecat_gateway::search::SearchState(ecat_search::connect_search()));
     // /api/cdn/* 受保护路径：供应商 CRUD / 启停 / 刷新预热 / 签名 URL
     let cdn_admin = Router::new()
         .route("/cdn/providers", get(cdn_proxy).post(cdn_proxy))
@@ -242,6 +264,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .nest("/api/access", access_admin)
         .nest("/api", data_admin)
         .nest("/api", rule_admin)
+        .nest("/api", search_admin)
         .nest("/api", cdn_admin)
         .nest("/api", console_admin)
         .nest("/api", models_admin)

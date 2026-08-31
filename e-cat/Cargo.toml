@@ -41,6 +41,7 @@ members = [
     "ecat-versioning",
     "ecat-graphql",
     "ecat-data-elasticsearch",
+    "ecat-search",
     "ecat-data-clickhouse",
     "ecat-data-memcached",
     "ecat-data-neo4j",

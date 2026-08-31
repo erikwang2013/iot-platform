@@ -14,6 +14,7 @@ ecat-data-sqlx = { path = "../ecat-data-sqlx" }
 ecat-health = { path = "../ecat-health" }
 ecat-middleware = { path = "../ecat-middleware" }
 ecat-data = { path = "../ecat-data" }
+ecat-search = { path = "../ecat-search" }
 axum.workspace = true
 serde.workspace = true
 serde_json.workspace = true

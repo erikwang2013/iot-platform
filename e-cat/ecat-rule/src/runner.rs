@@ -137,6 +137,26 @@ async fn deliver_alert(
     if let Err(e) = store.insert_alert(msg).await {
         tracing::warn!(error = %e, "alert record insert failed");
     }
+    // T2.8: 告警同步写入 OpenSearch 索引（doc id 与 alert_records 同源；
+    // 失败仅 warn，不阻断送达流水线）
+    if let Some(search) = ecat_search::connect_search() {
+        let id = crate::engine::to_alert_record(msg).id;
+        let doc = serde_json::json!({
+            "id": id,
+            "rule_id": msg.rule_id,
+            "tenant_id": msg.tenant_id,
+            "device_id": msg.device_id,
+            "code": msg.code,
+            "operator": msg.operator,
+            "threshold": msg.threshold,
+            "value": msg.value,
+            "ts": msg.ts,
+            "status": "active",
+        });
+        if let Err(e) = search.index("alerts", &id, &doc).await {
+            tracing::warn!(error = %e, "alert index failed");
+        }
+    }
     let rule = rules.iter().find(|r| r.id == msg.rule_id);
     // D-3 联动：命中规则配置了动作 → 发布指令事件到 iot.commands，access 消费后下发
     if let Some(dev) = rule.and_then(|r| r.action_device_id.clone()) {

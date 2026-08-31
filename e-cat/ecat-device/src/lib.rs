@@ -204,6 +204,32 @@ pub async fn update_device(
     if n == 0 {
         return Err((StatusCode::NOT_FOUND, "device not found".into()));
     }
+    // T2.8: 索引同步（覆盖式 PUT，先取回 name/vendor 补全 doc；失败仅 warn 不阻断）
+    if let Some(search) = ecat_search::connect_search() {
+        match db.0
+            .query_with(
+                "SELECT name, vendor FROM devices WHERE id = ? AND tenant_id = ?",
+                &[json!(id), json!(tenant.as_str())],
+            )
+            .await
+        {
+            Ok(rows) => {
+                if let Some(r) = rows.first() {
+                    let doc = json!({
+                        "tenant_id": tenant.as_str(),
+                        "id": id,
+                        "name": r.get("name").and_then(Value::as_str).unwrap_or(""),
+                        "vendor": r.get("vendor").and_then(Value::as_str).unwrap_or(""),
+                        "status": status,
+                    });
+                    if let Err(e) = search.index("devices", &id, &doc).await {
+                        tracing::warn!(error = %e, "device index update failed");
+                    }
+                }
+            }
+            Err(e) => tracing::warn!(error = %e, "device index lookup failed"),
+        }
+    }
     Ok(Json(json!({ "ok": true, "status": status })))
 }
 
@@ -257,6 +283,12 @@ pub async fn delete_device(
         .map_err(db_err)?;
     if n == 0 {
         return Err((StatusCode::NOT_FOUND, "device not found".into()));
+    }
+    // T2.8: 同步删除 OpenSearch 索引（失败仅 warn，不阻断删除）
+    if let Some(search) = ecat_search::connect_search()
+        && let Err(e) = search.delete("devices", &id).await
+    {
+        tracing::warn!(error = %e, "device index delete failed");
     }
     Ok(Json(json!({ "ok": true })))
 }

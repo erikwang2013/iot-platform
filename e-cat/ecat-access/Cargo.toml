@@ -12,6 +12,7 @@ ecat = { path = "../ecat" }
 ecat-transport-http.workspace = true
 ecat-data-sqlx = { path = "../ecat-data-sqlx" }
 ecat-data = { path = "../ecat-data" }
+ecat-search = { path = "../ecat-search" }
 ecat-middleware = { path = "../ecat-middleware" }
 ecat-iot = { path = "../ecat-iot" }
 ecat-health = { path = "../ecat-health" }

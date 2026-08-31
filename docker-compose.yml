@@ -59,6 +59,16 @@ services:
     ports:
       - "${TDENGINE_PORT:-6041}:6041"
 
+  opensearch:
+    image: opensearchproject/opensearch:2
+    environment:
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: "true"
+    ports:
+      - "${OPENSEARCH_PORT:-9200}:9200"
+    volumes:
+      - opensearchdata:/usr/share/opensearch/data
+
 
 # ===== 业务服务（本地全栈一键起：docker compose --profile app up -d --build）=====
   # 镜像经 deploy/docker/Dockerfile 多阶段构建（release 二进制，无源码）。
@@ -76,9 +86,10 @@ services:
     environment:
       DATABASE_URL: "mysql://iot:iot@mysql:3306/iot"
       REDIS_URL: "redis://redis:6379"
+      OPENSEARCH_URL: "http://opensearch:9200"
     ports:
       - "8080:8080"
-    depends_on: [mysql, redis]
+    depends_on: [mysql, redis, opensearch]
 
   iot-device:
     image: iot-device:local
@@ -92,9 +103,10 @@ services:
         required: false
     environment:
       DATABASE_URL: "mysql://iot:iot@mysql:3306/iot"
+      OPENSEARCH_URL: "http://opensearch:9200"
     ports:
       - "8081:8081"
-    depends_on: [mysql]
+    depends_on: [mysql, opensearch]
 
   iot-access:
     image: iot-access:local
@@ -112,9 +124,10 @@ services:
       KAFKA_BROKERS: "kafka:9092"
       MQTT_URL: "tcp://emqx:1883"
       ACCESS_CALLBACK_BASE: "http://localhost:8080/api/access/oauth/callback"
+      OPENSEARCH_URL: "http://opensearch:9200"
     ports:
       - "8082:8082"
-    depends_on: [mysql, redis, kafka, emqx]
+    depends_on: [mysql, redis, kafka, emqx, opensearch]
 
   iot-rule:
     image: iot-rule:local
@@ -130,9 +143,10 @@ services:
       DATABASE_URL: "mysql://iot:iot@mysql:3306/iot"
       REDIS_URL: "redis://redis:6379"
       KAFKA_BROKERS: "kafka:9092"
+      OPENSEARCH_URL: "http://opensearch:9200"
     ports:
       - "8084:8084"
-    depends_on: [mysql, redis, kafka]
+    depends_on: [mysql, redis, kafka, opensearch]
 
   iot-data:
     image: iot-data:local
@@ -173,3 +187,4 @@ volumes:
   mysqldata:
   kafkadata:
   miniodata:
+  opensearchdata:

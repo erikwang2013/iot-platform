@@ -11,6 +11,7 @@ path = "src/main.rs"
 ecat = { path = "../ecat" }
 ecat-transport-http.workspace = true
 ecat-data = { path = "../ecat-data" }
+ecat-search = { path = "../ecat-search" }
 ecat-data-sqlx = { path = "../ecat-data-sqlx" }
 ecat-middleware = { path = "../ecat-middleware" }
 ecat-iot = { path = "../ecat-iot" }

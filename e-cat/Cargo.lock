@@ -1280,6 +1280,7 @@ dependencies = [
  "ecat-mq-kafka",
  "ecat-mq-mqtt",
  "ecat-scheduler",
+ "ecat-search",
  "ecat-security",
  "ecat-transport-http",
  "futures-util",
@@ -1686,6 +1687,7 @@ dependencies = [
  "ecat-data-sqlx",
  "ecat-health",
  "ecat-middleware",
+ "ecat-search",
  "ecat-transport-http",
  "serde",
  "serde_json",
@@ -1760,6 +1762,7 @@ dependencies = [
  "ecat-openapi",
  "ecat-registry",
  "ecat-registry-consul",
+ "ecat-search",
  "ecat-security",
  "ecat-transport",
  "ecat-transport-http",
@@ -2007,6 +2010,7 @@ dependencies = [
  "ecat-middleware",
  "ecat-mq",
  "ecat-mq-kafka",
+ "ecat-search",
  "ecat-transport-http",
  "futures-util",
  "jsonwebtoken",
@@ -2029,6 +2033,15 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "ecat-search"
+version = "3.0.3"
+dependencies = [
+ "ecat-data",
+ "ecat-data-elasticsearch",
+ "ecat-data-opensearch",
 ]
 
 [[package]]

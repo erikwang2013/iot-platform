@@ -1,0 +1,11 @@
+[package]
+name = "ecat-search"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Search backend factory for e-cat (OpenSearch / Elasticsearch)"
+
+[dependencies]
+ecat-data = { path = "../ecat-data" }
+ecat-data-opensearch = { path = "../ecat-data-opensearch" }
+ecat-data-elasticsearch = { path = "../ecat-data-elasticsearch" }
