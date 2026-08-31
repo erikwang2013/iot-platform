@@ -129,6 +129,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     );
     tokio::spawn(async move { scheduler.run().await });
 
+    // 后台任务：消费指令事件（D-3 联动）→ MQTT 下发目标设备
+    let (cmd_kafka, cmd_mqtt, cmd_store) = (kafka.clone(), mqtt.clone(), store.clone());
+    tokio::spawn(async move {
+        ecat_access::command_consumer::run(cmd_kafka, cmd_mqtt, cmd_store).await;
+    });
+
     // 公开路由：涂鸦 webhook、OAuth 回调、登录、开放 API 换 token
     // （浏览器跳回/登录前置/开放客户端，无 JWT/租户）
     let login = Router::new().route("/login", axum::routing::post(auth::login)).with_state(auth_state.clone());

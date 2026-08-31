@@ -2,6 +2,7 @@ use crate::engine::{TOPIC_EVENTS, evaluate};
 use crate::models::{AlertMessage, EventMessage};
 use crate::push::AlertBridge;
 use crate::store::RuleStore;
+use ecat_iot::CommandEvent;
 use ecat_mq::MessageQueue;
 use ecat_mq_kafka::KafkaMq;
 use futures_util::{StreamExt, stream::poll_fn};
@@ -96,7 +97,7 @@ pub async fn run(kafka: Arc<KafkaMq>, store: Arc<RuleStore>, bridge: AlertBridge
         };
         for msg in evaluate(&ev, &rules) {
             if dedup.should_deliver(&msg) {
-                deliver_alert(&store, &bridge, &http, &msg, &rules).await;
+                deliver_alert(&store, &bridge, &http, &msg, &rules, &kafka).await;
             }
         }
         if ev.kind == "anomaly" {
@@ -116,29 +117,47 @@ pub async fn run(kafka: Arc<KafkaMq>, store: Arc<RuleStore>, bridge: AlertBridge
                 ts: ev.ts,
             };
             if dedup.should_deliver(&msg) {
-                deliver_alert(&store, &bridge, &http, &msg, &rules).await;
+                deliver_alert(&store, &bridge, &http, &msg, &rules, &kafka).await;
             }
         }
     }
 }
 
-/// 告警送达流水线：WS 推送 + 落告警记录 + 规则 webhook + 多渠道通知。
-/// （规则 webhook 仅规则触发的告警有；anomaly-detector 无 webhook 配置。）
+/// 告警送达流水线：WS 推送 + 落告警记录 + 规则 webhook + 联动动作（D-3）
+/// + 多渠道通知。（规则 webhook 仅规则触发的告警有；anomaly-detector 无。）
 async fn deliver_alert(
     store: &Arc<RuleStore>,
     bridge: &AlertBridge,
     http: &reqwest::Client,
     msg: &AlertMessage,
     rules: &[crate::models::Rule],
+    kafka: &KafkaMq,
 ) {
     bridge.publish(&msg.tenant_id, msg).await;
     if let Err(e) = store.insert_alert(msg).await {
         tracing::warn!(error = %e, "alert record insert failed");
     }
-    let webhook = rules
-        .iter()
-        .find(|r| r.id == msg.rule_id)
-        .and_then(|r| r.webhook_url.clone());
+    let rule = rules.iter().find(|r| r.id == msg.rule_id);
+    // D-3 联动：命中规则配置了动作 → 发布指令事件到 iot.commands，access 消费后下发
+    if let Some(dev) = rule.and_then(|r| r.action_device_id.clone()) {
+        if let (Some(code), Some(value)) = (
+            rule.and_then(|r| r.action_code.clone()),
+            rule.and_then(|r| r.action_value.clone()),
+        ) {
+            let cmd = CommandEvent {
+                device_id: dev,
+                tenant_id: msg.tenant_id.clone(),
+                code,
+                value,
+                ts: msg.ts,
+            };
+            let payload = serde_json::to_vec(&cmd).unwrap_or_default();
+            if let Err(e) = kafka.publish(ecat_iot::TOPIC_COMMANDS, &payload).await {
+                tracing::warn!(error = %e, "linkage action publish failed");
+            }
+        }
+    }
+    let webhook = rule.and_then(|r| r.webhook_url.clone());
     if let Some(url) = webhook {
         notify_webhook(http, &url, msg).await;
     }

@@ -15,6 +15,10 @@ pub struct Rule {
     pub threshold: f64,
     /// 命中时额外 POST 告警 JSON 到该 URL；None = 仅推送
     pub webhook_url: Option<String>,
+    /// D-3 联动：命中时对另一设备下发指令（device_id + code + value）；全 None = 仅告警
+    pub action_device_id: Option<String>,
+    pub action_code: Option<String>,
+    pub action_value: Option<serde_json::Value>,
     pub enabled: bool,
     pub created_at: String,
     pub updated_at: String,
@@ -29,6 +33,10 @@ pub struct NewRule {
     pub operator: String,
     pub threshold: f64,
     pub webhook_url: Option<String>,
+    /// D-3 联动：目标设备指令（需三件套齐全才生效）
+    pub action_device_id: Option<String>,
+    pub action_code: Option<String>,
+    pub action_value: Option<serde_json::Value>,
     pub enabled: Option<bool>,
 }
 

@@ -110,6 +110,27 @@ pub fn validate_rule(r: &NewRule) -> Result<(), String> {
             return Err("webhook_url must start with http and be <= 512 chars".into());
         }
     }
+    // D-3 联动：action 三件套必须齐全（device_id + code + value）或不配置
+    let action_fields = [
+        r.action_device_id.is_some(),
+        r.action_code.is_some(),
+        r.action_value.is_some(),
+    ];
+    let any_action = action_fields.iter().any(|&f| f);
+    let all_action = action_fields.iter().all(|&f| f);
+    if any_action && !all_action {
+        return Err("action requires action_device_id, action_code, action_value together".into());
+    }
+    if let Some(id) = &r.action_device_id {
+        if id.len() > 64 {
+            return Err("action_device_id must be <= 64 chars".into());
+        }
+    }
+    if let Some(code) = &r.action_code {
+        if code.len() > 64 {
+            return Err("action_code must be <= 64 chars".into());
+        }
+    }
     Ok(())
 }
 
@@ -119,8 +140,37 @@ pub async fn migrate(db: &SqlxClient) -> Result<(), String> {
             .await
             .map_err(|e| format!("migrate: {e}"))?;
     }
+    // D-3 联动规则：老库补列（MySQL 8 无 ADD COLUMN IF NOT EXISTS，先查
+    // information_schema，不存在才 ALTER；新装库由 0001 CREATE TABLE 直接建全列）。
+    for (column, ddl) in RULE_ACTION_EXTRA_COLUMNS {
+        let exists = db
+            .query_with(
+                "SELECT COUNT(*) AS n FROM information_schema.COLUMNS \
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'rules' AND COLUMN_NAME = ?",
+                &[json!(column)],
+            )
+            .await
+            .map_err(|e| format!("check column {column}: {e}"))?;
+        let n = exists
+            .first()
+            .and_then(|r| r.get("n"))
+            .and_then(Value::as_i64)
+            .unwrap_or(0);
+        if n == 0 {
+            db.execute_with(&format!("ALTER TABLE rules ADD COLUMN {ddl}"), &[])
+                .await
+                .map_err(|e| format!("alter rules add {column}: {e}"))?;
+        }
+    }
     Ok(())
 }
+
+/// D-3 联动规则新增列（老库补列；新库由 0001 CREATE TABLE 直接建）。
+const RULE_ACTION_EXTRA_COLUMNS: [(&str, &str); 3] = [
+    ("action_device_id", "action_device_id VARCHAR(64) NULL"),
+    ("action_code", "action_code VARCHAR(64) NULL"),
+    ("action_value", "action_value JSON NULL"),
+];
 
 #[cfg(test)]
 mod tests {
@@ -155,7 +205,8 @@ impl RuleStore {
             .query_with(
                 // sqlx Any 不支持 Timestamp 类型，时间列须 CAST 成文本
                 "SELECT id, tenant_id, name, device_id, code, operator, threshold, webhook_url, \
-                 enabled, CAST(created_at AS CHAR), CAST(updated_at AS CHAR) \
+                 action_device_id, action_code, action_value, enabled, \
+                 CAST(created_at AS CHAR), CAST(updated_at AS CHAR) \
                  FROM rules WHERE tenant_id = ? ORDER BY created_at DESC",
                 &[json!(tenant_id)],
             )
@@ -175,14 +226,18 @@ impl RuleStore {
             operator: r.operator.clone(),
             threshold: r.threshold,
             webhook_url: r.webhook_url.clone(),
+            action_device_id: r.action_device_id.clone(),
+            action_code: r.action_code.clone(),
+            action_value: r.action_value.clone(),
             enabled: r.enabled.unwrap_or(true),
             created_at: String::new(),
             updated_at: String::new(),
         };
         self.db
             .execute_with(
-                "INSERT INTO rules (id, tenant_id, name, device_id, code, operator, threshold, webhook_url, enabled) \
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO rules (id, tenant_id, name, device_id, code, operator, threshold, \
+                 webhook_url, action_device_id, action_code, action_value, enabled) \
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 &[
                     json!(rule.id),
                     json!(rule.tenant_id),
@@ -192,6 +247,9 @@ impl RuleStore {
                     json!(rule.operator),
                     json!(rule.threshold),
                     json!(rule.webhook_url),
+                    json!(rule.action_device_id),
+                    json!(rule.action_code),
+                    json!(rule.action_value),
                     json!(rule.enabled as i64),
                 ],
             )
@@ -206,7 +264,8 @@ impl RuleStore {
             .db
             .execute_with(
                 "UPDATE rules SET name = ?, device_id = ?, code = ?, operator = ?, threshold = ?, \
-                 webhook_url = ?, enabled = ? WHERE id = ? AND tenant_id = ?",
+                 webhook_url = ?, action_device_id = ?, action_code = ?, action_value = ?, \
+                 enabled = ? WHERE id = ? AND tenant_id = ?",
                 &[
                     json!(r.name),
                     json!(r.device_id),
@@ -214,6 +273,9 @@ impl RuleStore {
                     json!(r.operator),
                     json!(r.threshold),
                     json!(r.webhook_url),
+                    json!(r.action_device_id),
+                    json!(r.action_code),
+                    json!(r.action_value),
                     json!(r.enabled.unwrap_or(true) as i64),
                     json!(id),
                     json!(tenant_id),
@@ -400,6 +462,9 @@ fn rule_from_row(r: &Row) -> Rule {
         operator: r.get("operator").and_then(Value::as_str).unwrap_or_default().to_string(),
         threshold: r.get("threshold").and_then(Value::as_f64).unwrap_or(0.0),
         webhook_url: r.get("webhook_url").and_then(Value::as_str).map(str::to_string),
+        action_device_id: r.get("action_device_id").and_then(Value::as_str).map(str::to_string),
+        action_code: r.get("action_code").and_then(Value::as_str).map(str::to_string),
+        action_value: r.get("action_value").and_then(Value::as_object).map(|o| Value::Object(o.clone())),
         enabled: r.get("enabled").and_then(Value::as_i64).unwrap_or(0) != 0,
         created_at: r.get("created_at").and_then(Value::as_str).unwrap_or_default().to_string(),
         updated_at: r.get("updated_at").and_then(Value::as_str).unwrap_or_default().to_string(),
