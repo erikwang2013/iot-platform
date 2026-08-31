@@ -7,7 +7,7 @@ description = "Distributed tracing (OpenTelemetry) for e-cat"
 
 [dependencies]
 tracing.workspace = true
-tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
 http.workspace = true
 tower.workspace = true
 uuid = { version = "1", features = ["v4"] }

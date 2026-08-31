@@ -6,6 +6,12 @@ use tower::{Layer, Service};
 
 /// Initialize structured logging with env filter.
 ///
+/// 输出格式由 `LOG_FORMAT` 环境变量控制：
+/// - `json`（或 `JSON`）：每行一条 JSON 日志，便于 Loki/ELK 等集中采集（C-2）
+/// - 其他/缺省：人类可读文本
+///
+/// 日志级别由 `RUST_LOG`（或 `ECAT_LOG`）环境变量控制，缺省 `info`。
+///
 /// NOTE: only one subscriber can be installed per process. Do not call this
 /// together with `ecat_tracing_otlp::init` (or any other subscriber init);
 /// the second `init` would panic with "a global default trace dispatcher
@@ -14,15 +20,26 @@ pub fn init(service_name: &str) {
     use tracing_subscriber::layer::SubscriberExt;
     use tracing_subscriber::util::SubscriberInitExt;
 
-    tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
-        )
-        .with(tracing_subscriber::fmt::layer())
-        .init();
+    let filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
+    let json = matches!(
+        std::env::var("LOG_FORMAT").as_deref(),
+        Ok("json") | Ok("JSON")
+    );
+    // JSON 与文本 layer 具体类型不同，分两条 `.init()` 分支避免类型统一问题
+    if json {
+        tracing_subscriber::registry()
+            .with(filter)
+            .with(tracing_subscriber::fmt::layer().json())
+            .init();
+    } else {
+        tracing_subscriber::registry()
+            .with(filter)
+            .with(tracing_subscriber::fmt::layer())
+            .init();
+    }
 
-    tracing::info!(service = service_name, "tracing initialized");
+    tracing::info!(service = service_name, log_format = if json { "json" } else { "text" }, "tracing initialized");
 }
 
 /// Tower Layer that creates a request span with trace_id injection.
