@@ -40,11 +40,25 @@ def camel_to_snake(name: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
 
 
+def _load(path: Path) -> dict:
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
 def arb_keys(path: Path) -> dict:
     """Return key->value of an arb file, skipping "@" metadata keys."""
-    with open(path, encoding="utf-8") as f:
-        data = json.load(f)
-    return {k: v for k, v in data.items() if not k.startswith("@")}
+    return {k: v for k, v in _load(path).items() if not k.startswith("@")}
+
+
+def arb_locale(path: Path) -> str | None:
+    """Return the @@locale metadata value (may be missing)."""
+    return _load(path).get("@@locale")
+
+
+def placeholders(value: str) -> set[str]:
+    """ICU placeholder names in a value ({{ }} escapes stripped first)."""
+    text = str(value).replace("{{", "").replace("}}", "")
+    return set(re.findall(r"\{([A-Za-z_]\w*)", text))
 
 
 def check_arbs(arb_dir: Path) -> tuple[list[str], list[str]]:
@@ -74,6 +88,9 @@ def check_arbs(arb_dir: Path) -> tuple[list[str], list[str]]:
         p = arb_dir / f"app_{loc}.arb"
         if not p.exists():
             continue
+        locale = arb_locale(p)
+        if locale != loc:
+            problems.append(f"{p.name}: @@locale is {locale!r}, expected {loc!r}")
         keys = arb_keys(p)
         missing = sorted(set(zh) - set(keys))
         extra = sorted(set(keys) - set(zh))
@@ -83,6 +100,14 @@ def check_arbs(arb_dir: Path) -> tuple[list[str], list[str]]:
             empty = [k for k in zh if not str(keys.get(k, "")).strip()]
             if empty:
                 warnings.append(f"{p.name}: empty values (warning): {empty}")
+            for k in zh:
+                got = placeholders(keys.get(k, ""))
+                want = placeholders(zh[k])
+                if got != want:
+                    problems.append(
+                        f"{p.name}[{k}]: placeholders {sorted(got)}, "
+                        f"expected {sorted(want)}"
+                    )
     return problems, warnings
 
 
@@ -112,9 +137,12 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--harmony", nargs="+", metavar="DIR",
                     help="HarmonyOS resources dir(s) to validate against the arb key set")
+    ap.add_argument("--arb-dir", metavar="DIR",
+                    help="arb directory to check (default: apps/shared/l10n)")
     args = ap.parse_args()
 
-    problems, warnings = check_arbs(ARB_DIR)
+    arb_dir = Path(args.arb_dir).resolve() if args.arb_dir else ARB_DIR
+    problems, warnings = check_arbs(arb_dir)
     for w in warnings:
         print(f"WARNING: {w}")
     for p in problems:
