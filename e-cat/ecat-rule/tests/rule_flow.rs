@@ -47,6 +47,9 @@ async fn engine_fires_rule_and_alert_reaches_store_and_hub() {
                 operator: "gt".into(),
                 threshold: 30.0,
                 webhook_url: None,
+                action_device_id: None,
+                action_code: None,
+                action_value: None,
                 enabled: Some(true),
             },
         )

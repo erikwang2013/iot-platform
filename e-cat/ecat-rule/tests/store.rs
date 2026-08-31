@@ -1,5 +1,5 @@
 use ecat_rule::models::NewRule;
-use ecat_rule::store::{CHANNELS, OPERATORS, validate_channel, validate_rule};
+use ecat_rule::store::{OPERATORS, validate_channel, validate_rule};
 use serde_json::json;
 
 fn new_rule() -> NewRule {
@@ -10,6 +10,9 @@ fn new_rule() -> NewRule {
         operator: "gt".into(),
         threshold: 30.0,
         webhook_url: None,
+        action_device_id: None,
+        action_code: None,
+        action_value: None,
         enabled: Some(true),
     }
 }
