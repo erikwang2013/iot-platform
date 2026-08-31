@@ -1,0 +1,45 @@
+# PR 检查（C-4）：Rust 后端 check/clippy/test + Flutter 管理端 analyze。
+# 触发：push 到任意分支 + 对 main 的 PR。不发布镜像（发布见 release.yml）。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  rust:
+    name: Rust backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: e-cat
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: e-cat -> target
+      - name: Check
+        run: cargo check --workspace
+      - name: Lint
+        run: cargo clippy --workspace -- -D warnings
+      - name: Test
+        run: cargo test --workspace
+
+  flutter:
+    name: Flutter admin
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/admin/flutter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Analyze
+        run: flutter pub get && flutter analyze

@@ -1,5 +1,5 @@
 use ecat_data_tdengine::sql::{escape_sql_string, parse_points, ts_to_ms};
-use ecat_data_service::td::schema_sqls;
+use ecat_data_service::td::{schema_sqls, tsdb_kind};
 use serde_json::json;
 
 #[test]
@@ -59,4 +59,19 @@ fn parse_points_extracts_rows_in_column_order() {
 fn parse_points_rejects_error_response() {
     let resp = json!({"code": 1, "desc": "syntax error"});
     assert!(parse_points(&resp).is_err());
+}
+
+#[test]
+fn tsdb_kind_defaults_to_tdengine() {
+    // SAFETY: 单线程测试，无并发读取环境变量
+    unsafe { std::env::remove_var("TSDB_KIND") };
+    assert_eq!(tsdb_kind(), "tdengine");
+}
+
+#[test]
+fn tsdb_kind_respects_env_case_insensitive() {
+    // SAFETY: 单线程测试，无并发读取环境变量
+    unsafe { std::env::set_var("TSDB_KIND", "ClickHouse") };
+    assert_eq!(tsdb_kind(), "clickhouse");
+    unsafe { std::env::remove_var("TSDB_KIND") };
 }

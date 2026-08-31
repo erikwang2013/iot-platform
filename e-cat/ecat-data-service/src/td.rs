@@ -1,5 +1,6 @@
 use ecat_data_tdengine::TdengineClient;
 use ecat_data_tdengine::sql::escape_sql_string;
+use std::sync::Arc;
 
 /// 库/超级表名。写入与查询一律全限定（TdengineClient 用 /rest/sql 无默认库）。
 pub const DB: &str = "iot";
@@ -49,4 +50,35 @@ pub fn event_to_insert(ev: &crate::models::EventMessage) -> String {
 /// 连接（TdengineClient 内部为 TDengine REST /rest/sql + basic auth）。
 pub fn connect(url: &str, user: &str, pass: &str) -> TdengineClient {
     TdengineClient::new(url, user, pass)
+}
+
+/// 时序存储后端（B-4）：env `TSDB_KIND` 取值 `tdengine`（默认）| `clickhouse`。
+pub fn tsdb_kind() -> String {
+    std::env::var("TSDB_KIND")
+        .unwrap_or_else(|_| "tdengine".into())
+        .to_ascii_lowercase()
+}
+
+/// 按 `TSDB_KIND` 选择并建立时序存储客户端，返回 trait 对象。
+/// - tdengine（默认）：`TDENGINE_URL` / `TDENGINE_USER` / `TDENGINE_PASS`
+/// - clickhouse：`CLICKHOUSE_URL`（含 database query 参数或 `/` 后为库名）
+///
+/// 注意：当前 history/export 的查询 SQL 为 TDengine 方言（INTERVAL 聚合、
+/// `parse_points`），切到 clickhouse 后需按 ClickHouse 语法重写查询层。
+/// 此处先落地"客户端选择 + 幂等建表"的抽象，全链路 SQL 对齐属验证型后续。
+pub async fn connect_tsdb() -> Arc<dyn ecat_data::TsdbClient> {
+    match tsdb_kind().as_str() {
+        "clickhouse" => {
+            let url = std::env::var("CLICKHOUSE_URL")
+                .unwrap_or_else(|_| "http://localhost:8123".into());
+            let db = std::env::var("CLICKHOUSE_DB").unwrap_or_else(|_| "iot".into());
+            Arc::new(ecat_data_clickhouse::ClickhouseClient::new(url, db))
+        }
+        _ => {
+            let url = std::env::var("TDENGINE_URL").unwrap_or_else(|_| "http://localhost:6041".into());
+            let user = std::env::var("TDENGINE_USER").unwrap_or_else(|_| "root".into());
+            let pass = std::env::var("TDENGINE_PASS").unwrap_or_else(|_| "taosdata".into());
+            Arc::new(connect(&url, &user, &pass))
+        }
+    }
 }

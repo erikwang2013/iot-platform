@@ -15,6 +15,7 @@ ecat-iot = { path = "../ecat-iot" }
 ecat-health = { path = "../ecat-health" }
 ecat-transport-http.workspace = true
 ecat-data-tdengine = { path = "../ecat-data-tdengine" }
+ecat-data-clickhouse = { path = "../ecat-data-clickhouse" }
 ecat-scheduler = { path = "../ecat-scheduler" }
 ecat-metrics = { path = "../ecat-metrics" }
 prometheus = "0.13"

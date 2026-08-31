@@ -1627,6 +1627,7 @@ dependencies = [
  "axum 0.8.9",
  "ecat",
  "ecat-data",
+ "ecat-data-clickhouse",
  "ecat-data-tdengine",
  "ecat-health",
  "ecat-iot",
