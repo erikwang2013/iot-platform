@@ -21,6 +21,12 @@ async fn submit() -> &'static str {
     "ok"
 }
 
+/// GET /api/open/openapi.json：返回只读端点的 OpenAPI 3.0 文档。
+async fn openapi_doc() -> axum::Json<serde_json::Value> {
+    let spec = ecat_gateway::openapi::read_only_spec();
+    axum::Json(serde_json::to_value(&spec).unwrap_or_else(|_| serde_json::json!({})))
+}
+
 /// 值级 RBAC 角色表（与登录签发的 role claim 对齐）：
 /// 读操作（GET/HEAD/OPTIONS）三角色均可；写操作 admin/operator；
 /// 租户/用户/固件管理仅 admin。
@@ -229,6 +235,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .merge(HealthRegistry::new().into_router())
         .route("/api/ping", get(|| async { "pong" }))
         .route("/api/submit", post(submit))
+        // OpenAPI 3.0 文档（A-4）：只读端点描述，公开只读，无鉴权（纯文档）
+        .route("/api/open/openapi.json", get(openapi_doc))
         .nest("/api/access", access_public)
         .nest("/api/access", access_admin)
         .nest("/api", data_admin)

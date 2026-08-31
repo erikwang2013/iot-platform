@@ -1742,6 +1742,7 @@ dependencies = [
  "ecat-data-sqlx",
  "ecat-health",
  "ecat-middleware",
+ "ecat-openapi",
  "ecat-security",
  "ecat-transport-http",
  "http",

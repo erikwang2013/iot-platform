@@ -11,6 +11,7 @@ use serde_json::Value;
 pub const CHANNEL_EMAIL: &str = "email";
 pub const CHANNEL_DINGTALK: &str = "dingtalk";
 pub const CHANNEL_WECOM: &str = "wecom";
+pub const CHANNEL_SMS: &str = "sms";
 
 fn cfg_str(c: &Value, key: &str) -> Option<String> {
     c.get(key)
@@ -85,6 +86,45 @@ async fn send_webhook(
     Ok(())
 }
 
+/// 短信发送（A-1）：POST JSON 到短信服务商 HTTP 端点，带 1 次重试。
+/// config：api_url / phone / sign / template_id；正文取告警文案截断到短信长度。
+/// 失败重试 1 次（间隔 1s），仍失败返回 Err（调用方记录日志，不阻塞主流程）。
+async fn send_sms(
+    http: &reqwest::Client,
+    ch: &NotifyChannel,
+    msg: &AlertMessage,
+) -> Result<(), String> {
+    let c = &ch.config;
+    let api_url = cfg_str(c, "api_url").ok_or("api_url not configured")?;
+    let phone = cfg_str(c, "phone").ok_or("phone not configured")?;
+    let sign = cfg_str(c, "sign").ok_or("sign not configured")?;
+    let template_id = cfg_str(c, "template_id").ok_or("template_id not configured")?;
+    // 短信正文：告警文案（短信模板通常只传内容变量，截断到 70 字）
+    let mut text = alert_text(msg);
+    if text.chars().count() > 70 {
+        text = text.chars().take(70).collect::<String>() + "…";
+    }
+    let payload = serde_json::json!({
+        "phone": phone,
+        "sign": sign,
+        "template_id": template_id,
+        "content": text,
+    });
+    let mut last_err = String::new();
+    // 1 次重试：失败间隔 1s 重发一次，仍失败则返回错误
+    for attempt in 0..2 {
+        match http.post(&api_url).json(&payload).send().await {
+            Ok(resp) if resp.status().is_success() => return Ok(()),
+            Ok(resp) => last_err = format!("sms non-2xx: {}", resp.status()),
+            Err(e) => last_err = format!("sms request failed: {e}"),
+        }
+        if attempt == 0 {
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+        }
+    }
+    Err(last_err)
+}
+
 /// 单渠道发送入口：渠道名白名单在 store::validate_channel 已保证。
 pub async fn send_channel(
     ch: &NotifyChannel,
@@ -102,6 +142,7 @@ pub async fn send_channel(
             .map_err(|e| format!("email task join: {e}"))?
         }
         CHANNEL_DINGTALK | CHANNEL_WECOM => send_webhook(http, ch, msg).await,
+        CHANNEL_SMS => send_sms(http, ch, msg).await,
         other => Err(format!("unknown channel: {other}")),
     }
 }
@@ -164,13 +205,62 @@ mod tests {
 
     #[test]
     fn unknown_channel_rejected() {
-        let ch = channel("sms", json!({}));
+        // 非白名单渠道（非 email/dingtalk/wecom/sms）→ 拒绝
+        let ch = channel("bogus", json!({}));
         let rt = tokio::runtime::Runtime::new().unwrap();
         let http = reqwest::Client::new();
         let err = rt
             .block_on(send_channel(&ch, &msg(), &http))
             .unwrap_err();
         assert!(err.contains("unknown channel"));
+    }
+
+    #[tokio::test]
+    async fn sms_channel_reaches_mock_server() {
+        // 本地 mock 短信 API：收到 POST 即记录载荷并返回 200
+        let received = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let store = received.clone();
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        tokio::spawn(async move {
+            let app = axum::Router::new().route(
+                "/sms",
+                axum::routing::post(move |body: String| {
+                    let store = store.clone();
+                    async move {
+                        store.lock().unwrap().push(body);
+                        axum::http::StatusCode::OK
+                    }
+                }),
+            );
+            axum::serve(listener, app).await.unwrap();
+        });
+
+        let ch = channel(
+            CHANNEL_SMS,
+            json!({
+                "api_url": format!("http://{addr}/sms"),
+                "phone": "13800138000",
+                "sign": "IoT平台",
+                "template_id": "SMS_123",
+            }),
+        );
+        let http = reqwest::Client::new();
+        send_channel(&ch, &msg(), &http).await.unwrap();
+        let got = received.lock().unwrap();
+        assert_eq!(got.len(), 1);
+        let parsed: Value = serde_json::from_str(&got[0]).unwrap();
+        assert_eq!(parsed["phone"], "13800138000");
+        assert_eq!(parsed["sign"], "IoT平台");
+        assert!(parsed["content"].as_str().unwrap().contains("高温告警"));
+    }
+
+    #[tokio::test]
+    async fn sms_missing_config_rejected() {
+        let ch = channel(CHANNEL_SMS, json!({}));
+        let http = reqwest::Client::new();
+        let err = send_channel(&ch, &msg(), &http).await.unwrap_err();
+        assert!(err.contains("api_url not configured"), "got: {err}");
     }
 
     #[tokio::test]

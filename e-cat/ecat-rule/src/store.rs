@@ -12,7 +12,7 @@ pub struct RuleStore {
 
 pub const OPERATORS: [&str; 6] = ["gt", "gte", "lt", "lte", "eq", "neq"];
 
-pub const CHANNELS: [&str; 3] = ["email", "dingtalk", "wecom"];
+pub const CHANNELS: [&str; 4] = ["email", "dingtalk", "wecom", "sms"];
 
 fn config_str(c: &serde_json::Value, key: &str) -> Option<String> {
     c.get(key)
@@ -48,6 +48,27 @@ fn validate_webhook_config(c: &serde_json::Value) -> Result<(), String> {
     Ok(())
 }
 
+/// 短信渠道（A-1）：经 HTTP API 发送（阿里云/腾讯云短信等，POST JSON）。
+/// config 字段：api_url（短信服务商 HTTP 端点）、phone（接收手机号）、
+/// sign（短信签名）、template_id（模板 ID）。
+fn validate_sms_config(c: &serde_json::Value) -> Result<(), String> {
+    let url = config_str(c, "api_url").ok_or("api_url required")?;
+    if url.len() > 512 || !(url.starts_with("https://") || url.starts_with("http://")) {
+        return Err("api_url must start with http(s):// and be <= 512 chars".into());
+    }
+    let phone = config_str(c, "phone").ok_or("phone required")?;
+    if phone.len() > 20 || !phone.chars().all(|ch| ch.is_ascii_digit() || ch == '+') {
+        return Err("phone must be a valid phone number".into());
+    }
+    if config_str(c, "sign").is_none() {
+        return Err("sign required".into());
+    }
+    if config_str(c, "template_id").is_none() {
+        return Err("template_id required".into());
+    }
+    Ok(())
+}
+
 /// 通知渠道校验：渠道名白名单 + 按渠道校验 config 结构。
 pub fn validate_channel(channel: &str, c: &serde_json::Value) -> Result<(), String> {
     if !c.is_object() {
@@ -56,6 +77,7 @@ pub fn validate_channel(channel: &str, c: &serde_json::Value) -> Result<(), Stri
     match channel {
         "email" => validate_email_config(c),
         "dingtalk" | "wecom" => validate_webhook_config(c),
+        "sms" => validate_sms_config(c),
         _ => Err(format!("channel must be one of {CHANNELS:?}")),
     }
 }

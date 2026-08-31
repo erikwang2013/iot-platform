@@ -46,9 +46,9 @@ pub struct AlertMessage {
     pub ts: i64,
 }
 
-/// 通知渠道（notify_channels 表行）。channel：email|dingtalk|wecom。
+/// 通知渠道（notify_channels 表行）。channel：email|dingtalk|wecom|sms。
 /// config 为渠道私有 JSON：email 用 smtp_host/port/user/pass/mail_from/mail_to，
-/// dingtalk/wecom 用 webhook_url。
+/// dingtalk/wecom 用 webhook_url，sms 用 api_url/phone/sign/template_id（A-1）。
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct NotifyChannel {
     pub id: String,
