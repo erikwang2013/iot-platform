@@ -19,6 +19,8 @@ pub struct TenantRow {
     pub id: String,
     pub name: String,
     pub quota: i64,
+    /// 当前设备数（用量；配额强制 C-5）
+    pub device_count: i64,
 }
 
 /// 凭据密文 JSON 序列化：字段顺序固定，VendorCreds 的存盘形态。
@@ -156,6 +158,18 @@ impl Store {
             .collect())
     }
 
+    /// 将设备落库状态标记为 offline（离线巡检 B-1 用）。幂等。
+    pub async fn set_device_offline(&self, device_id: &str) -> Result<(), String> {
+        self.db
+            .execute_with(
+                "UPDATE devices SET status = 'offline' WHERE id = ?",
+                &[json!(device_id)],
+            )
+            .await
+            .map_err(|e| format!("set device offline: {e}"))?;
+        Ok(())
+    }
+
     pub async fn device_name(&self, device_id: &str) -> Result<String, String> {
         let rows = self
             .db
@@ -270,7 +284,12 @@ impl Store {
     pub async fn list_tenants(&self) -> Result<Vec<TenantRow>, String> {
         let rows = self
             .db
-            .query_with("SELECT id, name, quota FROM tenants ORDER BY created_at", &[])
+            .query_with(
+                "SELECT t.id, t.name, t.quota, \
+                 (SELECT COUNT(*) FROM devices d WHERE d.tenant_id = t.id) AS device_count \
+                 FROM tenants t ORDER BY t.created_at",
+                &[],
+            )
             .await
             .map_err(|e| format!("list tenants: {e}"))?;
         Ok(rows
@@ -279,6 +298,10 @@ impl Store {
                 id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
                 name: r.get("name").and_then(Value::as_str).unwrap_or("").to_string(),
                 quota: r.get("quota").and_then(Value::as_i64).unwrap_or(0),
+                device_count: r
+                    .get("device_count")
+                    .and_then(Value::as_i64)
+                    .unwrap_or(0),
             })
             .collect())
     }
@@ -389,6 +412,49 @@ impl Store {
         Ok(n > 0)
     }
 
+    /// 租户设备配额与当前用量：返回 (quota, 已用)。quota=0 视为不限制。
+    pub async fn tenant_quota(&self, tenant_id: &str) -> Result<(i64, i64), String> {
+        let rows = self
+            .db
+            .query_with(
+                "SELECT quota FROM tenants WHERE id = ?",
+                &[json!(tenant_id)],
+            )
+            .await
+            .map_err(|e| format!("tenant quota: {e}"))?;
+        let quota = rows
+            .first()
+            .and_then(|r| r.get("quota"))
+            .and_then(Value::as_i64)
+            .unwrap_or(0);
+        let rows = self
+            .db
+            .query_with(
+                "SELECT COUNT(*) AS n FROM devices WHERE tenant_id = ?",
+                &[json!(tenant_id)],
+            )
+            .await
+            .map_err(|e| format!("count devices: {e}"))?;
+        let used = rows
+            .first()
+            .and_then(|r| r.get("n"))
+            .and_then(Value::as_i64)
+            .unwrap_or(0);
+        Ok((quota, used))
+    }
+
+    /// 校验配额：quota>0 且已用>=quota 时返回 Err（409 语义，调用方映射状态码）。
+    /// 新增 n 台前调用；quota=0 表示不限制。
+    pub async fn check_quota(&self, tenant_id: &str, adding: i64) -> Result<(), String> {
+        let (quota, used) = self.tenant_quota(tenant_id).await?;
+        if quota > 0 && used + adding > quota {
+            return Err(format!(
+                "device quota exceeded: {used}/{quota} (need {adding} more)"
+            ));
+        }
+        Ok(())
+    }
+
     /// 导入设备（Task 5 用）：platform_id 已存在则复用，否则新建。
     pub async fn upsert_device(
         &self,
@@ -402,6 +468,8 @@ impl Store {
         if let Some(existing) = self.find_device_by_vendor_id(vendor, vendor_id).await? {
             return Ok(existing);
         }
+        // 配额强制：新设备入库前校验（C-5）
+        self.check_quota(tenant_id, 1).await?;
         let platform_id = uuid::Uuid::new_v4().to_string();
         let status = if online { "online" } else { "offline" };
         self.db

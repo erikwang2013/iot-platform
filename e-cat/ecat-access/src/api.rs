@@ -70,6 +70,24 @@ pub async fn import_devices(
         .list_devices(&creds)
         .await
         .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
+    // 配额校验（C-5）：仅统计"确实会新增"的设备（已存在复用不占配额），
+    // 超限整批拒绝（409），防部分生效。
+    let mut adding = 0i64;
+    for d in &devices {
+        if api
+            .store
+            .find_device_by_vendor_id(&vendor, &d.vendor_id)
+            .await
+            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?
+            .is_none()
+        {
+            adding += 1;
+        }
+    }
+    api.store
+        .check_quota(&tenant_id, adding)
+        .await
+        .map_err(|e| (StatusCode::CONFLICT, e))?;
     let mut imported = Vec::new();
     for d in &devices {
         let platform_id = api

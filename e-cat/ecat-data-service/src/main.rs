@@ -62,6 +62,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         ecat_data_service::anomaly::run(anomaly_kafka).await;
     });
 
+    // 定时任务：数据生命周期清理（C-6）——按 DATA_RETENTION_DAYS 周期
+    // 删除超期时序数据。每 6h 巡检一次；删除幂等、失败仅记日志。
+    let mut scheduler = ecat_scheduler::Scheduler::new();
+    let retention_interval = std::env::var("DATA_RETENTION_INTERVAL_SECS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(6 * 3600u64);
+    ecat_data_service::retention::register(
+        &mut scheduler,
+        td.clone(),
+        std::time::Duration::from_secs(retention_interval),
+    );
+    tokio::spawn(async move { scheduler.run().await });
+
     let api_state = ApiState { td: td.clone() };
 
     // 受保护路由：需网关 secret + x-tenant-id

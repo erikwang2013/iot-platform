@@ -65,9 +65,13 @@ pub async fn run(td: Arc<TdengineClient>, kafka: Arc<KafkaMq>) {
 }
 
 async fn flush(td: &TdengineClient, buf: &mut Vec<EventMessage>) {
+    let n = buf.len() as u64;
     let sql = batch_sql(buf);
     buf.clear();
     if let Err(e) = td.query(&sql).await {
         tracing::error!(error = %e, "tdengine batch write failed");
+        crate::metrics::record_write_failure();
+    } else {
+        crate::metrics::record_ingested(n);
     }
 }

@@ -6,6 +6,7 @@ pub mod console;
 pub mod events;
 pub mod mqtt;
 pub mod models;
+pub mod offline;
 pub mod oauth;
 pub mod store;
 pub mod webhook;

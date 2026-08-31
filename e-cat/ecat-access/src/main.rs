@@ -112,6 +112,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             .await;
     });
 
+    // 定时任务：设备离线巡检（B-1）——心跳超时（默认 5 分钟）未上报则标记
+    // offline + 发 offline 事件。每 60s 巡检一次（OFFLINE_PATROL_SECS 可配）。
+    let mut scheduler = ecat_scheduler::Scheduler::new();
+    let patrol_interval = std::env::var("OFFLINE_PATROL_SECS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(60u64);
+    ecat_access::offline::register(
+        &mut scheduler,
+        store.clone(),
+        redis.clone(),
+        kafka.clone(),
+        std::time::Duration::from_secs(patrol_interval),
+    );
+    tokio::spawn(async move { scheduler.run().await });
+
     // 公开路由：涂鸦 webhook、OAuth 回调、登录、开放 API 换 token
     // （浏览器跳回/登录前置/开放客户端，无 JWT/租户）
     let login = Router::new().route("/login", axum::routing::post(auth::login)).with_state(auth_state.clone());

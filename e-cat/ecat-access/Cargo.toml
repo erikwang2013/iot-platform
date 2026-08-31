@@ -21,6 +21,7 @@ ecat-data-redis = { path = "../ecat-data-redis" }
 ecat-mq = { path = "../ecat-mq" }
 ecat-mq-kafka = { path = "../ecat-mq-kafka" }
 ecat-mq-mqtt = { path = "../ecat-mq-mqtt" }
+ecat-scheduler = { path = "../ecat-scheduler" }
 axum.workspace = true
 async-trait.workspace = true
 serde.workspace = true
