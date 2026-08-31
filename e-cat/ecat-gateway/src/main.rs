@@ -43,6 +43,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let proxy_state = ProxyState {
         client: reqwest::Client::new(),
+        resolver: ecat_gateway::service::ServiceResolver::new(),
     };
 
     // 全局限流与登录限流共享同一存储（Redis 优先，多实例计数一致；

@@ -1744,6 +1744,8 @@ dependencies = [
  "ecat-health",
  "ecat-middleware",
  "ecat-openapi",
+ "ecat-registry",
+ "ecat-registry-consul",
  "ecat-security",
  "ecat-transport",
  "ecat-transport-http",

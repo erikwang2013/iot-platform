@@ -18,6 +18,8 @@ ecat-middleware = { path = "../ecat-middleware", features = ["redis"] }
 ecat-data = { path = "../ecat-data" }
 ecat-data-sqlx = { path = "../ecat-data-sqlx" }
 ecat-openapi = { path = "../ecat-openapi" }
+ecat-registry = { path = "../ecat-registry" }
+ecat-registry-consul = { path = "../ecat-registry-consul" }
 async-trait.workspace = true
 axum.workspace = true
 http.workspace = true
