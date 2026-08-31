@@ -158,6 +158,71 @@ impl Store {
             .collect())
     }
 
+    /// 将一条指令写入离线指令队列（D-2）。expires_at 过期后不再补发。
+    pub async fn enqueue_command(
+        &self,
+        tenant_id: &str,
+        device_id: &str,
+        code: &str,
+        value: &serde_json::Value,
+        expires_after_secs: i64,
+    ) -> Result<String, String> {
+        let id = uuid::Uuid::new_v4().to_string();
+        self.db
+            .execute_with(
+                "INSERT INTO command_queue (id, tenant_id, device_id, code, value_json, expires_at) \
+                 VALUES (?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? SECOND))",
+                &[
+                    json!(id),
+                    json!(tenant_id),
+                    json!(device_id),
+                    json!(code),
+                    value.clone(),
+                    json!(expires_after_secs),
+                ],
+            )
+            .await
+            .map_err(|e| format!("enqueue command: {e}"))?;
+        Ok(id)
+    }
+
+    /// 取设备未过期待补发指令（按入队时间升序）。同时删除已过期的占位（不返回）。
+    pub async fn pending_commands(
+        &self,
+        device_id: &str,
+    ) -> Result<Vec<(String, String, serde_json::Value)>, String> {
+        let rows = self
+            .db
+            .query_with(
+                "SELECT id, code, value_json FROM command_queue \
+                 WHERE device_id = ? AND (expires_at IS NULL OR expires_at > NOW()) \
+                 ORDER BY created_at ASC",
+                &[json!(device_id)],
+            )
+            .await
+            .map_err(|e| format!("pending commands: {e}"))?;
+        Ok(rows
+            .iter()
+            .filter_map(|r| {
+                let id = r.get("id")?.as_str()?.to_string();
+                let code = r.get("code")?.as_str()?.to_string();
+                let value = r
+                    .get("value_json")
+                    .and_then(|v| serde_json::from_str(v.as_str()?).ok())?;
+                Some((id, code, value))
+            })
+            .collect())
+    }
+
+    /// 补发完成后删除已下发的指令。
+    pub async fn delete_command(&self, id: &str) -> Result<(), String> {
+        self.db
+            .execute_with("DELETE FROM command_queue WHERE id = ?", &[json!(id)])
+            .await
+            .map_err(|e| format!("delete command: {e}"))?;
+        Ok(())
+    }
+
     /// 将设备落库状态标记为 offline（离线巡检 B-1 用）。幂等。
     pub async fn set_device_offline(&self, device_id: &str) -> Result<(), String> {
         self.db

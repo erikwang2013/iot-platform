@@ -22,6 +22,7 @@ async fn migrate(db: &SqlxClient) -> Result<(), Box<dyn std::error::Error + Send
         include_str!("../migrations/0004_audit.sql"),
         include_str!("../migrations/0005_groups.sql"),
         include_str!("../migrations/0006_api_keys.sql"),
+        include_str!("../migrations/0007_command_queue.sql"),
     ] {
         db.execute_script(sql).await?;
     }

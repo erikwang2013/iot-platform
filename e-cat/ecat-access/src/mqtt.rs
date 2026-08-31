@@ -97,6 +97,8 @@ pub async fn run(
             subs.lock().await.insert(device_id.clone(), ());
             let redis = redis.clone();
             let kafka = kafka.clone();
+            let store = store.clone();
+            let mqtt = mqtt.clone();
             let did = device_id.clone();
             tokio::spawn(async move {
                 while let Some(Ok(raw)) = stream.next().await {
@@ -108,6 +110,14 @@ pub async fn run(
                             if let Err(e) = shadow_apply(&redis, &ev).await {
                                 tracing::warn!(error = %e, "shadow update failed");
                             }
+                            // 设备上报（property）说明在线：补发离线指令队列（D-2）
+                            crate::command_queue::flush_for_device(
+                                store.clone(),
+                                redis.clone(),
+                                mqtt.clone(),
+                                &did,
+                            )
+                            .await;
                         }
                         Err(e) => tracing::warn!(device = %did, error = %e, "drop mqtt payload"),
                     }

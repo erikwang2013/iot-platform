@@ -122,11 +122,27 @@ pub async fn send_command(
     let (vendor, vendor_id) = link
         .ok_or_else(|| (StatusCode::NOT_FOUND, "device not linked".to_string()))?;
     if vendor == "direct" {
-        // 直连设备：MQTT 下发
-        crate::mqtt::publish_command(&api.mqtt, &device_id, &req.code, &req.value)
+        // 直连设备：在线则 MQTT 下发；离线则入队（D-2），上线后补发。
+        if crate::command_queue::device_online(&api.redis, &device_id).await {
+            crate::mqtt::publish_command(&api.mqtt, &device_id, &req.code, &req.value)
+                .await
+                .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
+            return Ok(Json(json!({ "ok": true, "channel": "mqtt" })));
+        }
+        let id = api
+            .store
+            .enqueue_command(
+                &tenant_id,
+                &device_id,
+                &req.code,
+                &req.value,
+                crate::command_queue::command_expire_secs(),
+            )
             .await
-            .map_err(|e| (StatusCode::BAD_GATEWAY, e.to_string()))?;
-        return Ok(Json(json!({ "ok": true, "channel": "mqtt" })));
+            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
+        return Ok(Json(
+            json!({ "ok": true, "queued": true, "channel": "mqtt", "queue_id": id }),
+        ));
     }
     let adapter = adapter_for(&vendor).map_err(|e| (StatusCode::BAD_REQUEST, e.to_string()))?;
     let creds = api
