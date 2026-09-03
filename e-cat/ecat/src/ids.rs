@@ -24,11 +24,37 @@ fn parse_worker_id(raw: &str) -> u16 {
     worker_id
 }
 
+/// hostname → 0..=1023 的确定性哈希（DefaultHasher 固定种子，跨进程/跨重启稳定）。
+/// 哈希碰撞=同 ms 同 worker 撞号，10bit 空间固有边界；多副本需钉住时显式配
+/// SNOWFLAKE_WORKER_ID（此时 hostname 分支不生效）。
+fn worker_id_for_hostname(hostname: &str) -> u16 {
+    use std::hash::Hasher;
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    h.write(hostname.as_bytes());
+    (h.finish() % 1024) as u16
+}
+
+/// worker 号三阶解析（纯函数，env 由调用方注入便于测试）：
+/// SNOWFLAKE_WORKER_ID 显式 → 校验后使用（越界/非数字 panic）；
+/// 否则 HOSTNAME（k8s/docker 运行时必设，天然唯一）哈希 → 1024 内；
+/// 都没有（裸机本地开发）→ 0。返回 (worker_id, 来源)。
+fn resolve_from(explicit: Option<&str>, hostname: Option<&str>) -> (u16, &'static str) {
+    match explicit {
+        Some(raw) => (parse_worker_id(raw), "env"),
+        None => match hostname {
+            Some(h) => (worker_id_for_hostname(h), "hostname"),
+            None => (0, "default"),
+        },
+    }
+}
+
 fn init() -> &'static FastIdGenerator {
     GEN.get_or_init(|| {
-        let raw = std::env::var("SNOWFLAKE_WORKER_ID").unwrap_or_else(|_| "0".into());
-        let worker_id = parse_worker_id(&raw);
-        tracing::info!(worker_id, "snowflake id generator initialized");
+        let (worker_id, source) = resolve_from(
+            std::env::var("SNOWFLAKE_WORKER_ID").ok().as_deref(),
+            std::env::var("HOSTNAME").ok().as_deref(),
+        );
+        tracing::info!(worker_id, source, "snowflake id generator initialized");
         FastIdGenerator::new(
             &IGOptions::builder(worker_id)
                 .worker_id_bit_length(10) // 1024 节点
@@ -89,5 +115,35 @@ mod tests {
     fn worker_id_bounds() {
         assert_eq!(parse_worker_id("0"), 0);
         assert_eq!(parse_worker_id("1023"), 1023);
+    }
+
+    #[test]
+    fn hostname_hash_stable_and_in_range() {
+        // 纯函数不触碰进程全局 env，可并行；同输入跨进程/跨调用稳定
+        for name in ["pod-a", "iot-access-7f9c2d", "localhost", "", "主机-01"] {
+            assert_eq!(worker_id_for_hostname(name), worker_id_for_hostname(name));
+            let w = worker_id_for_hostname(name);
+            assert!((0..=1023).contains(&w), "{name} → {w} 越界");
+        }
+    }
+
+    #[test]
+    fn explicit_env_takes_precedence() {
+        // SNOWFLAKE_WORKER_ID 显式时优先生效（来源 env），hostname 存在也不走哈希
+        assert_eq!(resolve_from(Some("7"), Some("pod-x")), (7, "env"));
+        // 越界/非数字 panic 路径不变（parse_worker_id 纯函数，上方 #should_panic 已覆盖）
+        assert_eq!(resolve_from(Some("0"), None), (0, "env"));
+    }
+
+    #[test]
+    fn hostname_fallback_used_without_explicit_env() {
+        let (w, src) = resolve_from(None, Some("iot-device-abc"));
+        assert_eq!(src, "hostname");
+        assert_eq!(w, worker_id_for_hostname("iot-device-abc"));
+    }
+
+    #[test]
+    fn no_env_no_hostname_defaults_to_zero() {
+        assert_eq!(resolve_from(None, None), (0, "default"));
     }
 }

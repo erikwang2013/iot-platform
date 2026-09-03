@@ -1,5 +1,7 @@
 # 六业务服务 Deployment + Service（镜像统一 Dockerfile 构建，见 deploy/docker/Dockerfile）。
 # 水平扩展：改 replicas 即可（多实例语义见 docs/deploy/multi-instance.md）。
+# snowflake 主键 worker 号：各副本自动按 pod HOSTNAME 哈希取号（0-1023），无需配 env；
+# 需确定性隔离时给副本显式配 SNOWFLAKE_WORKER_ID（0-1023，见 ecat/src/ids.rs）。
 # HPA 预留：`kubectl autoscale deployment iot-gateway --cpu-percent=70 --min=1 --max=5`
 ---
 apiVersion: apps/v1

@@ -64,15 +64,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn command_expire_secs_defaults() {
-        // SAFETY: 单线程测试
+    fn command_expire_secs_env_behavior() {
+        // env 为进程全局，同变量只允许一个测试触碰：并行线程下多写者会竞态，合并串行断言。
         unsafe { std::env::remove_var("COMMAND_EXPIRE_SECS") };
         assert_eq!(command_expire_secs(), 3600);
-    }
-
-    #[test]
-    fn command_expire_secs_respects_env() {
-        // SAFETY: 单线程测试
         unsafe { std::env::set_var("COMMAND_EXPIRE_SECS", "600") };
         assert_eq!(command_expire_secs(), 600);
         unsafe { std::env::remove_var("COMMAND_EXPIRE_SECS") };

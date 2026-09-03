@@ -1,5 +1,5 @@
 //! 需 docker：`docker compose up -d tdengine kafka` 后运行：
-//! `cargo test -p iot-data --test data_flow -- --ignored`
+//! `cargo test -p ecat-data-service --test data_flow -- --ignored`
 use ecat_data::TsdbClient;
 use ecat_data_tdengine::TdengineClient;
 use ecat_data_tdengine::sql::parse_points;

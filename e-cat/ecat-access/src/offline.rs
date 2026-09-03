@@ -122,23 +122,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn offline_timeout_defaults_to_5min() {
-        // SAFETY: 单线程测试，无并发读取
+    fn offline_timeout_env_behavior() {
+        // env 为进程全局，同变量只允许一个测试触碰：同 binary 内并行线程
+        // 若分属多个测试会相互 set_var/remove_var 竞态，故合并串行断言。
         unsafe { std::env::remove_var("OFFLINE_TIMEOUT_SECS") };
         assert_eq!(offline_timeout(), 300 * 1000);
-    }
-
-    #[test]
-    fn offline_timeout_respects_env() {
-        // SAFETY: 单线程测试，无并发读取
         unsafe { std::env::set_var("OFFLINE_TIMEOUT_SECS", "10") };
         assert_eq!(offline_timeout(), 10 * 1000);
-        unsafe { std::env::remove_var("OFFLINE_TIMEOUT_SECS") };
-    }
-
-    #[test]
-    fn offline_timeout_zero_disables() {
-        // SAFETY: 单线程测试，无并发读取
         unsafe { std::env::set_var("OFFLINE_TIMEOUT_SECS", "0") };
         assert_eq!(offline_timeout(), 0);
         unsafe { std::env::remove_var("OFFLINE_TIMEOUT_SECS") };

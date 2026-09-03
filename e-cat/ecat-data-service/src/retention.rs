@@ -66,24 +66,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn retention_days_parses_env() {
-        // 未设置时默认 90（Rust 2024 edition：env 变更为 unsafe）
-        // SAFETY: 单线程测试，无并发读取环境变量
+    fn retention_days_env_behavior() {
+        // env 为进程全局，同变量只允许一个测试触碰：并行线程下多写者会竞态，合并串行断言。
+        // 默认 90；Rust 2024 edition：env 变更为 unsafe。
         unsafe { std::env::remove_var("DATA_RETENTION_DAYS") };
         assert_eq!(retention_days(), 90);
-    }
-
-    #[test]
-    fn retention_days_respects_env() {
-        // SAFETY: 单线程测试，无并发读取环境变量
         unsafe { std::env::set_var("DATA_RETENTION_DAYS", "30") };
         assert_eq!(retention_days(), 30);
-        unsafe { std::env::remove_var("DATA_RETENTION_DAYS") };
-    }
-
-    #[test]
-    fn retention_days_zero_disables() {
-        // SAFETY: 单线程测试，无并发读取环境变量
         unsafe { std::env::set_var("DATA_RETENTION_DAYS", "0") };
         assert_eq!(retention_days(), 0);
         unsafe { std::env::remove_var("DATA_RETENTION_DAYS") };

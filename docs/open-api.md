@@ -38,7 +38,7 @@ scope 取值：`read`（仅读端点）| `write`（全部写端点）| `command`
 ```bash
 curl -s -X POST http://localhost:8080/api/access/open/token \
   -H "Content-Type: application/json" \
-  -d '{"app_id": "<uuid>", "app_secret": "<64-hex>"}'
+  -d '{"app_id": "175921860444160", "app_secret": "<64-hex>"}'
 # → { "token": "<jwt>", "tenant_id": "...", "role": "operator", "scope": "write" }
 ```
 

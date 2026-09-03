@@ -7,6 +7,10 @@ edition = "2024"
 name = "iot-access"
 path = "src/main.rs"
 
+[[bin]]
+name = "remap-legacy-ids"
+path = "src/bin/remap_legacy_ids.rs"
+
 [dependencies]
 ecat = { path = "../ecat" }
 ecat-transport-http.workspace = true
