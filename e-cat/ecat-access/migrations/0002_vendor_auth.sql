@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS vendor_credentials (
-    id VARCHAR(36) PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     tenant_id VARCHAR(36) NOT NULL,
     vendor VARCHAR(64) NOT NULL,
     config_encrypted TEXT NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS vendor_credentials (
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS device_links (
-    device_id VARCHAR(36) PRIMARY KEY,
+    device_id BIGINT PRIMARY KEY,
     tenant_id VARCHAR(36) NOT NULL,
     vendor VARCHAR(64) NOT NULL,
     vendor_id VARCHAR(128) NOT NULL,

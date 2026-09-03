@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS cdn_providers (
-    id VARCHAR(36) PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     tenant_id VARCHAR(36) NOT NULL,
     name VARCHAR(255) NOT NULL,
     vendor VARCHAR(64) NOT NULL,
@@ -13,9 +13,9 @@ CREATE TABLE IF NOT EXISTS cdn_providers (
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS cdn_tasks (
-    id VARCHAR(36) PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     tenant_id VARCHAR(36) NOT NULL,
-    provider_id VARCHAR(36) NOT NULL,
+    provider_id BIGINT NOT NULL,
     kind VARCHAR(16) NOT NULL,
     urls_json TEXT NOT NULL,
     status VARCHAR(16) NOT NULL DEFAULT 'pending',

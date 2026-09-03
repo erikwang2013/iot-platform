@@ -1,14 +1,14 @@
 CREATE TABLE IF NOT EXISTS rules (
-    id VARCHAR(36) PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     tenant_id VARCHAR(36) NOT NULL,
     name VARCHAR(128) NOT NULL,
-    device_id VARCHAR(64) NOT NULL,
+    device_id BIGINT NOT NULL,
     code VARCHAR(64) NOT NULL,
     operator VARCHAR(8) NOT NULL,
     threshold DOUBLE NOT NULL,
     webhook_url VARCHAR(512) NULL,
     enabled INT NOT NULL DEFAULT 1,
-    action_device_id VARCHAR(64) NULL,
+    action_device_id BIGINT NULL,
     action_code VARCHAR(64) NULL,
     action_value JSON NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -18,10 +18,10 @@ CREATE TABLE IF NOT EXISTS rules (
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS alert_records (
-    id VARCHAR(36) PRIMARY KEY,
-    rule_id VARCHAR(36) NOT NULL,
+    id BIGINT PRIMARY KEY,
+    rule_id BIGINT NOT NULL,
     tenant_id VARCHAR(36) NOT NULL,
-    device_id VARCHAR(64) NOT NULL,
+    device_id BIGINT NOT NULL,
     code VARCHAR(64) NOT NULL,
     operator VARCHAR(8) NOT NULL,
     threshold DOUBLE NOT NULL,

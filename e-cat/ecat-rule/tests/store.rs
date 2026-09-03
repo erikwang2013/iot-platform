@@ -5,7 +5,8 @@ use serde_json::json;
 fn new_rule() -> NewRule {
     NewRule {
         name: "高温告警".into(),
-        device_id: "d1".into(),
+        // 平台设备 id 为 snowflake i64（十进制字符串）
+        device_id: "12345678901234567".into(),
         code: "temp".into(),
         operator: "gt".into(),
         threshold: 30.0,

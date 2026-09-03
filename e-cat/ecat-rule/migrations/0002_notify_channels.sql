@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS notify_channels (
-    id VARCHAR(36) PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     tenant_id VARCHAR(36) NOT NULL,
     channel VARCHAR(16) NOT NULL,
     config JSON NOT NULL,

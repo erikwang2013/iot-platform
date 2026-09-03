@@ -110,7 +110,7 @@ pub async fn list_devices(
     let devices: Vec<DeviceRow> = rows
         .iter()
         .map(|r| DeviceRow {
-            id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
+            id: r.get("id").and_then(Value::as_i64).map(|n| n.to_string()).unwrap_or_default(),
             name: r.get("name").and_then(Value::as_str).unwrap_or("").to_string(),
             vendor: r.get("vendor").and_then(Value::as_str).unwrap_or("").to_string(),
             status: r.get("status").and_then(Value::as_str).unwrap_or("").to_string(),
@@ -204,11 +204,13 @@ pub async fn update_device(
     if !["online", "offline", "enabled", "disabled"].contains(&status.as_str()) {
         return Err((StatusCode::BAD_REQUEST, "status must be online/offline/enabled/disabled".into()));
     }
+    // devices.id 为 BIGINT 列：绑定数字
+    let id_n: i64 = id.parse().map_err(|_| (StatusCode::BAD_REQUEST, "invalid device id".into()))?;
     let n = db
         .0
         .execute_with(
             "UPDATE devices SET status = ? WHERE id = ? AND tenant_id = ?",
-            &[json!(status), json!(id), json!(tenant.as_str())],
+            &[json!(status), json!(id_n), json!(tenant.as_str())],
         )
         .await
         .map_err(db_err)?;
@@ -220,7 +222,7 @@ pub async fn update_device(
         match db.0
             .query_with(
                 "SELECT name, vendor FROM devices WHERE id = ? AND tenant_id = ?",
-                &[json!(id), json!(tenant.as_str())],
+                &[json!(id_n), json!(tenant.as_str())],
             )
             .await
         {
@@ -250,10 +252,11 @@ pub async fn unbind_device(
     tenant: axum::Extension<String>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, (StatusCode, String)> {
+    let id_n: i64 = id.parse().map_err(|_| (StatusCode::BAD_REQUEST, "invalid device id".into()))?;
     db.0
         .execute_with(
             "DELETE FROM device_links WHERE device_id = ? AND tenant_id = ?",
-            &[json!(id), json!(tenant.as_str())],
+            &[json!(id_n), json!(tenant.as_str())],
         )
         .await
         .map_err(db_err)?;
@@ -261,7 +264,7 @@ pub async fn unbind_device(
         .0
         .execute_with(
             "UPDATE devices SET status = 'unbound' WHERE id = ? AND tenant_id = ?",
-            &[json!(id), json!(tenant.as_str())],
+            &[json!(id_n), json!(tenant.as_str())],
         )
         .await
         .map_err(db_err)?;
@@ -277,10 +280,11 @@ pub async fn delete_device(
     tenant: axum::Extension<String>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, (StatusCode, String)> {
+    let id_n: i64 = id.parse().map_err(|_| (StatusCode::BAD_REQUEST, "invalid device id".into()))?;
     db.0
         .execute_with(
             "DELETE FROM device_links WHERE device_id = ? AND tenant_id = ?",
-            &[json!(id), json!(tenant.as_str())],
+            &[json!(id_n), json!(tenant.as_str())],
         )
         .await
         .map_err(db_err)?;
@@ -288,7 +292,7 @@ pub async fn delete_device(
         .0
         .execute_with(
             "DELETE FROM devices WHERE id = ? AND tenant_id = ?",
-            &[json!(id), json!(tenant.as_str())],
+            &[json!(id_n), json!(tenant.as_str())],
         )
         .await
         .map_err(db_err)?;
@@ -352,7 +356,7 @@ pub async fn list_firmwares(
     let items: Vec<FirmwareRow> = rows
         .iter()
         .map(|r| FirmwareRow {
-            id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
+            id: r.get("id").and_then(Value::as_i64).map(|n| n.to_string()).unwrap_or_default(),
             name: r.get("name").and_then(Value::as_str).unwrap_or("").to_string(),
             version: r.get("version").and_then(Value::as_str).unwrap_or("").to_string(),
             url: r.get("url").and_then(Value::as_str).unwrap_or("").to_string(),
@@ -380,7 +384,7 @@ pub async fn create_firmware(
     if req.name.trim().is_empty() || req.version.trim().is_empty() {
         return Err((StatusCode::BAD_REQUEST, "name/version required".into()));
     }
-    let id = uuid::Uuid::new_v4().to_string();
+    let id = ecat::ids::next_id();
     db.0
         .execute_with(
             "INSERT INTO ota_firmwares (id, tenant_id, name, version, url, description) VALUES (?, ?, ?, ?, ?, ?)",
@@ -395,7 +399,7 @@ pub async fn create_firmware(
         )
         .await
         .map_err(db_err)?;
-    Ok(Json(json!({ "id": id })))
+    Ok(Json(json!({ "id": id.to_string() })))
 }
 
 /// POST /api/ota/firmwares/upload：multipart 固件二进制上传。
@@ -441,7 +445,8 @@ pub async fn upload_firmware(
     let bytes = data
         .filter(|d| !d.is_empty())
         .ok_or_else(|| (StatusCode::BAD_REQUEST, "file field required".into()))?;
-    let id = uuid::Uuid::new_v4().to_string();
+    // 文件系统约定随 id 形态走：{十进制 id}.bin（url 亦同）
+    let id = ecat::ids::next_id();
     let sha256 = sha256_hex(&bytes);
     let dir = firmware_dir();
     tokio::fs::create_dir_all(&dir).await.map_err(io_err)?;
@@ -465,7 +470,7 @@ pub async fn upload_firmware(
         )
         .await
         .map_err(db_err)?;
-    Ok(Json(json!({ "id": id, "url": url, "sha256": sha256 })))
+    Ok(Json(json!({ "id": id.to_string(), "url": url, "sha256": sha256 })))
 }
 
 /// GET /api/ota/firmwares/{id}/download：固件二进制下载（租户隔离校验后读盘）。
@@ -475,22 +480,20 @@ pub async fn download_firmware(
     Path(id): Path<String>,
 ) -> Result<axum::response::Response, (StatusCode, String)> {
     use axum::response::IntoResponse;
-    // 防路径穿越：固件 id 必须形如 UUID 才允许拼盘路径
-    if id.len() != 36 || !id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
-        return Err((StatusCode::BAD_REQUEST, "invalid firmware id".into()));
-    }
+    // 防路径穿越：固件 id 为 snowflake i64，parse 成功（纯数字）才允许拼盘路径
+    let id_n: i64 = id.parse().map_err(|_| (StatusCode::BAD_REQUEST, "invalid firmware id".into()))?;
     let rows = db
         .0
         .query_with(
             "SELECT id FROM ota_firmwares WHERE id = ? AND tenant_id = ?",
-            &[json!(id), json!(tenant.as_str())],
+            &[json!(id_n), json!(tenant.as_str())],
         )
         .await
         .map_err(db_err)?;
     if rows.is_empty() {
         return Err((StatusCode::NOT_FOUND, "firmware not found".into()));
     }
-    let path = std::path::Path::new(&firmware_dir()).join(format!("{id}.bin"));
+    let path = std::path::Path::new(&firmware_dir()).join(format!("{id_n}.bin"));
     let bytes = tokio::fs::read(&path).await.map_err(|e| {
         tracing::warn!(error = %e, "firmware file read failed");
         (StatusCode::NOT_FOUND, "firmware file not found".into())
@@ -507,11 +510,12 @@ pub async fn delete_firmware(
     tenant: axum::Extension<String>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, (StatusCode, String)> {
+    let id_n: i64 = id.parse().map_err(|_| (StatusCode::BAD_REQUEST, "invalid firmware id".into()))?;
     let n = db
         .0
         .execute_with(
             "DELETE FROM ota_firmwares WHERE id = ? AND tenant_id = ?",
-            &[json!(id), json!(tenant.as_str())],
+            &[json!(id_n), json!(tenant.as_str())],
         )
         .await
         .map_err(db_err)?;
@@ -551,9 +555,9 @@ pub async fn list_ota_tasks(
     let items: Vec<TaskRow> = rows
         .iter()
         .map(|r| TaskRow {
-            id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
-            device_id: r.get("device_id").and_then(Value::as_str).unwrap_or("").to_string(),
-            firmware_id: r.get("firmware_id").and_then(Value::as_str).unwrap_or("").to_string(),
+            id: r.get("id").and_then(Value::as_i64).map(|n| n.to_string()).unwrap_or_default(),
+            device_id: r.get("device_id").and_then(Value::as_i64).map(|n| n.to_string()).unwrap_or_default(),
+            firmware_id: r.get("firmware_id").and_then(Value::as_i64).map(|n| n.to_string()).unwrap_or_default(),
             firmware_version: r.get("firmware_version").and_then(Value::as_str).unwrap_or("").to_string(),
             status: r.get("status").and_then(Value::as_str).unwrap_or("").to_string(),
             progress: r.get("progress").and_then(Value::as_i64).unwrap_or(0),
@@ -576,15 +580,24 @@ pub async fn create_ota_task(
     tenant: axum::Extension<String>,
     Json(req): Json<OtaTaskReq>,
 ) -> Result<Json<Value>, (StatusCode, String)> {
+    // ota_upgrade_tasks 的 id/device_id/firmware_id 均为 BIGINT 列：绑定数字
+    let device_id: i64 = req
+        .device_id
+        .parse()
+        .map_err(|_| (StatusCode::BAD_REQUEST, "invalid device id".into()))?;
+    let firmware_id: i64 = req
+        .firmware_id
+        .parse()
+        .map_err(|_| (StatusCode::BAD_REQUEST, "invalid firmware id".into()))?;
     let owned = db
         .0
         .query_with(
             "SELECT id FROM devices WHERE id = ? AND tenant_id = ? \
              UNION SELECT id FROM ota_firmwares WHERE id = ? AND tenant_id = ?",
             &[
-                json!(req.device_id),
+                json!(device_id),
                 json!(tenant.as_str()),
-                json!(req.firmware_id),
+                json!(firmware_id),
                 json!(tenant.as_str()),
             ],
         )
@@ -593,16 +606,16 @@ pub async fn create_ota_task(
     if owned.len() < 2 {
         return Err((StatusCode::FORBIDDEN, "device or firmware not in tenant".into()));
     }
-    let id = uuid::Uuid::new_v4().to_string();
+    let id = ecat::ids::next_id();
     db.0
         .execute_with(
             "INSERT INTO ota_upgrade_tasks (id, tenant_id, device_id, firmware_id, status) \
              VALUES (?, ?, ?, ?, 'pending')",
-            &[json!(id), json!(tenant.as_str()), json!(req.device_id), json!(req.firmware_id)],
+            &[json!(id), json!(tenant.as_str()), json!(device_id), json!(firmware_id)],
         )
         .await
         .map_err(db_err)?;
-    Ok(Json(json!({ "id": id, "status": "pending" })))
+    Ok(Json(json!({ "id": id.to_string(), "status": "pending" })))
 }
 
 /// OTA 任务状态机：pending → downloading → installing → success|failed。
@@ -647,11 +660,12 @@ pub async fn report_ota_progress(
     if message.len() > 512 {
         return Err((StatusCode::BAD_REQUEST, "message must be <= 512 chars".into()));
     }
+    let id_n: i64 = id.parse().map_err(|_| (StatusCode::BAD_REQUEST, "invalid ota task id".into()))?;
     let rows = db
         .0
         .query_with(
             "SELECT status FROM ota_upgrade_tasks WHERE id = ? AND tenant_id = ?",
-            &[json!(id), json!(tenant.as_str())],
+            &[json!(id_n), json!(tenant.as_str())],
         )
         .await
         .map_err(db_err)?;
@@ -680,7 +694,7 @@ pub async fn report_ota_progress(
                 json!(status),
                 json!(final_progress as i64),
                 json!(message),
-                json!(id),
+                json!(id_n),
                 json!(tenant.as_str()),
             ],
         )
@@ -718,10 +732,11 @@ mod tests {
 
     #[test]
     fn firmware_id_shape_guard() {
-        let ok = "550e8400-e29b-41d4-a716-446655440000";
-        assert_eq!(ok.len(), 36);
-        assert!(ok.chars().all(|c| c.is_ascii_alphanumeric() || c == '-'));
-        assert!(!("../etc/passwd".chars().all(|c| c.is_ascii_alphanumeric() || c == '-')));
+        // 固件 id 为 snowflake i64（十进制）：parse 成功才允许拼盘路径
+        assert!("12345678901234567".parse::<i64>().is_ok());
+        assert!("../etc/passwd".parse::<i64>().is_err());
+        assert!("550e8400-e29b-41d4-a716-446655440000".parse::<i64>().is_err());
+        assert!("123abc".parse::<i64>().is_err());
     }
 
     #[test]

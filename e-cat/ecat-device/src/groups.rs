@@ -39,7 +39,7 @@ pub async fn list_groups(
         .iter()
         .map(|r| {
             json!({
-                "id": r.get("id").and_then(Value::as_str).unwrap_or_default(),
+                "id": r.get("id").and_then(Value::as_i64).map(|n| n.to_string()).unwrap_or_default(),
                 "name": r.get("name").and_then(Value::as_str).unwrap_or_default(),
                 "member_count": r.get("member_count").and_then(Value::as_i64).unwrap_or(0),
             })
@@ -74,14 +74,14 @@ pub async fn create_group(
     if exists.first().and_then(|r| r.get("n")).and_then(Value::as_i64).unwrap_or(0) > 0 {
         return Err((StatusCode::CONFLICT, "group name exists".into()));
     }
-    let id = uuid::Uuid::new_v4().to_string();
+    let id = ecat::ids::next_id();
     db.0.execute_with(
         "INSERT INTO device_groups (id, tenant_id, name) VALUES (?, ?, ?)",
         &[json!(id), json!(tenant.as_str()), json!(name)],
     )
     .await
     .map_err(db_err)?;
-    Ok(Json(json!({ "id": id, "name": name })))
+    Ok(Json(json!({ "id": id.to_string(), "name": name })))
 }
 
 /// DELETE /api/devices/groups/{id}：删除分组（成员级联删，设备不受影响）。
@@ -90,11 +90,12 @@ pub async fn delete_group(
     tenant: axum::Extension<String>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, (StatusCode, String)> {
+    let group_n: i64 = id.parse().map_err(|_| (StatusCode::BAD_REQUEST, "invalid group id".into()))?;
     let n = db
         .0
         .execute_with(
             "DELETE FROM device_groups WHERE id = ? AND tenant_id = ?",
-            &[json!(id), json!(tenant.as_str())],
+            &[json!(group_n), json!(tenant.as_str())],
         )
         .await
         .map_err(db_err)?;
@@ -103,7 +104,7 @@ pub async fn delete_group(
     }
     db.0.execute_with(
         "DELETE FROM device_group_members WHERE group_id = ?",
-        &[json!(id)],
+        &[json!(group_n)],
     )
     .await
     .map_err(db_err)?;
@@ -117,11 +118,16 @@ async fn tenant_devices(db: &Db, tenant: &str, ids: &[String]) -> Result<Vec<Str
     }
     let mut missing = Vec::new();
     for id in ids {
+        // 非数字 id（或非本租户设备）一律视为无效（devices.id 为 BIGINT 列）
+        let Ok(id_n) = id.parse::<i64>() else {
+            missing.push(id.clone());
+            continue;
+        };
         let rows = db
             .0
             .query_with(
                 "SELECT COUNT(*) AS n FROM devices WHERE id = ? AND tenant_id = ?",
-                &[json!(id), json!(tenant)],
+                &[json!(id_n), json!(tenant)],
             )
             .await
             .map_err(db_err)?;
@@ -144,6 +150,8 @@ pub async fn add_members(
     Path(id): Path<String>,
     Json(req): Json<MembersReq>,
 ) -> Result<Json<Value>, (StatusCode, String)> {
+    // device_groups/device_group_members 的 id 列为 BIGINT：绑定数字
+    let group_n: i64 = id.parse().map_err(|_| (StatusCode::BAD_REQUEST, "invalid group id".into()))?;
     let missing = tenant_devices(&db, &tenant, &req.device_ids).await?;
     if !missing.is_empty() {
         return Err((StatusCode::BAD_REQUEST, json!({"error": "devices not in tenant", "device_ids": missing}).to_string()));
@@ -152,7 +160,7 @@ pub async fn add_members(
         .0
         .query_with(
             "SELECT COUNT(*) AS n FROM device_groups WHERE id = ? AND tenant_id = ?",
-            &[json!(id), json!(tenant.as_str())],
+            &[json!(group_n), json!(tenant.as_str())],
         )
         .await
         .map_err(db_err)?;
@@ -161,11 +169,14 @@ pub async fn add_members(
     }
     let mut affected = 0u64;
     for device_id in &req.device_ids {
+        let device_n: i64 = device_id
+            .parse()
+            .map_err(|_| (StatusCode::BAD_REQUEST, "invalid device id".into()))?;
         affected += db
             .0
             .execute_with(
                 "INSERT IGNORE INTO device_group_members (group_id, device_id) VALUES (?, ?)",
-                &[json!(id), json!(device_id)],
+                &[json!(group_n), json!(device_n)],
             )
             .await
             .map_err(db_err)?;
@@ -180,14 +191,18 @@ pub async fn remove_members(
     Path(id): Path<String>,
     Json(req): Json<MembersReq>,
 ) -> Result<Json<Value>, (StatusCode, String)> {
+    let group_n: i64 = id.parse().map_err(|_| (StatusCode::BAD_REQUEST, "invalid group id".into()))?;
     let mut affected = 0u64;
     for device_id in &req.device_ids {
+        let device_n: i64 = device_id
+            .parse()
+            .map_err(|_| (StatusCode::BAD_REQUEST, "invalid device id".into()))?;
         affected += db
             .0
             .execute_with(
                 "DELETE FROM device_group_members WHERE group_id = ? AND device_id = ? \
                  AND EXISTS (SELECT 1 FROM device_groups g WHERE g.id = ? AND g.tenant_id = ?)",
-                &[json!(id), json!(device_id), json!(id), json!(tenant.as_str())],
+                &[json!(group_n), json!(device_n), json!(group_n), json!(tenant.as_str())],
             )
             .await
             .map_err(db_err)?;
@@ -240,13 +255,16 @@ pub async fn batch_devices(
             }
             let mut affected = 0u64;
             for device_id in &req.device_ids {
+                let device_n: i64 = device_id
+                    .parse()
+                    .map_err(|_| (StatusCode::BAD_REQUEST, "invalid device id".into()))?;
                 // 单设备标签总数上限：现有 + 新增（保守判定，含重复也拒绝）防标签爆炸
                 if req.action == "tag" {
                     let n = db
                         .0
                         .query_with(
                             "SELECT COUNT(*) AS n FROM device_tags WHERE device_id = ?",
-                            &[json!(device_id)],
+                            &[json!(device_n)],
                         )
                         .await
                         .map_err(db_err)?;
@@ -261,18 +279,19 @@ pub async fn batch_devices(
                     } else {
                         "DELETE FROM device_tags WHERE device_id = ? AND tag = ?"
                     };
-                    affected += db.0.execute_with(sql, &[json!(device_id), json!(tag)]).await.map_err(db_err)?;
+                    affected += db.0.execute_with(sql, &[json!(device_n), json!(tag)]).await.map_err(db_err)?;
                 }
             }
             Ok(Json(json!({ "ok": true, "affected": affected })))
         }
         "bind_group" | "unbind_group" => {
             let group_id = req.group_id.ok_or_else(|| (StatusCode::BAD_REQUEST, "group_id required".into()))?;
+            let group_n: i64 = group_id.parse().map_err(|_| (StatusCode::BAD_REQUEST, "invalid group id".into()))?;
             let group_ok = db
                 .0
                 .query_with(
                     "SELECT COUNT(*) AS n FROM device_groups WHERE id = ? AND tenant_id = ?",
-                    &[json!(group_id), json!(tenant.as_str())],
+                    &[json!(group_n), json!(tenant.as_str())],
                 )
                 .await
                 .map_err(db_err)?;
@@ -281,35 +300,41 @@ pub async fn batch_devices(
             }
             let mut affected = 0u64;
             for device_id in &req.device_ids {
+                let device_n: i64 = device_id
+                    .parse()
+                    .map_err(|_| (StatusCode::BAD_REQUEST, "invalid device id".into()))?;
                 let sql = if req.action == "bind_group" {
                     "INSERT IGNORE INTO device_group_members (group_id, device_id) VALUES (?, ?)"
                 } else {
                     "DELETE FROM device_group_members WHERE group_id = ? AND device_id = ?"
                 };
-                affected += db.0.execute_with(sql, &[json!(group_id), json!(device_id)]).await.map_err(db_err)?;
+                affected += db.0.execute_with(sql, &[json!(group_n), json!(device_n)]).await.map_err(db_err)?;
             }
             Ok(Json(json!({ "ok": true, "affected": affected })))
         }
         "delete" => {
             let mut affected = 0u64;
             for device_id in &req.device_ids {
+                let device_n: i64 = device_id
+                    .parse()
+                    .map_err(|_| (StatusCode::BAD_REQUEST, "invalid device id".into()))?;
                 affected += db
                     .0
                     .execute_with(
                         "DELETE FROM devices WHERE id = ? AND tenant_id = ?",
-                        &[json!(device_id), json!(tenant.as_str())],
+                        &[json!(device_n), json!(tenant.as_str())],
                     )
                     .await
                     .map_err(db_err)?;
                 db.0.execute_with(
                     "DELETE FROM device_tags WHERE device_id = ?",
-                    &[json!(device_id)],
+                    &[json!(device_n)],
                 )
                 .await
                 .map_err(db_err)?;
                 db.0.execute_with(
                     "DELETE FROM device_group_members WHERE device_id = ?",
-                    &[json!(device_id)],
+                    &[json!(device_n)],
                 )
                 .await
                 .map_err(db_err)?;
@@ -326,13 +351,14 @@ pub async fn list_device_tags(
     tenant: axum::Extension<String>,
     Path(id): Path<String>,
 ) -> Result<Json<Value>, (StatusCode, String)> {
+    let device_n: i64 = id.parse().map_err(|_| (StatusCode::BAD_REQUEST, "invalid device id".into()))?;
     let rows = db
         .0
         .query_with(
             "SELECT tag FROM device_tags \
              WHERE device_id = ? AND EXISTS (SELECT 1 FROM devices d WHERE d.id = ? AND d.tenant_id = ?) \
              ORDER BY tag",
-            &[json!(id), json!(id), json!(tenant.as_str())],
+            &[json!(device_n), json!(device_n), json!(tenant.as_str())],
         )
         .await
         .map_err(db_err)?;

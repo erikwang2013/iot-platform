@@ -94,8 +94,9 @@ pub fn validate_rule(r: &NewRule) -> Result<(), String> {
     if r.name.trim().is_empty() || r.name.len() > 128 {
         return Err("name must be 1..128 chars".into());
     }
-    if r.device_id.trim().is_empty() || r.device_id.len() > 64 {
-        return Err("device_id must be 1..64 chars".into());
+    // 平台设备 id 为 snowflake i64（十进制字符串）；DB 列 BIGINT
+    if r.device_id.trim().is_empty() || r.device_id.parse::<i64>().is_err() {
+        return Err("device_id must be a platform device id".into());
     }
     if r.code.trim().is_empty() || r.code.len() > 64 {
         return Err("code must be 1..64 chars".into());
@@ -123,8 +124,8 @@ pub fn validate_rule(r: &NewRule) -> Result<(), String> {
         return Err("action requires action_device_id, action_code, action_value together".into());
     }
     if let Some(id) = &r.action_device_id {
-        if id.len() > 64 {
-            return Err("action_device_id must be <= 64 chars".into());
+        if id.trim().is_empty() || id.parse::<i64>().is_err() {
+            return Err("action_device_id must be a platform device id".into());
         }
     }
     if let Some(code) = &r.action_code {
@@ -168,7 +169,7 @@ pub async fn migrate(db: &SqlxClient) -> Result<(), String> {
 
 /// D-3 联动规则新增列（老库补列；新库由 0001 CREATE TABLE 直接建）。
 const RULE_ACTION_EXTRA_COLUMNS: [(&str, &str); 3] = [
-    ("action_device_id", "action_device_id VARCHAR(64) NULL"),
+    ("action_device_id", "action_device_id BIGINT NULL"),
     ("action_code", "action_code VARCHAR(64) NULL"),
     ("action_value", "action_value JSON NULL"),
 ];
@@ -218,11 +219,20 @@ impl RuleStore {
 
     pub async fn insert_rule(&self, tenant_id: &str, r: &NewRule) -> Result<Rule, String> {
         validate_rule(r)?;
+        // DB 列 BIGINT：绑定数字；Rule/JSON 层保持十进制字符串
+        let id = ecat::ids::next_id();
+        let device_id: i64 = r.device_id.parse().map_err(|_| "device_id invalid")?;
+        let action_device_id: Option<i64> = r
+            .action_device_id
+            .as_deref()
+            .map(str::parse)
+            .transpose()
+            .map_err(|_| "action_device_id invalid")?;
         let rule = Rule {
-            id: uuid::Uuid::new_v4().to_string(),
+            id: id.to_string(),
             tenant_id: tenant_id.to_string(),
             name: r.name.clone(),
-            device_id: r.device_id.clone(),
+            device_id: device_id.to_string(),
             code: r.code.clone(),
             operator: r.operator.clone(),
             threshold: r.threshold,
@@ -240,15 +250,15 @@ impl RuleStore {
                  webhook_url, action_device_id, action_code, action_value, enabled) \
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 &[
-                    json!(rule.id),
+                    json!(id),
                     json!(rule.tenant_id),
                     json!(rule.name),
-                    json!(rule.device_id),
+                    json!(device_id),
                     json!(rule.code),
                     json!(rule.operator),
                     json!(rule.threshold),
                     json!(rule.webhook_url),
-                    json!(rule.action_device_id),
+                    json!(action_device_id),
                     json!(rule.action_code),
                     json!(rule.action_value),
                     json!(rule.enabled as i64),
@@ -261,6 +271,14 @@ impl RuleStore {
 
     pub async fn update_rule(&self, tenant_id: &str, id: &str, r: &NewRule) -> Result<bool, String> {
         validate_rule(r)?;
+        let id: i64 = id.parse().map_err(|_| "id must be a platform id")?;
+        let device_id: i64 = r.device_id.parse().map_err(|_| "device_id invalid")?;
+        let action_device_id: Option<i64> = r
+            .action_device_id
+            .as_deref()
+            .map(str::parse)
+            .transpose()
+            .map_err(|_| "action_device_id invalid")?;
         let n = self
             .db
             .execute_with(
@@ -269,12 +287,12 @@ impl RuleStore {
                  enabled = ? WHERE id = ? AND tenant_id = ?",
                 &[
                     json!(r.name),
-                    json!(r.device_id),
+                    json!(device_id),
                     json!(r.code),
                     json!(r.operator),
                     json!(r.threshold),
                     json!(r.webhook_url),
-                    json!(r.action_device_id),
+                    json!(action_device_id),
                     json!(r.action_code),
                     json!(r.action_value),
                     json!(r.enabled.unwrap_or(true) as i64),
@@ -288,6 +306,7 @@ impl RuleStore {
     }
 
     pub async fn delete_rule(&self, tenant_id: &str, id: &str) -> Result<bool, String> {
+        let id: i64 = id.parse().map_err(|_| "id must be a platform id")?;
         let n = self
             .db
             .execute_with(
@@ -301,15 +320,22 @@ impl RuleStore {
 
     pub async fn insert_alert(&self, msg: &AlertMessage) -> Result<(), String> {
         let rec = to_alert_record(msg);
+        // alert_records 的 id/rule_id/device_id 为 BIGINT 列：绑定数字
+        let id: i64 = rec.id.parse().map_err(|_| "alert id invalid")?;
+        let rule_id: i64 = rec.rule_id.parse().map_err(|_| "rule_id must be a platform id")?;
+        let device_id: i64 = rec
+            .device_id
+            .parse()
+            .map_err(|_| "device_id must be a platform id")?;
         self.db
             .execute_with(
                 "INSERT INTO alert_records (id, rule_id, tenant_id, device_id, code, operator, threshold, value, status) \
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active')",
                 &[
-                    json!(rec.id),
-                    json!(rec.rule_id),
+                    json!(id),
+                    json!(rule_id),
                     json!(rec.tenant_id),
-                    json!(rec.device_id),
+                    json!(device_id),
                     json!(rec.code),
                     json!(rec.operator),
                     json!(rec.threshold),
@@ -367,6 +393,7 @@ impl RuleStore {
     }
 
     pub async fn ack_alert(&self, tenant_id: &str, id: &str) -> Result<bool, String> {
+        let id: i64 = id.parse().map_err(|_| "id must be a platform id")?;
         let n = self
             .db
             .execute_with(
@@ -400,7 +427,7 @@ impl RuleStore {
         req: &NewNotifyChannel,
     ) -> Result<NotifyChannel, String> {
         validate_channel(channel, &req.config)?;
-        let id = uuid::Uuid::new_v4().to_string();
+        let id = ecat::ids::next_id();
         self.db
             .execute_with(
                 "INSERT INTO notify_channels (id, tenant_id, channel, config, enabled) \
@@ -417,7 +444,7 @@ impl RuleStore {
             .await
             .map_err(|e| format!("upsert channel: {e}"))?;
         Ok(NotifyChannel {
-            id,
+            id: id.to_string(),
             tenant_id: tenant_id.to_string(),
             channel: channel.to_string(),
             config: req.config.clone(),
@@ -453,17 +480,26 @@ fn stats_from_counts(counts: &[(String, i64)]) -> (i64, i64) {
     (total, active)
 }
 
+/// BIGINT 列（snowflake id）读取 → 十进制字符串。JSON 侧该列是 Number，
+/// 严禁 as_str（会静默得空串）。
+fn id_str(r: &Row, col: &str) -> String {
+    r.get(col)
+        .and_then(Value::as_i64)
+        .map(|n| n.to_string())
+        .unwrap_or_default()
+}
+
 fn rule_from_row(r: &Row) -> Rule {
     Rule {
-        id: r.get("id").and_then(Value::as_str).unwrap_or_default().to_string(),
+        id: id_str(r, "id"),
         tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or_default().to_string(),
         name: r.get("name").and_then(Value::as_str).unwrap_or_default().to_string(),
-        device_id: r.get("device_id").and_then(Value::as_str).unwrap_or_default().to_string(),
+        device_id: id_str(r, "device_id"),
         code: r.get("code").and_then(Value::as_str).unwrap_or_default().to_string(),
         operator: r.get("operator").and_then(Value::as_str).unwrap_or_default().to_string(),
         threshold: r.get("threshold").and_then(Value::as_f64).unwrap_or(0.0),
         webhook_url: r.get("webhook_url").and_then(Value::as_str).map(str::to_string),
-        action_device_id: r.get("action_device_id").and_then(Value::as_str).map(str::to_string),
+        action_device_id: r.get("action_device_id").and_then(Value::as_i64).map(|n| n.to_string()),
         action_code: r.get("action_code").and_then(Value::as_str).map(str::to_string),
         action_value: r.get("action_value").and_then(Value::as_object).map(|o| Value::Object(o.clone())),
         enabled: r.get("enabled").and_then(Value::as_i64).unwrap_or(0) != 0,
@@ -474,7 +510,7 @@ fn rule_from_row(r: &Row) -> Rule {
 
 fn channel_from_row(r: &Row) -> NotifyChannel {
     NotifyChannel {
-        id: r.get("id").and_then(Value::as_str).unwrap_or_default().to_string(),
+        id: id_str(r, "id"),
         tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or_default().to_string(),
         channel: r.get("channel").and_then(Value::as_str).unwrap_or_default().to_string(),
         config: r
@@ -490,10 +526,10 @@ fn channel_from_row(r: &Row) -> NotifyChannel {
 
 fn alert_from_row(r: &Row) -> AlertRecord {
     AlertRecord {
-        id: r.get("id").and_then(Value::as_str).unwrap_or_default().to_string(),
-        rule_id: r.get("rule_id").and_then(Value::as_str).unwrap_or_default().to_string(),
+        id: id_str(r, "id"),
+        rule_id: id_str(r, "rule_id"),
         tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or_default().to_string(),
-        device_id: r.get("device_id").and_then(Value::as_str).unwrap_or_default().to_string(),
+        device_id: id_str(r, "device_id"),
         code: r.get("code").and_then(Value::as_str).unwrap_or_default().to_string(),
         operator: r.get("operator").and_then(Value::as_str).unwrap_or_default().to_string(),
         threshold: r.get("threshold").and_then(Value::as_f64).unwrap_or(0.0),

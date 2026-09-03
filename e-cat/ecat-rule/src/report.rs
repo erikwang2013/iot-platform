@@ -89,7 +89,11 @@ pub async fn list_reports(
     Ok(rows
         .iter()
         .map(|r| DailyReport {
-            id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
+            id: r
+                .get("id")
+                .and_then(Value::as_i64)
+                .map(|n| n.to_string())
+                .unwrap_or_default(),
             tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or("").to_string(),
             report_date: r.get("report_date").and_then(Value::as_str).unwrap_or("").to_string(),
             summary: r.get("summary").cloned().unwrap_or(Value::Null),
@@ -175,7 +179,8 @@ async fn generate(db: &SqlxClient, tenant: &str, date: &str) -> Result<bool, Str
         "rules_total": r_total,
         "rules_enabled": r_enabled,
     });
-    let id = uuid::Uuid::new_v4().to_string();
+    // daily_reports.id 为 BIGINT 列：绑定数字
+    let id = ecat::ids::next_id();
     db.execute_with(
         "INSERT INTO daily_reports (id, tenant_id, report_date, summary) VALUES (?, ?, ?, ?)",
         &[json!(id), json!(tenant), json!(date), json!(summary)],

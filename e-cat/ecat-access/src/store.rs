@@ -96,7 +96,7 @@ impl Store {
                 ring.version(),
             )
         };
-        let id = uuid::Uuid::new_v4().to_string();
+        let id = ecat::ids::next_id();
         let sql = "INSERT INTO vendor_credentials (id, tenant_id, vendor, config_encrypted, status, key_version) \
                    VALUES (?, ?, ?, ?, 'active', ?) \
                    ON DUPLICATE KEY UPDATE config_encrypted = VALUES(config_encrypted), \
@@ -155,12 +155,14 @@ impl Store {
         Ok(rows
             .first()
             .and_then(|r| r.get("device_id"))
-            .and_then(Value::as_str)
-            .map(str::to_string))
+            .and_then(Value::as_i64)
+            .map(|n| n.to_string()))
     }
 
     /// 查设备所属租户（webhook/MQTT 事件归属用）。
     pub async fn tenant_of_device(&self, device_id: &str) -> Result<String, String> {
+        // devices.id 为 BIGINT 列：绑定数字（非数字 id 顺带挡在库外）
+        let device_id: i64 = device_id.parse().map_err(|_| "device id must be a platform id")?;
         let rows = self
             .db
             .query_with(
@@ -189,7 +191,7 @@ impl Store {
         Ok(rows
             .iter()
             .filter_map(|r| {
-                let id = r.get("id").and_then(Value::as_str)?;
+                let id = r.get("id").and_then(Value::as_i64)?.to_string();
                 let t = r.get("tenant_id").and_then(Value::as_str)?;
                 Some((id.to_string(), t.to_string()))
             })
@@ -205,7 +207,9 @@ impl Store {
         value: &serde_json::Value,
         expires_after_secs: i64,
     ) -> Result<String, String> {
-        let id = uuid::Uuid::new_v4().to_string();
+        // command_queue 的 id/device_id 为 BIGINT 列：绑定数字
+        let device_id: i64 = device_id.parse().map_err(|_| "device id must be a platform id")?;
+        let id = ecat::ids::next_id();
         self.db
             .execute_with(
                 "INSERT INTO command_queue (id, tenant_id, device_id, code, value_json, expires_at) \
@@ -221,7 +225,7 @@ impl Store {
             )
             .await
             .map_err(|e| format!("enqueue command: {e}"))?;
-        Ok(id)
+        Ok(id.to_string())
     }
 
     /// 取设备未过期待补发指令（按入队时间升序）。同时删除已过期的占位（不返回）。
@@ -229,6 +233,7 @@ impl Store {
         &self,
         device_id: &str,
     ) -> Result<Vec<(String, String, serde_json::Value)>, String> {
+        let device_id: i64 = device_id.parse().map_err(|_| "device id must be a platform id")?;
         let rows = self
             .db
             .query_with(
@@ -242,7 +247,7 @@ impl Store {
         Ok(rows
             .iter()
             .filter_map(|r| {
-                let id = r.get("id")?.as_str()?.to_string();
+                let id = r.get("id")?.as_i64()?.to_string();
                 let code = r.get("code")?.as_str()?.to_string();
                 let value = r
                     .get("value_json")
@@ -254,6 +259,7 @@ impl Store {
 
     /// 补发完成后删除已下发的指令。
     pub async fn delete_command(&self, id: &str) -> Result<(), String> {
+        let id: i64 = id.parse().map_err(|_| "id must be a platform id")?;
         self.db
             .execute_with("DELETE FROM command_queue WHERE id = ?", &[json!(id)])
             .await
@@ -292,6 +298,7 @@ impl Store {
 
     /// 将设备落库状态标记为 offline（离线巡检 B-1 用）。幂等。
     pub async fn set_device_offline(&self, device_id: &str) -> Result<(), String> {
+        let device_id: i64 = device_id.parse().map_err(|_| "device id must be a platform id")?;
         self.db
             .execute_with(
                 "UPDATE devices SET status = 'offline' WHERE id = ?",
@@ -303,6 +310,7 @@ impl Store {
     }
 
     pub async fn device_name(&self, device_id: &str) -> Result<String, String> {
+        let device_id: i64 = device_id.parse().map_err(|_| "device id must be a platform id")?;
         let rows = self
             .db
             .query_with("SELECT name FROM devices WHERE id = ?", &[json!(device_id)])
@@ -317,6 +325,7 @@ impl Store {
 
     /// 查设备链接信息：(vendor, vendor_id)；未链接返回 None。
     pub async fn find_link(&self, device_id: &str) -> Result<Option<(String, String)>, String> {
+        let device_id: i64 = device_id.parse().map_err(|_| "device id must be a platform id")?;
         let rows = self
             .db
             .query_with(
@@ -354,7 +363,7 @@ impl Store {
             .await
             .map_err(|e| format!("find user: {e}"))?;
         Ok(rows.first().map(|r| UserRow {
-            id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
+            id: r.get("id").and_then(Value::as_i64).map(|n| n.to_string()).unwrap_or_default(),
             tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or("").to_string(),
             username: r.get("username").and_then(Value::as_str).unwrap_or("").to_string(),
             password_hash: r.get("password_hash").and_then(Value::as_str).unwrap_or("").to_string(),
@@ -369,7 +378,7 @@ impl Store {
         password_hash: &str,
         role: &str,
     ) -> Result<String, String> {
-        let id = uuid::Uuid::new_v4().to_string();
+        let id = ecat::ids::next_id();
         self.db
             .execute_with(
                 "INSERT INTO users (id, tenant_id, username, password_hash, role) VALUES (?, ?, ?, ?, ?)",
@@ -377,7 +386,7 @@ impl Store {
             )
             .await
             .map_err(|e| format!("create user: {e}"))?;
-        Ok(id)
+        Ok(id.to_string())
     }
 
     pub async fn list_users(&self, tenant_id: &str) -> Result<Vec<UserRow>, String> {
@@ -392,7 +401,7 @@ impl Store {
         Ok(rows
             .iter()
             .map(|r| UserRow {
-                id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
+                id: r.get("id").and_then(Value::as_i64).map(|n| n.to_string()).unwrap_or_default(),
                 tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or("").to_string(),
                 username: r.get("username").and_then(Value::as_str).unwrap_or("").to_string(),
                 password_hash: r.get("password_hash").and_then(Value::as_str).unwrap_or("").to_string(),
@@ -402,6 +411,7 @@ impl Store {
     }
 
     pub async fn delete_user(&self, tenant_id: &str, user_id: &str) -> Result<bool, String> {
+        let user_id: i64 = user_id.parse().map_err(|_| "user id must be a platform id")?;
         let n = self
             .db
             .execute_with(
@@ -475,6 +485,15 @@ impl Store {
         serde_json::from_str(&s).ok()
     }
 
+    /// Option<&str> 设备 id → Option<i64>（thing_models.device_id 为 BIGINT 列）。
+    fn parse_opt_device_id(id: Option<&str>) -> Result<Option<i64>, String> {
+        id.map(|s| {
+            s.parse::<i64>()
+                .map_err(|_| "device id must be a platform id".to_string())
+        })
+        .transpose()
+    }
+
     pub async fn list_models(&self, tenant_id: &str) -> Result<Vec<(String, Value)>, String> {
         let rows = self
             .db
@@ -487,7 +506,7 @@ impl Store {
         Ok(rows
             .iter()
             .filter_map(|r| {
-                let id = r.get("id").and_then(Value::as_str)?.to_string();
+                let id = r.get("id").and_then(Value::as_i64)?.to_string();
                 Some((id, Self::parse_schema(r.get("schema_json").cloned())?))
             })
             .collect())
@@ -499,6 +518,7 @@ impl Store {
         tenant_id: &str,
         device_id: &str,
     ) -> Result<Vec<Value>, String> {
+        let device_id: i64 = device_id.parse().map_err(|_| "device id must be a platform id")?;
         let rows = self
             .db
             .query_with(
@@ -520,7 +540,8 @@ impl Store {
         device_id: Option<&str>,
         schema: &Value,
     ) -> Result<String, String> {
-        let id = uuid::Uuid::new_v4().to_string();
+        let device_id = Self::parse_opt_device_id(device_id)?;
+        let id = ecat::ids::next_id();
         let schema_str = serde_json::to_string(schema).map_err(|e| e.to_string())?;
         self.db
             .execute_with(
@@ -529,7 +550,7 @@ impl Store {
             )
             .await
             .map_err(|e| format!("create model: {e}"))?;
-        Ok(id)
+        Ok(id.to_string())
     }
 
     /// 批量插入品类模板物模型行（逐行独立 INSERT 保持简单，模板 ≤5 行）。
@@ -539,9 +560,10 @@ impl Store {
         device_id: Option<&str>,
         items: &[Value],
     ) -> Result<Vec<String>, String> {
+        let device_id = Self::parse_opt_device_id(device_id)?;
         let mut ids = Vec::with_capacity(items.len());
         for item in items {
-            let id = uuid::Uuid::new_v4().to_string();
+            let id = ecat::ids::next_id();
             let schema_str = serde_json::to_string(item).map_err(|e| e.to_string())?;
             self.db
                 .execute_with(
@@ -551,12 +573,13 @@ impl Store {
                 )
                 .await
                 .map_err(|e| format!("create model: {e}"))?;
-            ids.push(id);
+            ids.push(id.to_string());
         }
         Ok(ids)
     }
 
     pub async fn delete_model(&self, tenant_id: &str, model_id: &str) -> Result<bool, String> {
+        let model_id: i64 = model_id.parse().map_err(|_| "model id must be a platform id")?;
         let n = self
             .db
             .execute_with(
@@ -626,7 +649,8 @@ impl Store {
         }
         // 配额强制：新设备入库前校验（C-5）
         self.check_quota(tenant_id, 1).await?;
-        let platform_id = uuid::Uuid::new_v4().to_string();
+        // devices 与 device_links 两次 INSERT 共用同一 i64（PK/FK 同型）
+        let platform_id = ecat::ids::next_id();
         let status = if online { "online" } else { "offline" };
         self.db
             .execute_with(
@@ -656,7 +680,7 @@ impl Store {
             )
             .await
             .map_err(|e| format!("insert link: {e}"))?;
-        Ok(platform_id)
+        Ok(platform_id.to_string())
     }
 
     /// 分页查询审计日志（网关写操作审计写入）。created_at 是 TIMESTAMP，
@@ -705,13 +729,15 @@ impl Store {
         name: &str,
         scope: &str,
     ) -> Result<(String, String), String> {
-        let id = uuid::Uuid::new_v4().to_string();
+        let id = ecat::ids::next_id();
         let secret = format!(
             "{}{}",
             uuid::Uuid::new_v4().simple(),
             uuid::Uuid::new_v4().simple()
         );
-        let hash = ecat_security::crypto::hmac_sha256_hex(&secret, id.as_bytes());
+        // HMAC 消息 = app_id 十进制字符串字节（客户端原样回传比对；不要用解析后的 i64）
+        let id_bytes = id.to_string();
+        let hash = ecat_security::crypto::hmac_sha256_hex(&secret, id_bytes.as_bytes());
         self.db
             .execute_with(
                 "INSERT INTO api_keys (id, tenant_id, name, secret_hash, scope) \
@@ -720,7 +746,7 @@ impl Store {
             )
             .await
             .map_err(|e| format!("create api key: {e}"))?;
-        Ok((id, secret))
+        Ok((id.to_string(), secret))
     }
 
     pub async fn list_api_keys(&self, tenant_id: &str) -> Result<Vec<ApiKeyRow>, String> {
@@ -737,7 +763,7 @@ impl Store {
         Ok(rows
             .iter()
             .map(|r| ApiKeyRow {
-                id: r.get("id").and_then(Value::as_str).unwrap_or("").to_string(),
+                id: r.get("id").and_then(Value::as_i64).map(|n| n.to_string()).unwrap_or_default(),
                 tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or("").to_string(),
                 name: r.get("name").and_then(Value::as_str).unwrap_or("").to_string(),
                 scope: r.get("scope").and_then(Value::as_str).unwrap_or("read").to_string(),
@@ -749,6 +775,7 @@ impl Store {
 
     /// 吊销密钥（幂等：已吊销返回 false）。仅本租户可吊销。
     pub async fn revoke_api_key(&self, tenant_id: &str, id: &str) -> Result<bool, String> {
+        let id: i64 = id.parse().map_err(|_| "id must be a platform id")?;
         let n = self
             .db
             .execute_with(
@@ -768,12 +795,14 @@ impl Store {
         app_id: &str,
         secret: &str,
     ) -> Result<Option<(String, String)>, String> {
+        // api_keys.id 为 BIGINT：查询绑定数字；HMAC 比对仍用 app_id 原始字符串字节
+        let id: i64 = app_id.parse().map_err(|_| "app_id must be a platform id")?;
         let rows = self
             .db
             .query_with(
                 "SELECT tenant_id, scope, secret_hash, CAST(revoked_at AS CHAR) AS revoked_at \
                  FROM api_keys WHERE id = ?",
-                &[json!(app_id)],
+                &[json!(id)],
             )
             .await
             .map_err(|e| format!("verify api key: {e}"))?;

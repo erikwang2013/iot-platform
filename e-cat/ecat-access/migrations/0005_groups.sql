@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS device_groups (
-    id VARCHAR(36) PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     tenant_id VARCHAR(36) NOT NULL,
     name VARCHAR(64) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -8,14 +8,14 @@ CREATE TABLE IF NOT EXISTS device_groups (
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS device_group_members (
-    group_id VARCHAR(36) NOT NULL,
-    device_id VARCHAR(36) NOT NULL,
+    group_id BIGINT NOT NULL,
+    device_id BIGINT NOT NULL,
     PRIMARY KEY (group_id, device_id),
     INDEX idx_member_device (device_id)
 ) ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS device_tags (
-    device_id VARCHAR(36) NOT NULL,
+    device_id BIGINT NOT NULL,
     tag VARCHAR(32) NOT NULL,
     PRIMARY KEY (device_id, tag),
     INDEX idx_tags_tag (tag)

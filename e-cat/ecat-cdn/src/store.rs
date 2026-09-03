@@ -31,7 +31,8 @@ impl CdnStore {
         }
         let enc = encrypt(&self.key, &serde_json::to_vec(config).unwrap_or_default())
             .map_err(|e| e.to_string())?;
-        let id = uuid::Uuid::new_v4().to_string();
+        // cdn_providers.id 为 BIGINT 列：绑定数字，返回十进制字符串
+        let id = ecat::ids::next_id();
         self.db
             .execute_with(
                 "INSERT INTO cdn_providers (id, tenant_id, name, vendor, domain, config_encrypted) \
@@ -40,7 +41,7 @@ impl CdnStore {
             )
             .await
             .map_err(|e| format!("insert provider: {e}"))?;
-        Ok(id)
+        Ok(id.to_string())
     }
 
     pub async fn list(&self, tenant_id: &str) -> Result<Vec<Provider>, String> {
@@ -57,12 +58,13 @@ impl CdnStore {
     }
 
     pub async fn get(&self, tenant_id: &str, id: &str) -> Result<Provider, String> {
+        let id_n: i64 = id.parse().map_err(|_| "invalid provider id".to_string())?;
         let rows = self
             .db
             .query_with(
                 "SELECT id, tenant_id, name, vendor, domain, config_encrypted, status, created_at \
                  FROM cdn_providers WHERE tenant_id = ? AND id = ?",
-                &[json!(tenant_id), json!(id)],
+                &[json!(tenant_id), json!(id_n)],
             )
             .await
             .map_err(|e| format!("get provider: {e}"))?;
@@ -73,7 +75,7 @@ impl CdnStore {
     }
 
     fn row_to_provider(&self, r: &ecat_data::Row) -> Result<Provider, String> {
-        let id = r.get("id").and_then(Value::as_str).unwrap_or_default().to_string();
+        let id = r.get("id").and_then(Value::as_i64).map(|n| n.to_string()).unwrap_or_default();
         let tenant_id = r.get("tenant_id").and_then(Value::as_str).unwrap_or_default().to_string();
         let name = r.get("name").and_then(Value::as_str).unwrap_or_default().to_string();
         let vendor = r.get("vendor").and_then(Value::as_str).unwrap_or_default().to_string();
@@ -103,11 +105,12 @@ impl CdnStore {
         let config = upd.config.as_ref().map_or(cur.config, Value::clone);
         let enc = encrypt(&self.key, &serde_json::to_vec(&config).unwrap_or_default())
             .map_err(|e| e.to_string())?;
+        let id_n: i64 = id.parse().map_err(|_| "invalid provider id".to_string())?;
         self.db
             .execute_with(
                 "UPDATE cdn_providers SET name = ?, domain = ?, config_encrypted = ? \
                  WHERE tenant_id = ? AND id = ?",
-                &[json!(name), json!(domain), json!(enc), json!(tenant_id), json!(id)],
+                &[json!(name), json!(domain), json!(enc), json!(tenant_id), json!(id_n)],
             )
             .await
             .map_err(|e| format!("update provider: {e}"))?;
@@ -115,11 +118,12 @@ impl CdnStore {
     }
 
     pub async fn delete(&self, tenant_id: &str, id: &str) -> Result<(), String> {
+        let id_n: i64 = id.parse().map_err(|_| "invalid provider id".to_string())?;
         let n = self
             .db
             .execute_with(
                 "DELETE FROM cdn_providers WHERE tenant_id = ? AND id = ?",
-                &[json!(tenant_id), json!(id)],
+                &[json!(tenant_id), json!(id_n)],
             )
             .await
             .map_err(|e| format!("delete provider: {e}"))?;
@@ -130,11 +134,12 @@ impl CdnStore {
     }
 
     pub async fn set_status(&self, tenant_id: &str, id: &str, status: &str) -> Result<Provider, String> {
+        let id_n: i64 = id.parse().map_err(|_| "invalid provider id".to_string())?;
         let n = self
             .db
             .execute_with(
                 "UPDATE cdn_providers SET status = ? WHERE tenant_id = ? AND id = ?",
-                &[json!(status), json!(tenant_id), json!(id)],
+                &[json!(status), json!(tenant_id), json!(id_n)],
             )
             .await
             .map_err(|e| format!("set status: {e}"))?;
@@ -154,13 +159,15 @@ impl CdnStore {
         status: &str,
         error: &str,
     ) -> Result<(), String> {
-        let id = uuid::Uuid::new_v4().to_string();
+        // cdn_tasks.id / provider_id 为 BIGINT 列：绑定数字
+        let id = ecat::ids::next_id();
+        let provider_n: i64 = provider_id.parse().map_err(|_| "invalid provider id".to_string())?;
         let urls_json = serde_json::to_string(urls).unwrap_or_default();
         self.db
             .execute_with(
                 "INSERT INTO cdn_tasks (id, tenant_id, provider_id, kind, urls_json, status, error) \
                  VALUES (?, ?, ?, ?, ?, ?, ?)",
-                &[json!(id), json!(tenant_id), json!(provider_id), json!(kind), json!(urls_json), json!(status), json!(error)],
+                &[json!(id), json!(tenant_id), json!(provider_n), json!(kind), json!(urls_json), json!(status), json!(error)],
             )
             .await
             .map_err(|e| format!("record task: {e}"))?;
@@ -202,9 +209,9 @@ impl CdnStore {
         Ok(rows
             .iter()
             .map(|r| CdnTask {
-                id: r.get("id").and_then(Value::as_str).unwrap_or_default().to_string(),
+                id: r.get("id").and_then(Value::as_i64).map(|n| n.to_string()).unwrap_or_default(),
                 tenant_id: r.get("tenant_id").and_then(Value::as_str).unwrap_or_default().to_string(),
-                provider_id: r.get("provider_id").and_then(Value::as_str).unwrap_or_default().to_string(),
+                provider_id: r.get("provider_id").and_then(Value::as_i64).map(|n| n.to_string()).unwrap_or_default(),
                 kind: r.get("kind").and_then(Value::as_str).unwrap_or_default().to_string(),
                 urls: r
                     .get("urls_json")

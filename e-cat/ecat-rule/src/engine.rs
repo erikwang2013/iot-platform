@@ -64,7 +64,7 @@ pub fn evaluate(ev: &EventMessage, rules: &[Rule]) -> Vec<AlertMessage> {
 /// 告警消息 → 落库记录（status 固定 active，created_at 由 DB 生成）。
 pub fn to_alert_record(msg: &AlertMessage) -> AlertRecord {
     AlertRecord {
-        id: uuid::Uuid::new_v4().to_string(),
+        id: ecat::ids::next_id().to_string(),
         rule_id: msg.rule_id.clone(),
         tenant_id: msg.tenant_id.clone(),
         device_id: msg.device_id.clone(),

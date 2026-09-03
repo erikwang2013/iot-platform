@@ -42,7 +42,7 @@ async fn engine_fires_rule_and_alert_reaches_store_and_hub() {
             "itest-tenant",
             &NewRule {
                 name: "itest-temp".into(),
-                device_id: "itest-dev".into(),
+                device_id: "6755399441055744".into(),
                 code: "temp".into(),
                 operator: "gt".into(),
                 threshold: 30.0,
@@ -59,7 +59,7 @@ async fn engine_fires_rule_and_alert_reaches_store_and_hub() {
     // 不匹配事件 → 无告警
     let rules = store.list_rules("itest-tenant").await.unwrap();
     let low = EventMessage {
-        device_id: "itest-dev".into(),
+        device_id: "6755399441055744".into(),
         tenant_id: "itest-tenant".into(),
         kind: "property".into(),
         code: "temp".into(),
@@ -70,7 +70,7 @@ async fn engine_fires_rule_and_alert_reaches_store_and_hub() {
 
     // 匹配事件 → evaluate 命中 → 推送 hub + 落告警记录
     let high = EventMessage {
-        device_id: "itest-dev".into(),
+        device_id: "6755399441055744".into(),
         tenant_id: "itest-tenant".into(),
         kind: "property".into(),
         code: "temp".into(),

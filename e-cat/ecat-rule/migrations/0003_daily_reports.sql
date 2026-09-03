@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS daily_reports (
-    id VARCHAR(36) PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     tenant_id VARCHAR(36) NOT NULL,
     report_date DATE NOT NULL,
     summary JSON NOT NULL,

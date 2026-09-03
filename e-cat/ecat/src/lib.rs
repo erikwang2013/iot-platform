@@ -1,4 +1,5 @@
 // Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
+pub mod ids;
 mod hook;
 mod reexports;
 mod signal;
