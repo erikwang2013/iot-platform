@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="IoT Bot · 沮丧 Depressed"><title>IoT Bot · 沮丧 Depressed</title><desc>IoT Bot 的 沮丧 表情形态 · animated expression form</desc><style>
+.ex-motion { animation: ex-slump 4.2s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+.ex-anim-tear { animation: ex-tear 1.8s ease-in infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-sweat { animation: ex-tear 1.5s ease-in infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-heart { animation: ex-heart 2.2s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-spark { animation: ex-spark 1.9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-rain { animation: ex-rain 1.4s linear infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-confetti { animation: ex-confetti 2.4s linear infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-pulse { animation: ex-pulse 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-knock { animation: ex-knock 0.55s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-knockline { animation: ex-knockline 0.55s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-palm { animation: ex-palm 0.9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-steam { animation: ex-steam 1.8s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-shock { animation: ex-shock 0.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-please { animation: ex-please 1.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.ex-anim-drift { animation: ex-drift 4.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes ex-slump { 0%,100% { transform: translateY(0); } 50% { transform: translateY(4.8px); } }
+@keyframes ex-tear { 0% { transform: translateY(0); opacity: 0; } 18% { opacity: 1; } 100% { transform: translateY(16.5px); opacity: 0; } }
+@keyframes ex-heart { 0% { transform: translateY(0) scale(.65); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-27px) scale(1.15); opacity: 0; } }
+@keyframes ex-spark { 0%,100% { transform: scale(.6) rotate(0deg); opacity: .3; } 50% { transform: scale(1.15) rotate(25deg); opacity: 1; } }
+@keyframes ex-rain { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(18px); opacity: 0; } }
+@keyframes ex-confetti { 0% { transform: translateY(-5.25px) rotate(0deg); opacity: 1; } 100% { transform: translateY(24px) rotate(200deg); opacity: 0; } }
+@keyframes ex-pulse { 0%,100% { transform: scale(1); opacity: .35; } 50% { transform: scale(1.18); opacity: .7; } }
+@keyframes ex-knock { 0%,100% { transform: translateX(6.75px); } 35% { transform: translateX(0); } }
+@keyframes ex-knockline { 0%,100% { transform: scaleX(.6); opacity: .35; } 35% { transform: scaleX(1); opacity: 1; } }
+@keyframes ex-palm { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-1.8px) rotate(-4deg); } }
+@keyframes ex-steam { 0% { transform: translateY(0); opacity: .7; } 100% { transform: translateY(-13.5px); opacity: 0; } }
+@keyframes ex-shock { 0%,100% { transform: scaleX(.7); opacity: .4; } 50% { transform: scaleX(1.25); opacity: 1; } }
+@keyframes ex-please { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2.7px); } }
+@keyframes ex-drift { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) {
+  .ex-motion, [class*="ex-anim-"] { animation: none !important; }
+}
+</style><g class="ex-motion ex-depressed"><g class="ex-base"><rect width="400" height="400" fill="#fbfbfd" rx="24"/>
+
+  
+  <circle cx="52" cy="130" r="14" fill="#10b981" stroke="#fbfbfd" stroke-width="4"/>
+  <circle cx="348" cy="150" r="14" fill="#f59e0b" stroke="#fbfbfd" stroke-width="4"/>
+  <line x1="64" y1="138" x2="180" y2="180" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="5 6"/>
+  <line x1="336" y1="158" x2="222" y2="196" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="5 6"/>
+
+  
+  <line x1="200" y1="112" x2="200" y2="58" stroke="#334155" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="200" cy="46" r="13" fill="#f59e0b" stroke="#fbbf24" stroke-width="3"/>
+
+  
+  <path d="M 218 38 A 22 22 0 0 1 232 54" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 230 28 A 38 38 0 0 1 252 52" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" opacity="0.55"/>
+
+  
+  <circle cx="88" cy="215" r="17" fill="#3b82f6" stroke="#1d4ed8" stroke-width="3"/>
+  <circle cx="312" cy="215" r="17" fill="#3b82f6" stroke="#1d4ed8" stroke-width="3"/>
+
+  
+  <rect x="88" y="112" width="224" height="190" rx="62" fill="#2563eb" stroke="#1d4ed8" stroke-width="4"/>
+
+  
+  <rect x="115" y="140" width="170" height="112" rx="36" fill="#eff6ff"/>
+
+  
+  <circle cx="155" cy="184" r="15" fill="#0f172a"/>
+  <circle cx="245" cy="184" r="15" fill="#0f172a"/>
+  <circle cx="160" cy="178" r="5" fill="#ffffff"/>
+  <circle cx="250" cy="178" r="5" fill="#ffffff"/>
+
+  
+  <path d="M 172 206 Q 200 234 228 206" fill="none" stroke="#0f172a" stroke-width="6" stroke-linecap="round"/>
+
+  
+  <circle cx="200" cy="230" r="4" fill="#10b981"/>
+  <circle cx="188" cy="230" r="4" fill="#f59e0b"/>
+  <circle cx="212" cy="230" r="4" fill="#f59e0b"/>
+
+  
+  <rect x="128" y="306" width="44" height="20" rx="10" fill="#1d4ed8"/>
+  <rect x="228" y="306" width="44" height="20" rx="10" fill="#1d4ed8"/>
+
+  
+  <ellipse cx="200" cy="342" rx="82" ry="11" fill="#e2e8f0"/></g><g class="ex-face"><rect x="115" y="140" width="170" height="112" rx="36" fill="#EFF6FF"/><path d="M 140.75,169 L 163.25,160" stroke="#0F172A" stroke-width="2.1" stroke-linecap="round"/><path d="M 259.25,169 L 236.75,160" stroke="#0F172A" stroke-width="2.1" stroke-linecap="round"/><ellipse cx="155" cy="184" rx="15" ry="13.8" fill="#FFFFFF" stroke="#0F172A" stroke-width="2.4"/><ellipse cx="155" cy="184" rx="7.2" ry="7.59" fill="#0F172A"/><circle cx="151.7" cy="180.14" r="3" fill="#FFFFFF"/><path d="M 140,179.17 Q 155,170.2 170,179.17" fill="none" stroke="#0F172A" stroke-width="2.76" stroke-linecap="round"/><ellipse cx="245" cy="184" rx="15" ry="13.8" fill="#FFFFFF" stroke="#0F172A" stroke-width="2.4"/><ellipse cx="245" cy="184" rx="7.2" ry="7.59" fill="#0F172A"/><circle cx="241.7" cy="180.14" r="3" fill="#FFFFFF"/><path d="M 230,179.17 Q 245,170.2 260,179.17" fill="none" stroke="#0F172A" stroke-width="2.76" stroke-linecap="round"/><path d="M 180.2,217 Q 200,200.8 219.8,217" fill="none" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round"/><ellipse cx="143.75" cy="204.25" rx="11.7" ry="6.3" fill="#FF8FB3" opacity="0.18"/><ellipse cx="256.25" cy="204.25" rx="11.7" ry="6.3" fill="#FF8FB3" opacity="0.18"/><g class="ex-anim-drift"><circle cx="177.3" cy="107.26" r="15.61" fill="#93A3B8"/><circle cx="196.45" cy="101.32" r="21.29" fill="#93A3B8"/><circle cx="219.87" cy="106.72" r="14.19" fill="#93A3B8"/><rect x="168.07" y="104.56" width="63.86" height="11.32" rx="5.66" fill="#93A3B8"/></g><g transform="translate(178.72 143.69)"><path class="ex-anim-rain" style="animation-delay:0.0s" d="M 0 0 L -2 12" stroke="#7CC4F8" stroke-width="2.48" stroke-linecap="round"/></g><g transform="translate(192.91 143.69)"><path class="ex-anim-rain" style="animation-delay:0.22s" d="M 0 0 L -2 12" stroke="#7CC4F8" stroke-width="2.48" stroke-linecap="round"/></g><g transform="translate(207.09 143.69)"><path class="ex-anim-rain" style="animation-delay:0.44s" d="M 0 0 L -2 12" stroke="#7CC4F8" stroke-width="2.48" stroke-linecap="round"/></g><g transform="translate(221.28 143.69)"><path class="ex-anim-rain" style="animation-delay:0.66s" d="M 0 0 L -2 12" stroke="#7CC4F8" stroke-width="2.48" stroke-linecap="round"/></g></g></g></svg>
