@@ -20,23 +20,19 @@
 
     <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">Vendor Integration</text>
-    <text x="60" y="324" font-size="10.5" fill="#475569">Tuya / Xiaomi / Huawei / AWS / Azure · AES-encrypted credentials · Webhook</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">Tuya / Xiaomi · AES-encrypted credentials · Webhook</text>
 
     <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-    <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">CDN Management</text>
-    <text x="60" y="394" font-size="10.5" fill="#475569">Vendor add/edit/delete · enable/disable · refresh &amp; prewarm · usage</text>
+    <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">Rules &amp; Alerts</text>
+    <text x="60" y="394" font-size="10.5" fill="#475569">Threshold rules · scene automation · alert history</text>
 
     <rect x="40" y="420" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-    <text x="60" y="446" font-size="14" font-weight="bold" fill="#0f172a">Rules &amp; Alerts</text>
-    <text x="60" y="464" font-size="10.5" fill="#475569">Threshold rules · scene automation · alert history</text>
+    <text x="60" y="446" font-size="14" font-weight="bold" fill="#0f172a">Reports &amp; Statistics</text>
+    <text x="60" y="464" font-size="10.5" fill="#475569">Devices · data · alerts · tenants · CSV/Excel export</text>
 
     <rect x="40" y="490" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-    <text x="60" y="516" font-size="14" font-weight="bold" fill="#0f172a">Reports &amp; Statistics</text>
-    <text x="60" y="534" font-size="10.5" fill="#475569">Devices · data · CDN · alerts · tenants · CSV/Excel export</text>
-
-    <rect x="40" y="560" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-    <text x="60" y="586" font-size="14" font-weight="bold" fill="#0f172a">System Settings</text>
-    <text x="60" y="604" font-size="10.5" fill="#475569">Operation logs · API keys · security policy</text>
+    <text x="60" y="516" font-size="14" font-weight="bold" fill="#0f172a">System Settings</text>
+    <text x="60" y="534" font-size="10.5" fill="#475569">Operation logs · API keys · security policy</text>
   </g>
 
   <text x="810" y="56" text-anchor="middle" font-size="12" font-weight="bold" letter-spacing="2" fill="#16a34a">CLIENT · END USERS</text>
@@ -72,7 +68,7 @@
 
   <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
   <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">Platform Capabilities</text>
-  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">13-language i18n · 4 platforms (Flutter Web/Mobile ×2 + HarmonyOS ×2) · dual API surfaces /api/* + /admin/* · multi-tenant SaaS · 6 microservices · one-click install</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">13-language i18n · 2 platforms (Flutter admin/client) · dual API surfaces /api/* + /admin/* · multi-tenant SaaS · 5 microservices · one-click install</text>
 
   <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
   <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>

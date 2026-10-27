@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS buffered_points (
    - 平台历史曲线 ts 连续无空洞（按设备侧时间戳）；
    - 查询数据量与采集量一致（无丢失）；同 ts 无重复行（TDengine 覆盖幂等）。
 
-## 7. 参考实现要点（若后续落 crate：e-cat/ecat-edge）
+## 7. 参考实现要点
 
 - MQTT 客户端复用 `ecat-mq-mqtt`（QoS1 参数、clean session false）；
 - SQLite 用 `rusqlite`（单连接 + 互斥即可，边缘量级无需连接池）；

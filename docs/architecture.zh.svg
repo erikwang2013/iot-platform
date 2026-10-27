@@ -16,22 +16,13 @@
     <text x="195" y="98" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">管理端 Flutter</text>
     <text x="195" y="116" text-anchor="middle" font-size="11.5" fill="#475569">Web</text>
 
-    <rect x="350" y="66" width="210" height="72" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-    <text x="455" y="98" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">管理端 HarmonyOS</text>
-    <text x="455" y="116" text-anchor="middle" font-size="11.5" fill="#475569">原生</text>
-
     <rect x="610" y="66" width="210" height="72" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="715" y="98" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">客户端 Flutter</text>
     <text x="715" y="116" text-anchor="middle" font-size="11.5" fill="#475569">Web · 移动端</text>
 
-    <rect x="870" y="66" width="210" height="72" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-    <text x="975" y="98" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">客户端 HarmonyOS</text>
-    <text x="975" y="116" text-anchor="middle" font-size="11.5" fill="#475569">原生</text>
   </g>
   <line x1="195" y1="138" x2="195" y2="182" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="455" y1="138" x2="455" y2="182" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
   <line x1="715" y1="138" x2="715" y2="182" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="975" y1="138" x2="975" y2="182" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
 
   <!-- 网关 -->
   <text x="30" y="174" font-size="12" font-weight="bold" letter-spacing="2" fill="#64748b">网关</text>
@@ -41,7 +32,6 @@
   <line x1="230" y1="268" x2="230" y2="304" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
   <line x1="420" y1="268" x2="420" y2="304" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
   <line x1="610" y1="268" x2="610" y2="304" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="800" y1="268" x2="800" y2="304" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
   <line x1="990" y1="268" x2="990" y2="304" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
 
   <!-- 服务 -->
@@ -62,11 +52,6 @@
     <text x="610" y="359" text-anchor="middle" font-size="11.5" fill="#475569">时序 · 报表</text>
     <text x="610" y="376" text-anchor="middle" font-size="11.5" fill="#475569">TDengine 查询</text>
 
-    <rect x="710" y="310" width="180" height="90" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/>
-    <text x="800" y="341" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#0f172a">iot-cdn</text>
-    <text x="800" y="359" text-anchor="middle" font-size="11.5" fill="#475569">CDN 配置 · 签名 URL</text>
-    <text x="800" y="376" text-anchor="middle" font-size="11.5" fill="#475569">刷新 · 预热</text>
-
     <rect x="900" y="310" width="180" height="90" rx="10" fill="#fdf2f8" stroke="#f9a8d4" stroke-width="1.5"/>
     <text x="990" y="341" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#0f172a">iot-access</text>
     <text x="990" y="359" text-anchor="middle" font-size="11.5" fill="#475569">厂商适配器</text>
@@ -75,7 +60,6 @@
     <rect x="1110" y="310" width="120" height="90" rx="10" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
     <text x="1170" y="346" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#0f172a">厂商云</text>
     <text x="1170" y="380" text-anchor="middle" font-size="10.5" fill="#475569">Tuya · MIoT</text>
-    <text x="1170" y="394" text-anchor="middle" font-size="10.5" fill="#475569">Huawei · AWS</text>
   </g>
   <line x1="1110" y1="355" x2="1080" y2="355" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
 
@@ -102,7 +86,7 @@
   </g>
   <line x1="1110" y1="485" x2="890" y2="485" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
 
-  <text x="620" y="538" text-anchor="middle" font-size="11.5" font-style="italic" fill="#64748b">SQL · Redis RESP · TDengine 原生 · S3 API</text>
+  <text x="620" y="538" text-anchor="middle" font-size="11.5" font-style="italic" fill="#64748b">SQL · Redis RESP · TDengine 原生</text>
 
   <!-- 存储 -->
   <text x="30" y="552" font-size="12" font-weight="bold" letter-spacing="2" fill="#64748b">存储</text>
@@ -119,9 +103,6 @@
     <text x="655" y="594" text-anchor="middle" font-size="13" font-weight="bold" fill="#0f172a">Redis</text>
     <text x="655" y="612" text-anchor="middle" font-size="11" fill="#475569">影子 · 缓存</text>
 
-    <rect x="770" y="564" width="190" height="72" rx="10" fill="#fefce8" stroke="#fde047" stroke-width="1.5"/>
-    <text x="865" y="594" text-anchor="middle" font-size="13" font-weight="bold" fill="#0f172a">S3 / MinIO</text>
-    <text x="865" y="612" text-anchor="middle" font-size="11" fill="#475569">对象</text>
   </g>
 
   <text x="620" y="656" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 620 656)">https://erik.xyz</text>

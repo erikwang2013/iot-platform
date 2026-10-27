@@ -1,9 +1,9 @@
 <!-- Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz -->
 # Ecat
 
-[简体中文](README.md) | English | [日本語](docs/i18n/ja/README.md) | [한국어](docs/i18n/ko/README.md) | [Русский](docs/i18n/ru/README.md) | [Deutsch](docs/i18n/de/README.md) | [Français](docs/i18n/fr/README.md) | [Español](docs/i18n/es/README.md) | [Português](docs/i18n/pt/README.md) | [हिन्दी](docs/i18n/hi/README.md) | [العربية](docs/i18n/ar/README.md) | [বাংলা](docs/i18n/bn/README.md) | [Bahasa Indonesia](docs/i18n/id/README.md)
+[简体中文](README.md) | English
 
-**Ecat** is a Rust microservices framework (v3.0.2 · 51 crates) inspired by [go-kratos/kratos](https://github.com/go-kratos/kratos) v3.
+**Ecat** is a Rust microservices framework (v3.0.2 · 45 crates) inspired by [go-kratos/kratos](https://github.com/go-kratos/kratos) v3.
 
 It provides an API-first development experience, pluggable component architecture, unified HTTP/gRPC middleware abstraction, and a complete CLI toolchain. Developers familiar with Kratos can get started immediately, while also leveraging Rust's type safety, zero-cost abstractions, and exceptional performance.
 
@@ -21,8 +21,8 @@ It provides an API-first development experience, pluggable component architectur
 │     ─────────      │    ──────────      │     ────────       │
 │     HTTP (axum)    │    RecoveryLayer   │     memory         │
 │     gRPC (tonic)   │    TracingLayer    │     consul         │
-│     WebSocket      │    LoggingLayer    │     etcd           │
-│     GraphQL        │    TimeoutLayer    │                    │
+│                    │    LoggingLayer    │                    │
+│                    │    TimeoutLayer    │                    │
 │                    │    RateLimitLayer  │                    │
 │                    │    SecurityLayer   │                    │
 │                    │    CircuitBreaker  │                    │
@@ -36,13 +36,10 @@ It provides an API-first development experience, pluggable component architectur
 │                         data layer                            │
 │     ────────────────────────────────────────────────          │
 │     rdbms:   SQLite / PostgreSQL / MySQL / TiDB              │
-│     cache:   Redis / Memcached                               │
+│     cache:   Redis                                           │
 │     olap:    ClickHouse                                      │
 │     search:  OpenSearch / Elasticsearch                      │
-│     graph:   Neo4j / NebulaGraph / ArangoDB                  │
-│     tsdb:    InfluxDB / Apache IoTDB / QuestDB / TDengine   │
-│     document: MongoDB                                        │
-│     storage: S3 / MinIO                                      │
+│     tsdb:    TDengine                                        │
 ├──────────────────────────────────────────────────────────────┤
 │                       ecat-protos                             │
 │     (shared .proto definitions: errors, metadata, ...)       │
@@ -93,8 +90,8 @@ Client Request
 - **Service comms**: HttpClient/GrpcClient with service discovery and load balancing; CircuitBreaker protection
 - **Auth**: JWT / API Key authentication middleware, claims propagated to request context
 - **Messaging**: MessageQueue trait + EventBus local/remote Pub/Sub
-- **Multi-protocol**: HTTP, gRPC, WebSocket, GraphQL unified routing
-- **Multi-source data**: RDBMS (SQLite/PG/MySQL/TiDB), cache (Redis/Memcached), search (OpenSearch/Elasticsearch), graph (Neo4j/NebulaGraph/ArangoDB), TSDB (InfluxDB/IoTDB/QuestDB/TDengine), document (MongoDB), object storage (S3/MinIO)
+- **Multi-protocol**: HTTP and gRPC unified routing
+- **Multi-source data**: RDBMS (SQLite/PG/MySQL/TiDB), cache (Redis), search (OpenSearch/Elasticsearch), OLAP (ClickHouse), TSDB (TDengine)
 
 ### Kratos Concept Mapping
 
@@ -127,7 +124,7 @@ Client Request
 | HTTP Client | **reqwest** |
 | CLI | **clap** |
 
-## Supported Databases (18 backends)
+## Supported Databases (9 backends)
 
 | Category | Database | Crate | Status |
 |----------|----------|-------|--------|
@@ -136,34 +133,23 @@ Client Request
 | RDBMS | MySQL | `ecat-data-sqlx` | ✅ Implemented |
 | RDBMS | TiDB | `ecat-data-sqlx` | ✅ Implemented |
 | Cache | Redis | `ecat-data-redis` | ✅ Implemented |
-| Cache | Memcached | `ecat-data-memcached` | ⚠️ In-memory only (not for production) |
 | Search | OpenSearch | `ecat-data-opensearch` | ✅ Implemented |
 | Search | Elasticsearch | `ecat-data-elasticsearch` | ✅ Implemented |
 | OLAP | ClickHouse | `ecat-data-clickhouse` | ✅ Implemented |
-| Graph | Neo4j | `ecat-data-neo4j` | ✅ REST API |
-| Graph | NebulaGraph | `ecat-data-nebulagraph` | ✅ REST API |
-| Graph | ArangoDB | `ecat-data-arangodb` | ✅ REST API |
-| TSDB | InfluxDB | `ecat-data-influxdb` | ✅ HTTP API |
-| TSDB | Apache IoTDB | `ecat-data-iotdb` | ✅ REST API |
-| TSDB | QuestDB | `ecat-data-questdb` | ✅ HTTP API |
 | TSDB | TDengine | `ecat-data-tdengine` | ✅ REST API |
-| Document | MongoDB | `ecat-data-mongodb` | ✅ Native driver |
-| Object storage | S3 / MinIO | `ecat-data-s3` | ✅ reqwest+rustls |
 
 > All backends share unified trait abstractions (`RdbmsClient` / `Cache` / `SearchClient` / `GraphClient` / `TsdbClient` / `DocumentClient` / `StorageClient`) and provide `XxxConfig` structs (`#[derive(Deserialize)]`) for loading connection info from JSON/YAML config files.
 
-> **Constructor naming convention**: message-queue crates (`ecat-mq-*`) use `connect` as the primary constructor (`KafkaMq::connect(brokers)`, `MqttMq::connect(url)`, …) and additionally offer `from_config`; data-backend crates (`ecat-data-*`) mostly use `new`, except `ecat-data-redis` / `ecat-data-sqlx` (which use `connect`) and `ecat-data-mongodb` / `ecat-data-s3` (which only offer `from_config`). This is an existing convention, not enforced — unification would be breaking and is deferred; it may be revisited in the 3.0 window.
+> **Constructor naming convention**: message-queue crates (`ecat-mq-*`) use `connect` as the primary constructor (`KafkaMq::connect(brokers)`, `MqttMq::connect(url)`, …) and additionally offer `from_config`; data-backend crates (`ecat-data-*`) mostly use `new`, except `ecat-data-redis` / `ecat-data-sqlx` (which use `connect`) and `ecat-data-mongodb` / `ecat-data-s3` (which only offer `from_config`). This is an existing convention, not enforced.
 
-### Messaging Backends (4 MQ)
+### Messaging Backends (2 MQ)
 
 | Backend | Crate | `from_config` |
 |---------|-------|---------------|
 | Kafka | `ecat-mq-kafka` | `async` |
-| RabbitMQ | `ecat-mq-rabbitmq` | `async` |
 | MQTT | `ecat-mq-mqtt` | `async` |
-| NATS | `ecat-mq-nats` | `async` |
 
-Also: service registry (Consul / etcd), distributed lock (Redis), scheduler (tokio), OTLP tracing export, API versioning, OpenAPI spec generation.
+Also: service registry (Consul), distributed lock (Redis), scheduler (tokio), OTLP tracing export, OpenAPI spec generation.
 
 ### Database Configuration
 
@@ -187,18 +173,9 @@ let rows = db.query("SELECT * FROM users").await?;
 | Redis | `RedisConfig` | `url`, `password`? |
 | RDBMS | `SqlxConfig` | `url`, `username`?, `password`? |
 | ClickHouse | `ClickhouseConfig` | `base_url`, `database`, `username`?, `password`? |
-| QuestDB | `QuestdbConfig` | `base_url`, `username`?, `password`? |
 | Elasticsearch | `ElasticsearchConfig` | `base_url`, `username`?, `password`? |
 | OpenSearch | `OpenSearchConfig` | `base_url`, `username`?, `password`? |
-| InfluxDB | `InfluxConfig` | `base_url`, `org`, `bucket`, `token` |
-| Neo4j | `Neo4jConfig` | `base_url`, `username`, `password` |
-| NebulaGraph | `NebulaGraphConfig` | `base_url`, `space`, `username`?, `password`? |
-| ArangoDB | `ArangoConfig` | `base_url`, `db`, `username`, `password` |
-| IoTDB | `IotdbConfig` | `base_url`, `username`, `password` |
-| Memcached | `MemcachedConfig` | `username`?, `password`? (reserved) |
 | TDengine | `TdengineConfig` | `base_url`, `username`, `password`, `database`? |
-| MongoDB | `MongoConfig` | `url`, `database`, `tls`? |
-| S3 | `S3Config` | `endpoint`, `region`, `access_key`, `secret_key`, `tls`? |
 
 > All backends support optional `tls` field (`TlsClientConfig`) for client certificate auth. See [Database Config Tutorial](docs/database-config-tutorial.md) and [TLS Certificate Tutorial](docs/tls-certificate-tutorial.md).
 
@@ -210,7 +187,6 @@ e-cat/
 ├── ecat-transport/             # Transport abstraction (Server trait)
 ├── ecat-transport-http/        # axum implementation
 ├── ecat-transport-grpc/        # tonic implementation
-├── ecat-transport-ws/          # WebSocket transport
 ├── ecat-middleware/            # tower::Layer middleware
 ├── ecat-protos/                # Protobuf definitions
 ├── ecat-errors/                # Error code system
@@ -219,12 +195,11 @@ e-cat/
 ├── ecat-logging/               # tracing integration
 ├── ecat-registry/              # Service registry & discovery
 ├── ecat-registry-consul/       # Consul registry
-├── ecat-registry-etcd/         # etcd registry
 ├── ecat-config/                # Configuration management
 ├── ecat-config-remote/         # Consul KV remote config
 ├── ecat-metrics/               # Prometheus integration
 ├── ecat-data/                  # Data access traits
-├── ecat-data-*/                # 18 database backend crates
+├── ecat-data-*/                # 9 database backend crates
 ├── ecat-security/              # Attack detection (security-rust)
 ├── ecat-cli/                   # CLI toolchain
 ├── ecat-health/                # Health checks (/health /ready)
@@ -233,17 +208,12 @@ e-cat/
 ├── ecat-circuit-breaker/       # Circuit breaker (Tower Layer)
 ├── ecat-mq/                    # Message queue abstraction
 ├── ecat-mq-kafka/              # Kafka adapter
-├── ecat-mq-rabbitmq/           # RabbitMQ adapter
 ├── ecat-mq-mqtt/               # MQTT adapter
-├── ecat-mq-nats/               # NATS adapter
 ├── ecat-events/                # Event bus (local + remote)
 ├── ecat-testing/               # Integration test tools
 ├── ecat-openapi/               # OpenAPI spec generation
-├── ecat-bench/                 # Performance benchmarks
 ├── ecat-tracing/               # Distributed tracing (trace_id)
 ├── ecat-tracing-otlp/          # OpenTelemetry OTLP export
-├── ecat-graphql/               # GraphQL endpoint (single-field)
-├── ecat-versioning/            # API version routing
 ├── ecat-tls/                   # TLS config & cert generation
 ├── ecat-lock/                  # Distributed lock (Redis)
 ├── ecat-scheduler/             # tokio scheduled tasks
@@ -430,16 +400,15 @@ fn get_user(id: u64) -> Result<User, Error> {
 | Phase 8 | ✅ Done | Attack detection (security-rust, ecat-security) |
 | Phase 9 | ✅ Done | Ecosystem I (health / client / circuit-breaker / auth / consul) |
 | Phase 10 | ✅ Done | Ecosystem II (redis / mq / events / config-remote) |
-| Phase 11 | ✅ Done | Ecosystem III (testing / deploy / bench / openapi) |
+| Phase 11 | ✅ Done | Ecosystem III (testing / deploy / openapi) |
 | Phase 12 | ✅ Done | Comms & security (gRPC client / OAuth2 / mTLS / tracing) |
-| Phase 13 | ✅ Done | Data backends (etcd / Kafka / OpenSearch / InfluxDB / ES / ClickHouse / Memcached / Neo4j / NebulaGraph / ArangoDB / IoTDB / QuestDB) |
-| Phase 14 | ✅ Done | Ops & UX (WebSocket / API versioning / GraphQL / Helm / CI/CD) |
-| Phase 15 | ✅ Done | Ecosystem v2 (real Kafka / RabbitMQ / MQTT / NATS / MongoDB / S3 / TDengine / OTLP / distributed lock / scheduler / CLI watch+upgrade) |
+| Phase 13 | ✅ Done | Data backends (Kafka / OpenSearch) |
+| Phase 14 | ✅ Done | Ops & UX (Helm / CI/CD) |
+| Phase 15 | ✅ Done | Ecosystem v2 (real Kafka / MQTT / TDengine / OTLP / distributed lock / scheduler / CLI watch+upgrade) |
 | Phase 16 | ✅ Done | Maintenance v2.4 (M1 MetricsLayer / M2 RetryLayer / M3 ValidateLayer / M4 CORS / U1 aggregation crate ecat / U2 examples / OAuth2 token hash / CVE tracking) |
 
 ## Known Limitations
 
-- **GraphQL resolution (ecat-graphql)**: field arguments and nested selections are supported (`query_field`/`mutation_field` rich resolvers receive `args`/`variables`/`selection`); aliases, fragments and multiple top-level fields are still rejected — do not expose it as a general-purpose GraphQL endpoint.
 - **OAuth2 introspection cache (ecat-auth)**: the cache key is a SHA-256 hash of the token (no plaintext token stored); cached values are whitelist-filtered (default keeps sub/exp/iat/role plus extra iss/aud/scope/roles, configurable via `cache_claims_whitelist`; misses still return full claims, only cached values are filtered); expired entries are actively purged on write (default TTL 300s).
 - **Kafka offset handling (ecat-mq-kafka)**: `enable.auto.commit=false` by default with no manual commit — after a restart the consumer re-reads from the partition end (latest), skipping messages produced while down; explicitly set `auto_commit=true` for at-least-once semantics (resumes from the last committed point).
 
@@ -491,22 +460,6 @@ Your support is welcome!
 | WeChat Pay | Alipay |
 |:---:|:---:|
 | <img src="docs/weixinpay.png" width="130" height="130" alt="WeChat Pay"> | <img src="docs/alipay.png" width="130" height="130" alt="Alipay"> |
-
-### Global Transfer (Bank Wire)
-
-| Field | Value |
-|-------|-------|
-| Beneficiary Name | WANG KEXUN |
-| Account Number | 881015918251 |
-| Bank | ZA Bank Limited |
-| SWIFT Code | AABLHKHHXXX |
-| Bank Code | 387 |
-| Bank Address | Core F, Cyberport 3, 100 Cyberport Road, Hong Kong |
-
-> **Cross-border remittance agent bank (if required)**: this is the agent (intermediary) bank information, NOT the receiving bank. Ask your remitting bank whether it is required.
->
-> - For HKD, CNY and USD remittances: **Citibank N.A. Hong Kong** (SWIFT: `CITIHKHXXXX`, Bank Code: 006, Branch: Hong Kong Branch, Branch Code: 391, Address: Citibank Tower, Citibank Plaza, 3 Garden Road, Central, Hong Kong)
-> - For other currencies: **THE BANK OF NEW YORK MELLON** (SWIFT: `IRVTUS3NXXX`, Address: 240 GREENWICH STREET, NEW YORK, United States)
 
 ## License
 

@@ -1,7 +1,7 @@
 <!-- Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz -->
 # Ecat
 
-[English](README.en.md) | [日本語](docs/i18n/ja/README.md) | [한국어](docs/i18n/ko/README.md) | [Русский](docs/i18n/ru/README.md) | [Deutsch](docs/i18n/de/README.md) | [Français](docs/i18n/fr/README.md) | [Español](docs/i18n/es/README.md) | [Português](docs/i18n/pt/README.md) | [हिन्दी](docs/i18n/hi/README.md) | [العربية](docs/i18n/ar/README.md) | [বাংলা](docs/i18n/bn/README.md) | [Bahasa Indonesia](docs/i18n/id/README.md) | 简体中文
+[English](README.en.md) | 简体中文
 
 Ecat中文名：一只猫
 
@@ -414,11 +414,11 @@ fn get_user(id: u64) -> Result<User, Error> {
 | Phase 8 | ✅ 完成 | 攻击检测集成（security-rust, ecat-security） |
 | Phase 9 | ✅ 完成 | 生态一期（health / client / circuit-breaker / auth / registry-consul） |
 | Phase 10 | ✅ 完成 | 生态二期（redis / mq / events / config-remote） |
-| Phase 11 | ✅ 完成 | 生态三期（testing / deploy / bench / openapi） |
+| Phase 11 | ✅ 完成 | 生态三期（testing / deploy / openapi） |
 | Phase 12 | ✅ 完成 | 通信与安全强化（gRPC 客户端 / OAuth2 / mTLS / 分布式追踪） |
-| Phase 13 | ✅ 完成 | 数据后端补齐（etcd / Kafka / OpenSearch / InfluxDB） |
-| Phase 14 | ✅ 完成 | 运维与体验（WebSocket / API 版本管理 / Helm / CI/CD） |
-| Phase 15 | ✅ 完成 | 生态扩展 v2（真 Kafka / RabbitMQ / MQTT / NATS / MongoDB / S3 / TDengine / OTLP / 分布式锁 / 调度 / CLI watch+upgrade） |
+| Phase 13 | ✅ 完成 | 数据后端补齐（Kafka / OpenSearch） |
+| Phase 14 | ✅ 完成 | 运维与体验（Helm / CI/CD） |
+| Phase 15 | ✅ 完成 | 生态扩展 v2（真 Kafka / MQTT / TDengine / OTLP / 分布式锁 / 调度 / CLI watch+upgrade） |
 | Phase 16 | ✅ 完成 | 维护强化 v2.4（M1 MetricsLayer / M2 RetryLayer / M3 ValidateLayer / M4 CORS / U1 聚合 crate ecat / U2 examples / OAuth2 token hash / CVE 跟踪） |
 
 ## 已知限制

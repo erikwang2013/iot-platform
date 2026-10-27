@@ -3,7 +3,7 @@
 ## 前置
 
 - 镜像构建：`deploy/docker/Dockerfile`（多阶段：编译 6 个 release 二进制 → 运行时镜像仅带目标二进制）。
-- 基础设施：MySQL / Redis / Kafka / EMQX / TDengine / MinIO 建议用托管服务或集群内独立部署
+- 基础设施：MySQL / Redis / Kafka / EMQX / TDengine 建议用托管服务或集群内独立部署
   （本项目 compose 编排为单机开发形态，不适合直接搬进集群）。本清单默认基础设施
   以 Service 名可达：`mysql`、`redis`、`kafka`、`emqx`、`tdengine`（地址见 ConfigMap）。
 
@@ -11,7 +11,7 @@
 
 ```bash
 cd iot-platform
-for bin in iot-gateway iot-device iot-access iot-rule iot-data iot-cdn; do
+for bin in iot-gateway iot-device iot-access iot-rule iot-data; do
   docker build -f deploy/docker/Dockerfile --build-arg BIN=$bin -t $bin:local .
 done
 # 推送到仓库后把 services.yaml 中的 image 改为仓库地址

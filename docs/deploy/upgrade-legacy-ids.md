@@ -8,7 +8,7 @@
 
 ## 前置条件
 
-1. **停止全部四个服务**：iot-access / iot-device / iot-rule / iot-cdn（工具不代执行，只为防止并发铸号与运行中表结构变更）。
+1. **停止全部三个服务**：iot-access / iot-device / iot-rule（工具不代执行，只为防止并发铸号与运行中表结构变更）。
 2. **mysqldump 备份**（例）：
    ```bash
    mysqldump -h127.0.0.1 -uiot -piot iot > iot-pre-remap-$(date +%F).sql

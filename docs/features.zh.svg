@@ -20,23 +20,19 @@
 
     <rect x="40" y="280" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
     <text x="60" y="306" font-size="14" font-weight="bold" fill="#0f172a">厂商集成</text>
-    <text x="60" y="324" font-size="10.5" fill="#475569">涂鸦 / 小米 / 华为 / AWS / Azure · 凭据 AES 加密 · Webhook</text>
+    <text x="60" y="324" font-size="10.5" fill="#475569">涂鸦 / 小米 · 凭据 AES 加密 · Webhook</text>
 
     <rect x="40" y="350" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-    <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">CDN 管理</text>
-    <text x="60" y="394" font-size="10.5" fill="#475569">厂商增删改 · 启用/禁用 · 刷新与预热 · 用量</text>
+    <text x="60" y="376" font-size="14" font-weight="bold" fill="#0f172a">规则与告警</text>
+    <text x="60" y="394" font-size="10.5" fill="#475569">阈值规则 · 场景自动化 · 告警记录</text>
 
     <rect x="40" y="420" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-    <text x="60" y="446" font-size="14" font-weight="bold" fill="#0f172a">规则与告警</text>
-    <text x="60" y="464" font-size="10.5" fill="#475569">阈值规则 · 场景自动化 · 告警记录</text>
+    <text x="60" y="446" font-size="14" font-weight="bold" fill="#0f172a">报表与统计</text>
+    <text x="60" y="464" font-size="10.5" fill="#475569">设备 · 数据 · 告警 · 租户 · CSV/Excel 导出</text>
 
     <rect x="40" y="490" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-    <text x="60" y="516" font-size="14" font-weight="bold" fill="#0f172a">报表与统计</text>
-    <text x="60" y="534" font-size="10.5" fill="#475569">设备 · 数据 · CDN · 告警 · 租户 · CSV/Excel 导出</text>
-
-    <rect x="40" y="560" width="500" height="58" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
-    <text x="60" y="586" font-size="14" font-weight="bold" fill="#0f172a">系统设置</text>
-    <text x="60" y="604" font-size="10.5" fill="#475569">操作日志 · API 密钥 · 安全策略</text>
+    <text x="60" y="516" font-size="14" font-weight="bold" fill="#0f172a">系统设置</text>
+    <text x="60" y="534" font-size="10.5" fill="#475569">操作日志 · API 密钥 · 安全策略</text>
   </g>
 
   <text x="810" y="56" text-anchor="middle" font-size="12" font-weight="bold" letter-spacing="2" fill="#16a34a">客户端 · 终端用户</text>
@@ -72,7 +68,7 @@
 
   <rect x="40" y="582" width="1040" height="58" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
   <text x="560" y="608" text-anchor="middle" font-size="14" font-weight="bold" fill="#0f172a">平台能力</text>
-  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">13 语言 i18n · 4 平台（Flutter Web/移动 ×2 + HarmonyOS ×2）· 双 API 面 /api/* + /admin/* · 多租户 SaaS · 6 微服务 · 一键安装</text>
+  <text x="560" y="628" text-anchor="middle" font-size="11.5" fill="#334155">13 语言 i18n · 2 平台（Flutter 管理端/客户端）· 双 API 面 /api/* + /admin/* · 多租户 SaaS · 5 微服务 · 一键安装</text>
 
   <text x="560" y="650" text-anchor="middle" font-size="26" font-weight="bold" fill="#94a3b8" opacity="0.35" transform="rotate(-20 560 650)">https://erik.xyz</text>
   <text x="1100" y="648" text-anchor="end" font-size="12" fill="#64748b" opacity="0.55">https://erik.xyz</text>
