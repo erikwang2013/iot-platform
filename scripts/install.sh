@@ -5,7 +5,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BIN_DIR="$ROOT/scripts/bin"
-BINARIES=(iot-gateway iot-device iot-access iot-rule iot-data iot-cdn)
+BINARIES=(iot-gateway iot-device iot-access iot-rule iot-data)
 
 log()  { printf '\033[1;32m[install]\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[install]\033[0m %s\n' "$*"; }
@@ -28,9 +28,9 @@ log "使用 $COMPOSE 拉起基础设施（MySQL / Redis / EMQX / Kafka / TDengin
 
 # --- 2. 业务服务构建 ---
 if command -v cargo >/dev/null 2>&1; then
-  log "检测到 cargo，构建 6 个业务服务（release，首次构建较慢）"
+  log "检测到 cargo，构建 5 个业务服务（release，首次构建较慢）"
   (cd "$ROOT/e-cat" && cargo build --release \
-    --bin iot-gateway --bin iot-device --bin iot-access --bin iot-rule --bin iot-data --bin iot-cdn)
+    --bin iot-gateway --bin iot-device --bin iot-access --bin iot-rule --bin iot-data)
   mkdir -p "$BIN_DIR"
   for b in "${BINARIES[@]}"; do
     if [ -f "$ROOT/e-cat/target/release/$b" ]; then
@@ -93,7 +93,6 @@ echo "  8081  iot-device（设备服务）"
 echo "  8082  iot-access（接入 / 认证）"
 echo "  8083  iot-data（数据服务）"
 echo "  8084  iot-rule（规则引擎）"
-echo "  8085  iot-cdn（CDN 管理）"
 echo
 echo "启动服务（每个服务一个终端，或自行接 supervisor/systemd）："
 for b in "${BINARIES[@]}"; do

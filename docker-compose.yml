@@ -155,21 +155,6 @@ services:
       - "8083:8083"
     depends_on: [kafka, tdengine]
 
-  iot-cdn:
-    image: iot-cdn:local
-    profiles: ["app"]
-    build:
-      context: .
-      dockerfile: deploy/docker/Dockerfile
-      args: { BIN: iot-cdn }
-    env_file:
-      - path: .env
-        required: false
-    environment:
-      DATABASE_URL: "mysql://iot:iot@mysql:3306/iot"
-    ports:
-      - "8085:8085"
-    depends_on: [mysql]
 
 # ===== 可观测性（C-2 日志 / C-3 指标）：默认 profile，常驻 =====
 # Prometheus 抓取各服务 /metrics；Grafana 预置 Prometheus + Loki 数据源；

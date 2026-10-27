@@ -5,7 +5,7 @@ use ecat_gateway::{
     api_version::ApiVersionLayer,
     audit::MysqlAuditSink,
     proxy::{
-        ProxyState, access_proxy, access_proxy_open, auth_proxy, cdn_proxy, console_proxy,
+        ProxyState, access_proxy, access_proxy_open, auth_proxy, console_proxy,
         data_proxy, device_proxy, rule_proxy,
     },
 };
@@ -135,33 +135,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 .role_policy(ROLES_ALL, &[]),
         )
         .with_state(ecat_gateway::search::SearchState(ecat_search::connect_search()));
-    // /api/cdn/* 受保护路径：供应商 CRUD / 启停 / 刷新预热 / 签名 URL
-    let cdn_admin = Router::new()
-        .route("/cdn/providers", get(cdn_proxy).post(cdn_proxy))
-        .route(
-            "/cdn/providers/{id}",
-            get(cdn_proxy).put(cdn_proxy).delete(cdn_proxy),
-        )
-        .route("/cdn/providers/{id}/enable", post(cdn_proxy))
-        .route("/cdn/providers/{id}/disable", post(cdn_proxy))
-        .route("/cdn/providers/{id}/test", post(cdn_proxy))
-        .route("/cdn/providers/{id}/signed-url", post(cdn_proxy))
-        .route("/cdn/providers/{id}/purge", post(cdn_proxy))
-        .route("/cdn/providers/{id}/prefetch", post(cdn_proxy))
-        .route("/cdn/tasks", get(cdn_proxy))
-        .route("/cdn/stats", get(cdn_proxy))
-        // 审计层在 JWT 内层：JWT 先注入 AuthClaims，写操作据此记租户/角色；
-        // 401/403 短路（不产生业务事件），与"仅审计成功会话"语义一致。
-        .layer(axum::middleware::from_fn_with_state(
-            audit_state.clone(),
-            audit_middleware,
-        ))
-        .layer(
-            JwtAuthCompat::new(&secret, &["sub", "role"])?
-                .role_policy(ROLES_ALL, ROLES_WRITE),
-        )
-        .with_state(proxy_state.clone());
-
     // 管理面（/api/*）：租户/用户/物模型 → iot-access；设备/OTA → iot-device。
     // 双面都要求 sub+role：客户端登录 token 也带 role（P5 401 根因），
     // 客户端设备列表走 /api/devices 同样受此校验。
@@ -264,7 +237,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .nest("/api", data_admin)
         .nest("/api", rule_admin)
         .nest("/api", search_admin)
-        .nest("/api", cdn_admin)
         .nest("/api", console_admin)
         .nest("/api", models_admin)
         .nest("/api", device_admin)

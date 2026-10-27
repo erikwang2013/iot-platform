@@ -6,7 +6,7 @@
   <img src="docs/mascot.svg" width="120" height="120" alt="项目吉祥物" />
 </p>
 
-统一接入国内外主流设备厂商（涂鸦、小米、华为、AWS IoT、Azure IoT 等），提供设备管理、物模型、规则告警、时序数据、CDN 分发与多端应用的一站式 SaaS 物联网平台。后端为 Rust 微服务（e-cat 工作区），前端为 Flutter 双端（管理端 / 客户端），支持 13 种语言。
+统一接入国内外主流设备厂商（涂鸦、小米、华为、AWS IoT、Azure IoT 等），提供设备管理、物模型、规则告警、时序数据与多端应用的一站式 SaaS 物联网平台。后端为 Rust 微服务（e-cat 工作区），前端为 Flutter 双端（管理端 / 客户端），支持 13 种语言。
 
 ## 功能特性
 
@@ -15,7 +15,6 @@
 - **设备生命周期**：注册 → 启用 / 禁用 → 解绑 → 删除，运行时在线 / 离线状态
 - **规则与告警**：阈值规则、场景自动化、WebSocket 实时推送
 - **数据与报表**：TDengine 时序存储、历史曲线、CSV/Excel 导出
-- **CDN 管理**：厂商配置、启用 / 禁用、刷新与预热、签名 URL
 - **多租户 SaaS**：租户隔离、配额、角色权限（admin / operator / read-only）
 - **安全**：security-rust 入站扫描、JWT + RBAC、双向 TLS、凭据 AES 加密、限流与熔断
 - **13 语言 i18n**，Flutter Web / Mobile 管理端与客户端双端
@@ -79,7 +78,7 @@ cd iot-platform
 
 - Docker 24+ 与 docker compose（或 docker-compose）
 - Rust 1.80+（stable，用于编译业务服务；已安装 cargo 时脚本自动构建）
-- 端口占用检查：8080-8085、3306、6379、1883、9092、9000-9001、6041 需空闲
+- 端口占用检查：8080-8084、3306、6379、1883、9092、9000-9001、6041 需空闲
 
 ### 安装步骤
 
@@ -103,7 +102,6 @@ cd iot-platform
 | iot-access（接入 / 认证） | 8082 |
 | iot-data（数据服务） | 8083 |
 | iot-rule（规则引擎） | 8084 |
-| iot-cdn（CDN 管理） | 8085 |
 | MySQL / Redis / EMQX / Kafka / MinIO / TDengine | 3306 / 6379 / 1883 / 9092 / 9000 / 6041 |
 
 ### 模块使用
@@ -112,8 +110,7 @@ cd iot-platform
 - **物模型**：为设备品类定义属性 / 事件 / 服务，客户端控制面板自动渲染
 - **规则与告警**：配置阈值规则与场景自动化，触发后 WebSocket 实时推送
 - **历史数据**：iot-data 存储时序数据，查看历史曲线并导出 CSV / Excel
-- **报表统计**：设备 / 数据 / CDN / 告警 / 租户多维报表
-- **CDN 管理**：配置多厂商 CDN，支持刷新 / 预热与签名 URL
+- **报表统计**：设备 / 数据 / 告警 / 租户多维报表
 - **多厂商接入**：涂鸦 / 小米 / 华为 / AWS / Azure 云对云 OAuth 适配
 
 ## 实施阶段
@@ -124,7 +121,7 @@ cd iot-platform
 | P1 接入 | iot-access + 涂鸦适配器 + 直连 MQTT |
 | P2 数据 | iot-data + TDengine + 历史曲线 |
 | P3 规则 | iot-rule 告警 + 场景自动化 |
-| P4 多厂商 + CDN | 小米/华为/AWS/Azure 适配器 + iot-cdn |
+| P4 多厂商 | 小米/华为适配器 |
 | P5 前端 | apps/admin + apps/client 全端 |
 | P6 上线 | 安全加固、压测、OTA |
 

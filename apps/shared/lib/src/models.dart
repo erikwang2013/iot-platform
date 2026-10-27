@@ -344,34 +344,6 @@ class ThingParam {
       );
 }
 
-/// CDN 供应商配置（/api/cdn/vendors 行）。
-class CdnVendor {
-  CdnVendor({
-    required this.id,
-    this.type = '',
-    this.domain = '',
-    this.region = '',
-    this.enabled = true,
-    this.extra = const {},
-  });
-
-  final String id;
-  final String type;
-  final String domain;
-  final String region;
-  final bool enabled;
-  final Map<String, dynamic> extra;
-
-  factory CdnVendor.fromJson(Map<String, dynamic> j) => CdnVendor(
-        id: _s(j, 'id'),
-        type: _s(j, 'type'),
-        domain: _s(j, 'domain', _s(j, 'accelerate_domain')),
-        region: _s(j, 'region'),
-        enabled: j['enabled'] is bool ? j['enabled'] as bool : true,
-        extra: j,
-      );
-}
-
 /// OTA 固件（/api/ota/firmwares 行）。
 class OtaFirmware {
   OtaFirmware({

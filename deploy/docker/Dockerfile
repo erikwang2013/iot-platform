@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
-# 多阶段构建：编译阶段一次产出 6 个业务二进制（共享工作区依赖），
+# 多阶段构建：编译阶段一次产出 5 个业务二进制（共享工作区依赖），
 # 运行时镜像只带目标二进制（统一入口名 /usr/local/bin/app，入口由镜像确定）。
 # 用法：
 #   docker build -f deploy/docker/Dockerfile --build-arg BIN=iot-gateway -t iot-gateway:local .
-#   （BIN 可选：iot-gateway/iot-device/iot-access/iot-rule/iot-data/iot-cdn）
+#   （BIN 可选：iot-gateway/iot-device/iot-access/iot-rule/iot-data）
 ARG BIN=iot-gateway
 
 FROM rust:1.88-slim-bookworm AS build
@@ -11,7 +11,7 @@ WORKDIR /build
 COPY e-cat/ ./e-cat/
 RUN cd e-cat && cargo build --release \
     --bin iot-gateway --bin iot-device --bin iot-access \
-    --bin iot-rule --bin iot-data --bin iot-cdn
+    --bin iot-rule --bin iot-data
 
 FROM debian:bookworm-slim
 ARG BIN

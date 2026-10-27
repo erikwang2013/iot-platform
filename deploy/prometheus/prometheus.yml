@@ -27,7 +27,3 @@ scrape_configs:
   - job_name: iot-rule
     static_configs:
       - targets: ["iot-rule:8084"]
-
-  - job_name: iot-cdn
-    static_configs:
-      - targets: ["iot-cdn:8085"]

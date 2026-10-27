@@ -796,37 +796,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ecat-cdn"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "axum 0.8.9",
- "base64 0.22.1",
- "ecat",
- "ecat-data",
- "ecat-data-sqlx",
- "ecat-health",
- "ecat-metrics",
- "ecat-middleware",
- "ecat-security",
- "ecat-transport-http",
- "hex",
- "hmac",
- "md-5",
- "reqwest",
- "serde",
- "serde_json",
- "sha1",
- "sha2",
- "thiserror 2.0.19",
- "tokio",
- "tower 0.5.3",
- "tower-util",
- "tracing",
- "uuid",
-]
-
-[[package]]
 name = "ecat-circuit-breaker"
 version = "3.0.3"
 dependencies = [

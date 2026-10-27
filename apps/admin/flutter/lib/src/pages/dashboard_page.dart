@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
 
-/// 管理端起始页：设备/告警/CDN 统计卡片 + 在线率 + 厂商分布 + 最近告警。
+/// 管理端起始页：设备/告警统计卡片 + 在线率 + 厂商分布 + 最近告警。
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
@@ -19,7 +19,6 @@ class _DashboardData {
     required this.offlineDevices,
     required this.activeAlerts,
     required this.totalAlerts,
-    required this.vendorCount,
     required this.vendors,
     required this.recentAlerts,
   });
@@ -29,7 +28,6 @@ class _DashboardData {
   final int offlineDevices;
   final int activeAlerts;
   final int totalAlerts;
-  final int vendorCount;
   final List<MapEntry<String, int>> vendors;
   final List<Map<String, dynamic>> recentAlerts;
 }
@@ -49,14 +47,12 @@ class _DashboardPageState extends State<DashboardPage> {
       api.get('/api/devices/stats'),
       api.get('/api/rule/stats'),
       api.get('/api/rule/alerts'),
-      api.get('/api/cdn/stats'),
     ]);
     Map<String, dynamic> m(dynamic v) =>
         v is Map ? Map<String, dynamic>.from(v) : const {};
     final devices = m(results[0]);
     final rules = m(results[1]);
     final alerts = m(results[2]);
-    final cdns = m(results[3]);
     int n(Map<String, dynamic> j, String k) =>
         j[k] is num ? (j[k] as num).toInt() : 0;
     final vendors = devices['vendors'] is List
@@ -80,7 +76,6 @@ class _DashboardPageState extends State<DashboardPage> {
       offlineDevices: n(devices, 'offline'),
       activeAlerts: n(rules, 'active'),
       totalAlerts: n(rules, 'total'),
-      vendorCount: n(cdns, 'total'),
       vendors: vendors,
       recentAlerts: recent,
     );
@@ -155,10 +150,6 @@ class _DashboardPageState extends State<DashboardPage> {
                         value: d.totalAlerts,
                         icon: Icons.notifications_active_outlined,
                         color: Colors.redAccent),
-                    _StatCard(
-                        label: l10n.statVendors,
-                        value: d.vendorCount,
-                        icon: Icons.cloud),
                   ],
                 ),
                 const SizedBox(height: 24),

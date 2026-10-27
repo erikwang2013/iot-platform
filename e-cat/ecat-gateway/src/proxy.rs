@@ -14,8 +14,6 @@ const ACCESS_BASE: &str = "http://localhost:8082";
 const DATA_BASE: &str = "http://localhost:8083";
 /// iot-rule 内部地址（RULE_BASE 环境变量可覆盖）。
 const RULE_BASE: &str = "http://localhost:8084";
-/// iot-cdn 内部地址（CDN_BASE 环境变量可覆盖）。
-const CDN_BASE: &str = "http://localhost:8085";
 /// iot-device 内部地址（DEVICE_BASE 环境变量可覆盖）。
 const DEVICE_BASE: &str = "http://localhost:8081";
 
@@ -69,13 +67,6 @@ pub async fn rule_proxy(State(ps): State<ProxyState>, req: Request) -> Response 
     // 路径是 /rule/rules 等剩余段，prefix "/api" 补回后即 /api/rule/rules
     let claims = claims_of(&req);
     forward(&ps, req, claims.as_ref(), "/api", "RULE_BASE", "iot-rule", RULE_BASE).await
-}
-
-/// /api/cdn/* 受保护转发：JWT sub → x-tenant-id + x-gateway-secret，
-/// 供应商 CRUD/启停/刷新预热/签名 URL 由 iot-cdn 处理。
-pub async fn cdn_proxy(State(ps): State<ProxyState>, req: Request) -> Response {
-    let claims = claims_of(&req);
-    forward(&ps, req, claims.as_ref(), "/api", "CDN_BASE", "iot-cdn", CDN_BASE).await
 }
 
 /// /api/tenants、/api/users、/api/models/* 受保护转发 → iot-access。

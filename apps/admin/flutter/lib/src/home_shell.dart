@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import 'pages/audit_page.dart';
-import 'pages/cdn_page.dart';
 import 'pages/dashboard_page.dart';
 import 'pages/devices_page.dart';
 import 'pages/groups_page.dart';
@@ -39,7 +38,6 @@ class _HomeShellState extends State<HomeShell> {
       const OtaPage(),
       const HistoryPage(),
       const ReportsPage(),
-      const CdnPage(),
       const TenantsPage(),
       const AuditPage(),
       const SettingsPage(),
@@ -101,11 +99,6 @@ class _HomeShellState extends State<HomeShell> {
           NavigationDrawerDestination(
             icon: const Icon(Icons.bar_chart),
             label: Text(l10n.navReports),
-          ),
-          NavigationDrawerDestination(
-            icon: const Icon(Icons.cloud_outlined),
-            selectedIcon: const Icon(Icons.cloud),
-            label: Text(l10n.navCdn),
           ),
           NavigationDrawerDestination(
             icon: const Icon(Icons.business_outlined),

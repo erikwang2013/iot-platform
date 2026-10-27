@@ -33,7 +33,6 @@ Map<String, Object?> _fixtures() => {
         ],
       },
       '/api/rule/stats': {'total': 5, 'active': 2},
-      '/api/cdn/stats': {'total': 3},
       '/api/devices': {
         'devices': [
           {'id': 'd1', 'name': '温度计', 'vendor': 'tuya', 'status': 'online'},
@@ -102,7 +101,6 @@ void main() {
     expect(find.text('6'), findsOneWidget);
     expect(find.text('4'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
-    expect(find.text('3'), findsOneWidget);
     expect(find.textContaining('d1'), findsOneWidget);
     expect(find.text('35'), findsOneWidget);
     expect(api.requested, contains('/api/data/history'));

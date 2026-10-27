@@ -21,7 +21,6 @@ class _ScreenData {
     required this.onlineDevices,
     required this.offlineDevices,
     required this.activeAlerts,
-    required this.vendorCount,
     required this.vendors,
     required this.trend,
     required this.alerts,
@@ -31,7 +30,6 @@ class _ScreenData {
   final int onlineDevices;
   final int offlineDevices;
   final int activeAlerts;
-  final int vendorCount;
   final List<MapEntry<String, int>> vendors;
   final List<int> trend;
   final List<AlertRecord> alerts;
@@ -67,7 +65,6 @@ class _ScreenPageState extends State<ScreenPage> {
     final results = await Future.wait([
       api.get('/api/devices/stats'),
       api.get('/api/rule/stats'),
-      api.get('/api/cdn/stats'),
       api.get('/api/devices'),
       api.get('/api/models/things'),
       api.get('/api/rule/alerts', query: {'status': 'active'}),
@@ -78,7 +75,6 @@ class _ScreenPageState extends State<ScreenPage> {
         j[k] is num ? (j[k] as num).toInt() : 0;
     final devices = m(results[0]);
     final rules = m(results[1]);
-    final cdns = m(results[2]);
     final vendors = devices['vendors'] is List
         ? (devices['vendors'] as List)
             .whereType<Map>()
@@ -88,11 +84,11 @@ class _ScreenPageState extends State<ScreenPage> {
             .toList()
         : <MapEntry<String, int>>[];
 
-    final deviceRows = m(results[3])['devices'];
+    final deviceRows = m(results[2])['devices'];
     final deviceId = deviceRows is List && deviceRows.isNotEmpty
         ? '${(deviceRows.first as Map)['id'] ?? ''}'
         : '';
-    final models = results[4] is List ? results[4] as List : const [];
+    final models = results[3] is List ? results[3] as List : const [];
     final code = _firstPropertyCode(models);
 
     var trend = <int>[];
@@ -115,7 +111,7 @@ class _ScreenPageState extends State<ScreenPage> {
       trend = points.map((p) => p.value.toInt()).toList();
     }
 
-    final alertRows = m(results[5])['alerts'];
+    final alertRows = m(results[4])['alerts'];
     final alerts = alertRows is List
         ? alertRows
             .whereType<Map<String, dynamic>>()
@@ -129,7 +125,6 @@ class _ScreenPageState extends State<ScreenPage> {
       onlineDevices: n(devices, 'online'),
       offlineDevices: n(devices, 'offline'),
       activeAlerts: n(rules, 'active'),
-      vendorCount: n(cdns, 'total'),
       vendors: vendors,
       trend: trend,
       alerts: alerts,
@@ -239,11 +234,6 @@ class _ScreenPageState extends State<ScreenPage> {
                 value: d.activeAlerts,
                 icon: Icons.warning_amber,
                 color: _ScreenColors.warn),
-            _StatCard(
-                label: l10n.statVendors,
-                value: d.vendorCount,
-                icon: Icons.cloud,
-                color: _ScreenColors.accent2),
           ],
         ),
         const SizedBox(height: 16),
@@ -321,7 +311,6 @@ class _ScreenColors {
   static const text = Color(0xFFE6EDF7);
   static const muted = Color(0xFF8CA3C7);
   static const accent = Color(0xFF4FD1FF);
-  static const accent2 = Color(0xFFA78BFA);
   static const online = Color(0xFF34D399);
   static const warn = Color(0xFFFBBF24);
   static const error = Color(0xFFF87171);
