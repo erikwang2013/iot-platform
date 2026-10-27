@@ -100,7 +100,7 @@ pub async fn authorize_url(
         .to_string();
     let state = encode_state(&tenant_id, &req.vendor);
     let url = match req.vendor.as_str() {
-        // 授权码 OAuth 厂商；AK/SK 类（huawei/aws/azure）无 OAuth，走
+        // 授权码 OAuth 厂商；无 OAuth 的厂商走
         // PUT /api/access/vendors/{vendor}/creds 直填凭据
         "tuya" => format!(
             "https://openapi.tuyacn.com/oauth2/auth?client_id={}&response_type=code&redirect_uri={}&state={}",

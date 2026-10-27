@@ -43,7 +43,7 @@ pub fn router(api: ApiState) -> axum::Router {
 }
 
 /// PUT /api/access/vendors/{vendor}/creds（受保护）
-/// 直填凭据（AK/SK 类厂商无 OAuth：huawei/aws/azure；涂鸦/小米也可用），AES 加密落库。
+/// 直填凭据（当前支持的厂商：涂鸦/小米；无 OAuth 时使用），AES 加密落库。
 pub async fn save_creds(
     State(api): State<ApiState>,
     axum::Extension(tenant_id): axum::Extension<String>,

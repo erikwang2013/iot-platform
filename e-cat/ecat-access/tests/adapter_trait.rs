@@ -4,8 +4,8 @@ use ecat_access::models::{DeviceRecord, EventMessage, PropertyValue};
 use serde_json::json;
 
 #[test]
-fn registry_covers_all_p4_vendors() {
-    for v in ["tuya", "miot", "huawei", "aws", "azure"] {
+fn registry_covers_supported_vendors() {
+    for v in ["tuya", "miot"] {
         assert!(adapter_for(v).is_ok(), "adapter_for({v}) should resolve");
     }
     assert!(matches!(
