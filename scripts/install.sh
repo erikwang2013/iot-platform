@@ -23,7 +23,7 @@ elif command -v docker-compose >/dev/null 2>&1; then
 else
   die "未检测到 docker compose 插件。请安装：https://docs.docker.com/compose/install/"
 fi
-log "使用 $COMPOSE 拉起基础设施（MySQL / Redis / EMQX / Kafka / MinIO / TDengine）"
+log "使用 $COMPOSE 拉起基础设施（MySQL / Redis / EMQX / Kafka / TDengine）"
 (cd "$ROOT" && $COMPOSE up -d)
 
 # --- 2. 业务服务构建 ---
@@ -54,8 +54,6 @@ MYSQL_PORT=3306
 REDIS_PORT=6379
 EMQX_MQTT_PORT=1883
 KAFKA_PORT=9092
-MINIO_API_PORT=9000
-MINIO_CONSOLE_PORT=9001
 TDENGINE_PORT=6041
 
 # JWT 密钥（生产环境务必替换为强随机值）
@@ -85,7 +83,7 @@ echo "  安装完成"
 echo "=============================================================="
 echo "基础设施（docker compose）已启动："
 echo "  MySQL 3306 · Redis 6379 · EMQX 1883（控制台 18083）"
-echo "  Kafka 9092 · MinIO 9000（控制台 9001）· TDengine 6041"
+echo "  Kafka 9092 · TDengine 6041"
 echo
 echo "业务服务二进制（$BIN_HINT）：$BIN_LIST"
 echo
