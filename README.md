@@ -6,7 +6,7 @@
   <img src="docs/mascot.svg" width="120" height="120" alt="项目吉祥物" />
 </p>
 
-统一接入国内外主流设备厂商（涂鸦、小米、华为、AWS IoT、Azure IoT 等），提供设备管理、物模型、规则告警、时序数据、CDN 分发与多端应用的一站式 SaaS 物联网平台。后端为 Rust 微服务（e-cat 工作区），前端为 Flutter + HarmonyOS 双端，支持 13 种语言。
+统一接入国内外主流设备厂商（涂鸦、小米、华为、AWS IoT、Azure IoT 等），提供设备管理、物模型、规则告警、时序数据、CDN 分发与多端应用的一站式 SaaS 物联网平台。后端为 Rust 微服务（e-cat 工作区），前端为 Flutter 双端（管理端 / 客户端），支持 13 种语言。
 
 ## 功能特性
 
@@ -18,7 +18,7 @@
 - **CDN 管理**：厂商配置、启用 / 禁用、刷新与预热、签名 URL
 - **多租户 SaaS**：租户隔离、配额、角色权限（admin / operator / read-only）
 - **安全**：security-rust 入站扫描、JWT + RBAC、双向 TLS、凭据 AES 加密、限流与熔断
-- **13 语言 i18n**，Flutter Web / Mobile 与 HarmonyOS 原生四端
+- **13 语言 i18n**，Flutter Web / Mobile 管理端与客户端双端
 
 ## 架构图
 
@@ -44,7 +44,7 @@
 
 | 层 | 技术 |
 |----|------|
-| 前端 | Flutter（Web / Mobile）· HarmonyOS ArkTS |
+| 前端 | Flutter（Web / Mobile） |
 | 后端 | Rust（axum · tokio · gRPC）· security-rust 安全扫描 |
 | 中间件 | EMQX（MQTT）· Kafka（事件总线）· gRPC（内部 RPC） |
 | 存储 | MySQL 8（元数据）· TDengine（时序）· Redis（影子 / 缓存）· S3 / MinIO（对象） |
@@ -54,8 +54,8 @@
 
 ```
 ├── apps/            # 前端应用
-│   ├── admin/       # 管理端（Flutter + HarmonyOS）
-│   └── client/      # 客户端（Flutter + HarmonyOS）
+│   ├── admin/       # 管理端（Flutter）
+│   └── client/      # 客户端（Flutter）
 ├── e-cat/           # Rust 工作区（框架 + 业务微服务一体）
 │   └── ecat*/       # 框架公共库 + 业务微服务（ecat · ecat-auth · ecat-gateway · ecat-device · ecat-access · ecat-rule · ecat-data-service · ecat-data-* …）
 ├── docs/            # 文档、架构图、打赏图片

@@ -40,21 +40,11 @@ else
     record FAIL "shared arb key consistency (13 locales)" "$(tail -1 "$LOG_DIR/arb.log")"
 fi
 
-# 2. HarmonyOS resource key consistency (admin + client)
-if python3 "$ROOT/scripts/check_l10n.py" --harmony \
-        "$ROOT/apps/admin/harmonyos/entry/src/main/resources" \
-        "$ROOT/apps/client/harmonyos/entry/src/main/resources" \
-        >"$LOG_DIR/harmony.log" 2>&1; then
-    record PASS "harmonyOS resource key consistency (admin + client)"
-else
-    record FAIL "harmonyOS resource key consistency (admin + client)" "$(tail -1 "$LOG_DIR/harmony.log")"
-fi
-
-# 3/4. Flutter tests (admin, client)
+# 2/3. Flutter tests (admin, client)
 run_flutter "$ROOT/apps/admin/flutter" "flutter test (admin)" flutter test
 run_flutter "$ROOT/apps/client/flutter" "flutter test (client)" flutter test
 
-# 5/6. Flutter web builds + artifact presence
+# 4/5. Flutter web builds + artifact presence
 run_flutter "$ROOT/apps/admin/flutter" "flutter build web (admin)" flutter build web
 if [ -f "$ROOT/apps/admin/flutter/build/web/index.html" ]; then
     record PASS "web artifact index.html (admin)"
@@ -69,19 +59,7 @@ else
     record FAIL "web artifact index.html (client)" "build/web/index.html missing"
 fi
 
-# 7. HarmonyOS .hap build artifacts (SKIPPED if cleaned, not a failure)
-hap_ok=1; hap_missing=""
-for side in admin client; do
-    hap="$ROOT/apps/$side/harmonyos/entry/build/default/outputs/default/entry-default-unsigned.hap"
-    [ -f "$hap" ] || { hap_ok=0; hap_missing="$hap_missing $side"; }
-done
-if [ "$hap_ok" = 1 ]; then
-    record PASS "harmonyOS .hap artifacts (admin + client)"
-else
-    record SKIP "harmonyOS .hap artifacts (admin + client)" "missing:$hap_missing — rerun Task 3 build (devEco/hvigor) to regenerate"
-fi
-
-# 8. Summary
+# 7. Summary
 echo
 echo "==== smoke_i18n summary: $PASS/$TOTAL PASS, $FAIL FAIL, $SKIP SKIP ===="
 if [ "$FAIL" -gt 0 ]; then
