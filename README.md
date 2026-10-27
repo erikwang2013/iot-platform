@@ -142,7 +142,7 @@ cd iot-platform
 
 > 商业版授权与交付条款请联系 **erik@erik.xyz**。
 
-| 维度 | 开源版（本仓库） | 商业版（open-project/iot-platform） |
+| 维度 | 开源版（本仓库） | 商业版 |
 |---|---|---|
 | 定位 | 个人学习、研究，核心 IoT 能力完整可跑 | 面向生产交付的完整 SaaS 版本 |
 | 业务服务 | 5 个：gateway / device / access / rule / data-service | 6 个：增加 iot-cdn |
