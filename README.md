@@ -138,6 +138,38 @@ cd iot-platform
 
 微信支付（WeChat Pay） · 支付宝（Alipay）
 
+## 开源版 vs 商业版
+
+> 商业版授权与交付条款请联系 **erik@erik.xyz**。
+
+| 维度 | 开源版（本仓库） | 商业版（open-project/iot-platform） |
+|---|---|---|
+| 定位 | 个人学习、研究，核心 IoT 能力完整可跑 | 面向生产交付的完整 SaaS 版本 |
+| 业务服务 | 5 个：gateway / device / access / rule / data-service | 6 个：增加 iot-cdn |
+| 设备厂商 | 涂鸦、小米 | 涂鸦、小米、华为、AWS IoT、Azure IoT |
+| 对象存储 | 本地 OTA 文件 | S3 / MinIO 对象存储编排 |
+| CDN 管理 | — | 多厂商 CDN 配置、刷新/预热、签名 URL、CDN 报表 |
+| 客户端 | Flutter 管理端 + Flutter 客户端 | Flutter + HarmonyOS 原生四端（15 个 ArkTS 文件） |
+| e-cat 框架 | 45 个 crate | 63 个 crate（额外 18 个：9 类数据后端、NATS/RabbitMQ、etcd 注册、GraphQL、WebSocket、版本化、CDN、Edge、Bench） |
+| 数据表 | 18 张 | 20 张（增加 `cdn_providers`、`cdn_tasks`） |
+| 代码规模 | 168 个 Rust 文件 / 31,695 行 | 218 个 Rust 文件 / 41,423 行 |
+| 授权 | 仅个人学习研究；商业使用需书面授权 | 商业授权，联系 erik@erik.xyz |
+
+### 商业版额外能力
+
+- **多厂商云对接**：华为、AWS IoT、Azure IoT 的 OAuth/AK-SK 适配器。
+- **CDN 服务**：独立 `iot-cdn` 服务、厂商配置、刷新/预热、签名 URL 与报表。
+- **HarmonyOS 四端**：管理端与客户端均提供 HarmonyOS 原生应用。
+- **对象存储**：S3/MinIO 编排与 `ecat-data-s3` 后端。
+- **完整 e-cat 框架**：9 类数据后端、NATS/RabbitMQ、etcd 注册、GraphQL、WebSocket 传输、版本化、Edge、Bench 等 crate。
+- **演示与运营面**：i18n 演示页、CDN 管理页等商业版页面。
+
+### 开源版保留
+
+设备接入（MQTT/mTLS）、物模型、设备生命周期、规则与告警、TDengine 时序存储、历史曲线与 CSV/Excel 导出、多租户与 RBAC、security-rust 安全扫描、Flutter 管理端与客户端、13 语言 i18n，以及完整的本地安装与 Docker 编排。
+
+**English:** The commercial edition adds multi-vendor OAuth (Huawei/AWS/Azure), the `iot-cdn` service and CDN console, S3/MinIO storage, HarmonyOS apps, and the full 63-crate e-cat workspace. The open edition keeps the complete core IoT platform (5 services, Tuya/Miot, Flutter admin + client, 13-language i18n). Commercial licensing: **erik@erik.xyz**.
+
 ## 项目授权 / Project License
 
 Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
