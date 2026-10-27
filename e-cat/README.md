@@ -5,7 +5,7 @@
 
 Ecat中文名：一只猫
 
-**一只猫** 是对标 [go-kratos/kratos](https://github.com/go-kratos/kratos) v3 的 Rust 微服务框架（v3.0.2 · 51 crates）。
+**一只猫** 是对标 [go-kratos/kratos](https://github.com/go-kratos/kratos) v3 的 Rust 微服务框架（v3.0.2 · 45 crates）。
 
 提供 API-first 开发体验、可插拔的组件架构、统一的 HTTP/gRPC 中间件抽象，以及完备的 CLI 工具链。让熟悉 Kratos 的开发者可以无缝上手，同时充分利用 Rust 的类型安全、零成本抽象和极致性能。
 
@@ -98,8 +98,8 @@ Ecat中文名：一只猫
 - **消息与事件**：MessageQueue trait + EventBus 本地/远程 Pub/Sub
 - **分布式追踪**：请求 span、trace_id 注入/提取
 - **gRPC 客户端**：GrpcClient 集成服务发现与负载均衡
-- **多协议**：HTTP、gRPC、WebSocket、GraphQL 统一路由
-- **多数据源**：RDBMS（SQLite/PG/MySQL/TiDB）、缓存（Redis/Memcached）、搜索（OpenSearch/Elasticsearch）、图（Neo4j/NebulaGraph/ArangoDB）、时序（InfluxDB/IoTDB/QuestDB/TDengine）、文档（MongoDB）、对象存储（S3/MinIO）
+- **多协议**：HTTP、gRPC 统一路由
+- **多数据源**：RDBMS（SQLite/PG/MySQL/TiDB）、缓存（Redis）、搜索（OpenSearch/Elasticsearch）、OLAP（ClickHouse）、时序（TDengine）
 
 ### Kratos 概念映射
 
@@ -143,21 +143,12 @@ Ecat中文名：一只猫
 | 缓存 | Redis | `ecat-data-redis` | ✅ 已实现 |
 | 搜索 | OpenSearch | `ecat-data-opensearch` | ✅ 已实现 |
 | 搜索 | Elasticsearch | `ecat-data-elasticsearch` | ✅ 已实现 |
-| 缓存 | Memcached | `ecat-data-memcached` | ⚠️ 内存实现（非生产，勿用于持久缓存） |
 | OLAP | ClickHouse | `ecat-data-clickhouse` | ✅ 已实现 |
-| 图 | Neo4j | `ecat-data-neo4j` | ✅ REST API |
-| 图 | NebulaGraph | `ecat-data-nebulagraph` | ✅ REST API |
-| 图 | ArangoDB | `ecat-data-arangodb` | ✅ REST API |
-| 时序 | InfluxDB | `ecat-data-influxdb` | ✅ HTTP API |
-| 时序 | Apache IoTDB | `ecat-data-iotdb` | ✅ REST API |
-| 时序 | QuestDB | `ecat-data-questdb` | ✅ HTTP API |
-| 时序 | TDengine | `ecat-data-tdengine` | ✅ REST API |
-| 文档 | MongoDB | `ecat-data-mongodb` | ✅ 原生驱动 |
-| 对象存储 | S3 / MinIO | `ecat-data-s3` | ✅ reqwest+rustls |
+| 时序 | TDengine | `ecat-data-tdengine` | ✅ 已实现 |
 
-> 所有数据后端通过统一的 trait 抽象（`RdbmsClient` / `Cache` / `SearchClient` / `GraphClient` / `TsdbClient` / `DocumentClient` / `StorageClient`），按需引入对应 contrib crate。每个后端均提供 `XxxConfig` 结构体（`#[derive(Deserialize)]`），支持从 JSON/YAML 配置文件加载连接信息。
+> 所有数据后端通过统一的 trait 抽象（`RdbmsClient` / `Cache` / `SearchClient` / `TsdbClient`），按需引入对应 contrib crate。每个后端均提供 `XxxConfig` 结构体（`#[derive(Deserialize)]`），支持从 JSON/YAML 配置文件加载连接信息。
 
-> **构造器命名约定**：消息队列 crate（`ecat-mq-*`）主构造器统一为 `connect`（如 `KafkaMq::connect(brokers)`、`MqttMq::connect(url)`），另提供 `from_config` 从配置加载；数据后端 crate（`ecat-data-*`）多数主构造器为 `new`，例外：`ecat-data-redis` / `ecat-data-sqlx` 沿用 `connect`，`ecat-data-mongodb` / `ecat-data-s3` 仅提供 `from_config`。此为既有约定，不强制统一（避免破坏性变更）；3.0 窗口可评估统一。
+> **构造器命名约定**：消息队列 crate（`ecat-mq-*`）主构造器统一为 `connect`（如 `KafkaMq::connect(brokers)`、`MqttMq::connect(url)`），另提供 `from_config` 从配置加载；数据后端 crate（`ecat-data-*`）多数主构造器为 `new`，例外：`ecat-data-redis` / `ecat-data-sqlx` 沿用 `connect`。此为既有约定，不强制统一（避免破坏性变更）；3.0 窗口可评估统一。
 
 ### 数据库配置示例
 
@@ -198,18 +189,9 @@ ch.execute("INSERT INTO events VALUES (1, 'start')").await?;
 | Redis | `RedisConfig` | `url`, `password`? | `redis://localhost:6379` |
 | RDBMS | `SqlxConfig` | `url`, `username`?, `password`? | `postgres://localhost/db` |
 | ClickHouse | `ClickhouseConfig` | `base_url`, `database`, `username`?, `password`? | `http://localhost:8123`, `default` |
-| QuestDB | `QuestdbConfig` | `base_url`, `username`?, `password`? | `http://localhost:9000` |
 | Elasticsearch | `ElasticsearchConfig` | `base_url`, `username`?, `password`? | `http://localhost:9200` |
 | OpenSearch | `OpenSearchConfig` | `base_url`, `username`?, `password`? | `http://localhost:9200` |
-| InfluxDB | `InfluxConfig` | `base_url`, `org`, `bucket`, `token` | — |
-| Neo4j | `Neo4jConfig` | `base_url`, `username`, `password` | — |
-| NebulaGraph | `NebulaGraphConfig` | `base_url`, `space`, `username`?, `password`? | — |
-| ArangoDB | `ArangoConfig` | `base_url`, `db`, `username`, `password` | — |
-| IoTDB | `IotdbConfig` | `base_url`, `username`, `password` | — |
-| Memcached | `MemcachedConfig` | `username`?, `password`?（保留字段） | — |
 | TDengine | `TdengineConfig` | `base_url`, `username`, `password`, `database`? | `http://localhost:6041` |
-| MongoDB | `MongoConfig` | `url`, `database`, `tls`? | `mongodb://localhost:27017`, `app` |
-| S3 | `S3Config` | `endpoint`, `region`, `access_key`, `secret_key`, `tls`? | `http://localhost:9000`, `us-east-1` |
 
 > 所有后端 Config 均支持可选的 `tls` 字段（`TlsClientConfig`），用于配置 TLS 客户端证书认证。详见 [数据库配置教程](docs/database-config-tutorial.md)。
 
@@ -244,35 +226,19 @@ e-cat/
 ├── ecat-events/                # 事件总线（本地 + 远程）
 ├── ecat-testing/               # 集成测试工具
 ├── ecat-openapi/               # OpenAPI spec 生成
-├── ecat-bench/                 # 性能基准
 ├── ecat-tracing/               # 分布式追踪（trace_id 注入/提取）
-├── ecat-registry-etcd/         # etcd 服务注册
 ├── ecat-mq-kafka/              # Kafka 消息队列适配
 ├── ecat-data-opensearch/       # OpenSearch 搜索后端
-├── ecat-data-influxdb/         # InfluxDB 时序后端
-├── ecat-graphql/               # GraphQL endpoint
 ├── ecat-data-elasticsearch/    # Elasticsearch 搜索后端
 ├── ecat-data-clickhouse/       # ClickHouse OLAP 后端
 ├── ecat-data-sqlx/             # RDBMS 后端（SQLite/PG/MySQL/TiDB）
-├── ecat-data-memcached/        # Memcached 缓存后端（内存实现）
-├── ecat-data-neo4j/            # Neo4j 图后端
-├── ecat-data-nebulagraph/      # NebulaGraph 图后端
-├── ecat-data-arangodb/         # ArangoDB 图后端
-├── ecat-data-iotdb/            # IoTDB 时序后端
-├── ecat-data-questdb/          # QuestDB 时序后端
-├── ecat-transport-ws/          # WebSocket transport
-├── ecat-versioning/            # API 版本路由
 ├── ecat-tls/                   # TLS 证书配置与自动生成
 ├── ecat-deploy/                # Docker / K8s / Helm / CI/CD
 ├── ecat-lock/                  # 分布式锁抽象（Redis 实现）
 ├── ecat-scheduler/             # tokio 定时任务调度
 ├── ecat-tracing-otlp/          # OpenTelemetry OTLP 追踪导出
 ├── ecat-data-tdengine/         # TDengine 时序后端
-├── ecat-data-mongodb/          # MongoDB 文档后端
-├── ecat-data-s3/               # S3 / MinIO 对象存储后端
-├── ecat-mq-rabbitmq/           # RabbitMQ 消息后端
 ├── ecat-mq-mqtt/               # MQTT 消息后端
-├── ecat-mq-nats/               # NATS 消息后端
 ├── config/                     # 配置示例文件
 ├── docs/                       # 设计文档与生态规划
 └── examples/                   # 示例项目
@@ -457,7 +423,6 @@ fn get_user(id: u64) -> Result<User, Error> {
 
 ## 已知限制
 
-- **GraphQL 解析（ecat-graphql）**：支持字段参数与嵌套 selection（`query_field`/`mutation_field` 富 resolver 可访问 `args`/`variables`/`selection`）；仍不支持别名、fragment 与多顶层字段，请勿将其暴露为通用 GraphQL 端点。
 - **OAuth2 内省缓存（ecat-auth）**：缓存 key 为 token 的 SHA-256 hash（不存 token 明文）；缓存值经白名单过滤（默认保留 sub/exp/iat/role + extra 的 iss/aud/scope/roles，`cache_claims_whitelist` 可配置；miss 时仍返回完整 claims，仅缓存值过滤）；TTL 过期条目在写入时主动清除（默认 TTL 300s）。
 - **Kafka offset（ecat-mq-kafka）**：默认 `enable.auto.commit=false` 且无手动 commit——进程重启后从分区末尾（latest）重读，停机期间产生的消息会被跳过；需显式配置 `auto_commit=true` 才具备 at-least-once 语义（重启从最近提交点继续）。
 
@@ -509,22 +474,6 @@ prost 是 Rust 社区最广泛使用的 protobuf 实现，编译期生成类型�
 | 微信支付 | 支付宝 |
 |:---:|:---:|
 | <img src="docs/weixinpay.png" width="130" height="130" alt="微信支付"> | <img src="docs/alipay.png" width="130" height="130" alt="支付宝"> |
-
-### 全球转账（银行汇款）
-
-| 项目 | 信息 |
-|------|------|
-| 收款人姓名 | WANG KEXUN |
-| 收款账户号码 | 881015918251 |
-| 收款银行 | ZA Bank Limited |
-| SWIFT Code | AABLHKHHXXX |
-| 银行编号 | 387 |
-| 银行地址 | Core F, Cyberport 3, 100 Cyberport Road, Hong Kong |
-
-> **跨境汇款代理银行（如需）**：此为代理银行（中转银行）信息，非收款银行信息，请向汇款银行查询是否需要提供。
->
-> - 汇入港元、人民币及美元：**Citibank N.A. Hong Kong**（SWIFT：`CITIHKHXXXX`，银行编号：006，分行：Hong Kong Branch，分行编号：391，地址：Citibank Tower, Citibank Plaza, 3 Garden Road, Central, Hong Kong）
-> - 汇入其他币种：**THE BANK OF NEW YORK MELLON**（SWIFT：`IRVTUS3NXXX`，地址：240 GREENWICH STREET, NEW YORK, United States）
 
 ## 许可证
 
