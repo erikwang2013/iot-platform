@@ -45,9 +45,9 @@ PY
 code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -H "authorization: Bearer $token" "$GATEWAY/api/devices")
 check "valid token -> 200" 200 "$code"
 
-# 6. 攻击 payload → 403
+# 6. 攻击 payload → 403（安全扫描层在 JWT/路由之前，任意 POST 路径均可验证）
 code=$(curl -s -o /dev/null -w "%{http_code}" -H "x-api-version: v1" -X POST \
-  -d "{\"q\":\"'; DROP TABLE users; --\"}" "$GATEWAY/api/submit")
+  -d "{\"q\":\"'; DROP TABLE users; --\"}" "$GATEWAY/api/devices/batch")
 check "sql injection -> 403" 403 "$code"
 
 # 7. device 健康 + 数据（/ready 由 ecat-health 提供，含 db 检查）

@@ -36,7 +36,7 @@ fn make_token(sub: &str, role: &str) -> String {
     .unwrap()
 }
 
-async fn submit() -> &'static str {
+async fn echo_ok() -> &'static str {
     "ok"
 }
 
@@ -50,7 +50,7 @@ fn router() -> Router {
         .layer(JwtAuthCompat::new(SECRET, &["sub", "role"]).unwrap());
     Router::new()
         .route("/api/ping", get(|| async { "pong" }))
-        .route("/api/submit", post(submit))
+        .route("/api/echo", post(echo_ok))
         .nest("/api", admin)
         .layer(ApiVersionLayer)
         .layer(SecurityBodyCompatLayer::new().strict().body_limit(1024 * 1024))
@@ -90,7 +90,7 @@ async fn attack_body_blocked_by_strict_scan() {
     // 与 smoke.sh step 6 同款 SQL 注入样本：strict 模式命中任意 severity 即 403
     let resp = router()
         .oneshot(
-            Request::post("/api/submit")
+            Request::post("/api/echo")
                 .header("x-api-version", "v1")
                 .body(Body::from(r#"{"q":"'; DROP TABLE users; --"}"#))
                 .unwrap(),

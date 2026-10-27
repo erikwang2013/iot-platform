@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
 import 'auth_controller.dart';
 import 'i18n/locale_controller.dart';
-import 'i18n_demo_page.dart';
 
 const _nativeNames = {
   'zh': '中文', 'en': 'English', 'ko': '한국어', 'ru': 'Русский', 'de': 'Deutsch',
@@ -109,14 +108,6 @@ class SettingsPage extends StatelessWidget {
             leading: const Icon(Icons.brightness_6_outlined),
             title: Text(l10n.settingsTheme),
             onTap: placeholder,
-          ),
-          ListTile(
-            leading: const Icon(Icons.translate),
-            title: Text(l10n.i18nDemoTitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const I18nDemoPage()),
-            ),
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),

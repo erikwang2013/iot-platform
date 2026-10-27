@@ -18,10 +18,6 @@ use ecat_security::SecurityBodyCompatLayer;
 use std::sync::Arc;
 use std::time::Duration;
 
-async fn submit() -> &'static str {
-    "ok"
-}
-
 /// GET /api/open/openapi.json：返回只读端点的 OpenAPI 3.0 文档。
 async fn openapi_doc() -> axum::Json<serde_json::Value> {
     let spec = ecat_gateway::openapi::read_only_spec();
@@ -261,7 +257,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         // C-3 Prometheus：/metrics 公开（scrape 端点），MetricsLayer 记请求数/时延/状态码
         .merge(ecat_metrics::metrics_router())
         .route("/api/ping", get(|| async { "pong" }))
-        .route("/api/submit", post(submit))
         // OpenAPI 3.0 文档（A-4）：只读端点描述，公开只读，无鉴权（纯文档）
         .route("/api/open/openapi.json", get(openapi_doc))
         .nest("/api/access", access_public)
