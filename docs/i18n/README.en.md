@@ -2,9 +2,7 @@
 
 [中文](../../README.md) | [English](README.en.md)
 
-<p align="center">
-  <img src="../mascot.svg" width="120" height="120" alt="Project Mascot" />
-</p>
+![Project Mascot](../mascot.svg)
 
 A one-stop SaaS IoT platform that unifies access to major device vendors (Tuya, Xiaomi, etc.), providing device management, thing models, rules & alerts, time-series data, and multi-platform apps. The backend is a Rust microservice workspace (e-cat); the frontends are Flutter, with support for 13 languages.
 
@@ -131,10 +129,9 @@ Your support keeps this project going. Donations are greatly appreciated!
 
 ### Scan to Donate (WeChat Pay / Alipay)
 
-<p>
-  <img src="../weixinpay.png" width="130" height="130" alt="WeChat Pay QR code" title="WeChat Pay" />
-  <img src="../alipay.png" width="130" height="130" alt="Alipay QR code" title="Alipay" />
-</p>
+![WeChat Pay QR code](../weixinpay.png)
+
+![Alipay QR code](../alipay.png)
 
 WeChat Pay · Alipay
 
@@ -145,7 +142,7 @@ This project's code is provided for learning and communication purposes only.
 
 ## 项目授权 / Project License
 
-Copyright (c) 2026 erik <erik@erik.xyz> — https://erik.xyz
+Copyright (c) 2026 erik erik@erik.xyz — https://erik.xyz
 
 - 本项目仅供个人学习、研究使用。
 - 未经作者书面授权，禁止任何形式的商业使用（包括但不限于商业部署、付费服务、二次销售、SaaS 运营及以本项目为基础提供商业服务）。
