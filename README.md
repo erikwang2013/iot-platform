@@ -168,7 +168,22 @@ cd iot-platform
 
 设备接入（MQTT/mTLS）、物模型、设备生命周期、规则与告警、TDengine 时序存储、历史曲线与 CSV/Excel 导出、多租户与 RBAC、security-rust 安全扫描、Flutter 管理端与客户端、13 语言 i18n，以及完整的本地安装与 Docker 编排。
 
-**English:** The commercial edition adds multi-vendor OAuth (Huawei/AWS/Azure), the `iot-cdn` service and CDN console, S3/MinIO storage, HarmonyOS apps, and the full 63-crate e-cat workspace. The open edition keeps the complete core IoT platform (5 services, Tuya/Miot, Flutter admin + client, 13-language i18n). Commercial licensing: **erik@erik.xyz**.
+### 多维度对比
+
+| 维度 | 开源版（本仓库） | 商业版 |
+|---|---|---|
+| 功能覆盖 | 5 个业务服务、45 个 e-cat crate、18 张表 | 6 个服务（+`iot-cdn`）、63 个 crate、20 张表；多 3 家云厂商、CDN、S3/MinIO、HarmonyOS 四端 |
+| 安全防护 | `ecat-security` / `ecat-auth` / `ecat-tls` 与商业版逐字节相同；JWT/RBAC、mTLS、AES 凭据加密、限流、审计、多租户隔离 | 同一安全基线；额外 CDN 签名 URL 与 CDN 凭据管理面，未见独立安全模块差异 |
+| 性能与规模 | Rust axum/tokio；Kafka/MQTT/TDengine/Redis；面向单机或小规模自建 | 同栈 + CDN 边缘缓存、S3/MinIO、可选 NATS/RabbitMQ 与 9 类数据后端；面向多区域、大规模生产 |
+| 数据与检索 | 18 张表；TDengine 时序、Redis、Kafka/MQTT、本地 OTA 文件 | 20 张表（+`cdn_providers`/`cdn_tasks`）；额外 S3/MinIO、CDN 缓存，及 Elasticsearch/OpenSearch/ClickHouse/InfluxDB/IoTDB/QuestDB/Neo4j 等可选 crate |
+| 测试与质量 | 106 个测试文件 / 720 个 `#[test]`；`ci.yml` + `release.yml` | 133 个测试文件 / 914 个 `#[test]`；沿用同一 CI/Release 流程 |
+| 部署与运维 | Docker Compose 20 个服务、`install.sh`、6 个 k8s 清单 + HPA、6 个 Prometheus job | 23 个服务（含 `iot-cdn`/MinIO 等）、同套 k8s/HPA、7 个 Prometheus job |
+| 多端与国际化 | Flutter 管理端 + 客户端；13 个 ARB 语言 | 增加 HarmonyOS 管理端/客户端四端（15 个 ArkTS 文件）；同为 13 语言，另有 i18n 演示页 |
+| 扩展性与二次开发 | 涂鸦/米家适配器、规则引擎、45 个 crate、HTTP/gRPC API | 涂鸦/米家/华为/AWS/Azure、CDN、GraphQL/WebSocket transport/Edge/Scheduler/Versioning/Bench 等 63 个 crate；协议基线一致 |
+| 授权与商业支持 | 仅个人学习/研究；商业使用需书面授权；无 SLA | 商业授权、交付与支持；联系 **erik@erik.xyz** |
+| 适用场景 | 学习、研究、小型自建、二次开发验证 | 生产级 SaaS、多厂商接入、多区域/CDN 分发、需要商业支持 |
+
+**English:** The commercial edition keeps the same security crates and 13-language clients, and adds a sixth service (`iot-cdn`), 18 extra e-cat crates, three cloud-vendor adapters, S3/MinIO, CDN delivery, HarmonyOS four-end apps, 2 extra tables, and 133/914 tests vs 106/720. Deployment grows from 20 to 23 Compose services and 6→7 Prometheus jobs; k8s/HPA and the security baseline are unchanged. Commercial licensing and delivery: **erik@erik.xyz**.
 
 ## 项目授权 / Project License
 
